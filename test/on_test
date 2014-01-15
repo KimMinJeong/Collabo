@@ -1,0 +1,19 @@
+<!doctype html>
+<html>
+<head> <script scr="http://code.jquery.com/jquery-latest.js"></script> </head>
+<body>
+<span class="bold buttons">Bold</span>
+<span class="italic buttons"> Italic </span>
+</body>
+<script>
+$(document).ready(function(){
+	$('.bold').on('click', function(){
+		alert('You have clicked the Bold button');
+	});
+	$('.italic').on('click', function(){
+		alert('You have clicked the italic button');
+	});
+});
+</script>
+
+</html>
