@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+<head>
+	<script src="http://code.jquery.com/jquery-latest.js"></script>
+	<style>
+		div {
+		background:yellow;
+		width:100px;
+		border:1px solid green;
+
+	</style>
+</head>
+<body>
+	<div id="example">
+		example
+	</div>
+	<input type="button" id="btn" value="change" />
+
+	<script>
+		$('input').click(function(){
+		$('div').change().html('change');
+
+	})
+	</script>
+</body>
+
+</html>
