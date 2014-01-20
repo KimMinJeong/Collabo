@@ -25,11 +25,10 @@ class Boot(db.Model):
     
 db.create_all()
 db.session.commit()
-
-a= Boot('Profile',)
     
 @app.route('/')
 def index():
+    
     return render_template('boot_temp.html')
 
 if __name__ == '__main__':
