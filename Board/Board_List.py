@@ -9,7 +9,6 @@ app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 app.config['SQLALCHEMY_DATABASE_URI']='postgresql://postgres:1234@localhost/pos'
 
 
-
 @app.route('/')
 def top():
     return render_template('top.html')
@@ -22,4 +21,4 @@ def board_list():
 def board_insert():
     return render_template('board_insert.html')
 if __name__ == '__main__':
-    app.run(debug=True, port=int(os.environ.get('PORT',5000)))
+    app.run(debug=True, host='0.0.0.0' ,port=int(os.environ.get('PORT',5000)))
