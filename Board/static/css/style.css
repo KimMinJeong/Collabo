@@ -1,10 +1,12 @@
 	
-        .col-centered{
+        .centered{
         	
         	float:none;
         	margin-left:auto;
         	margin-right:auto;
         	display:block;
+        	padding-right:100px;
+		  	padding-left:100px;
         }	
        
        
@@ -18,9 +20,9 @@
 
         .box {
              margin: 10px;
-             padding: 30px;
-             height: 10px;
-             width: 250px;
+             padding: 15px;
+             height: 15px;
+             width: 300px;
              text-align: center;
              border: 1px solid lightgray;
              background-color:lightgray;
