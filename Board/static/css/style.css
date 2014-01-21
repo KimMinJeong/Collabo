@@ -1,0 +1,75 @@
+	
+        .col-centered{
+        	
+        	float:none;
+        	margin-left:auto;
+        	margin-right:auto;
+        	display:block;
+        }	
+       
+       
+       	P {
+   			font-size: medium;
+   			margin-left: 100px;
+   			
+   			font-weight: bolder
+       		}
+			
+
+        .box {
+             margin: 10px;
+             padding: 30px;
+             height: 10px;
+             width: 250px;
+             text-align: center;
+             border: 1px solid lightgray;
+             background-color:lightgray;
+             font-size: 10pt; 
+             cursor:pointer;
+             
+            }
+       .pTitle{
+          	font-size:20pt;
+           	font-weight:bolder;
+           	text-align: center
+            }
+       .lFont{
+           	font-size: 10pt;
+           	text-align: right;
+           }
+            .nav-list {
+            	position:fixed;
+            	top: 35%;
+            	
+            	width: 21.7%
+            }
+           .go-top{
+
+				position: fixed;
+				bottom:2em;
+				left:2em;
+				text-decoration: none;
+				color:white;
+				background-color:gray;
+				font-size: 12px;
+				padding:1em;
+				
+				}
+
+		   .go-top:hover{
+				
+				background-color:black;
+				        
+					   }
+		   .date{
+		   		text-align:center;
+		   		font-size: 12px;
+		   				   	
+		   }
+		  .body{
+		  		padding-top:20%;
+		  		padding-right:100px;
+		  		padding-left:100px;
+		  		
+		  }
+		  

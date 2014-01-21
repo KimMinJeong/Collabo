@@ -1,34 +1,20 @@
 <!doctype html>
-<title>{% block title %}도도 제안서{% endblock %} </title>
 
-
-		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-		<meta http-equiv="X-UA-Compatible" content="IE=Edge">
-        <link href="{{ url_for('static', filename='css/bootstrap.min.css'}} " rel="stylesheet" type=text/css>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-        <link href="{{url_for('static, filename='bootstrap-responsive.css' }}" rel="stylesheet" type=text/css>
-        <link href="{{url_for('static, filename='style.css }}" rel="stylesheet" type=text/css>
-		<script type=text/javascript src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
-		<script type=text/javascript src="js/bootstrap.min.js"></script>	
-	<!--<script>window.jQuery || document.write('<script src="{{
-		url_for('static', filename='jquery.js') }}">\x3C/script>')</script>
-	-->
-	<script type=text/javascript>
- 	 var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
-	</script>
-
-<h1>Flask OpenID Example</h1>
-<ul class=navigation>
-  <li><a href="{{ url_for('index') }}">overview</a>
-  {% if g.user %}
-  <li><a href="{{ url_for('edit_profile') }}">profile</a>
-  <li><a href="{{ url_for('logout') }}">sign out [{{ g.user.name }}]</a>
-  {% else %}
-  <li><a href="{{ url_for('login') }}">sign in</a>
-  {% endif %}
-</ul>
-{% for message in get_flashed_messages() %}
-  <p class=message>{{ message }}
-{% endfor %}
+<title>Bootstrap Board</title>
+<link rel="stylesheet" href="{{url_for('static', filename='css/style.css')}}" type="text/css">
+<link rel="stylesheet" href="{{url_for('static', filename='css/bootstrap.min.css')}}" type="text/css">
+<link rel="stylesheet" href="{{url_for('static', filename='css/bootstrap-responsive.css')}}" type="text/css">
+<link rel="stylesheet" href="{{url_for('static', filename='css/editor.css')}}" type="text/css">
+{% block metas %}
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% endblock metas%}
+<script type=text/javascript
+  src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+<script type="text/javascript" src="js/bootstrap.min.js"></script>
+<script src="js/editor_loader.js?environment=development" type="text/javascript"></script>
+<script type=text/javascript>
+  var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+</script>
 {% block body %}{% endblock %}
