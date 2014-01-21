@@ -1,1 +1,1 @@
-web: python board/board_main.py
+web: python Board/Board_main.py
