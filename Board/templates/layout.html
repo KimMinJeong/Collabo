@@ -1,5 +1,4 @@
 <!doctype html>
-{% block title %}Welcome{% endblock %}
 <!-- Always force latest IE rendering engine (even in intranet) & Chrome Frame
 Remove this if you use the .htaccess -->
 <meta charset="utf-8">
@@ -12,13 +11,12 @@ Remove this if you use the .htaccess -->
 <script type="text/javascript" src="static/js/jquery-1.10.2.min.js"></script>
 <script type="text/javascript" src="static/js/bootstrap.js"></script>
 <script type="text/javascript" src="static/js/jquery-1.10.2.js"></script>
+<script type="text/javascript" src="static/js/button.js"></script>
+<script type="text/javascript" src="static/js/dropdown.js"></script>
 
-<link rel="stylesheet" href="{{url_for('static',filename='style.css')}}" type="text/css" media="screen" charset="UTF-8" title="notitle">
+<link rel="stylesheet" href="{{STATIC_URL}}static/css/style.css" type="text/css" media="screen" charset="UTF-8" title="notitle">
 <!-- Replace favicon.ico & apple-touch-icon.png in the root of your domain and delete these references -->
-<link rel="stylesheet" href="static/css/bootstrap.css" type="text/css" media="screen" charset="UTF-8" title="notitle"/>
-<link rel="stylesheet" href="static/css/font-awesome.css" type="text/css" media="screen" charset="UTF-8" title="notitile" />
+<link rel="stylesheet" href="{{STATIC_URL}}static/css/bootstrap.css" type="text/css" media="screen" charset="UTF-8" title="notitle"/>
+<link rel="stylesheet" href="{{STATIC_URL}}static/css/font-awesome.css" type="text/css" media="screen" charset="UTF-8" title="notitile" />
 
-<ul class=navigation>
-	<li><a href="{{ url_for('login') }}">sign in</a>
-</ul>
 {% block body %}{% endblock %}

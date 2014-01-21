@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+
+{% block body %}
+{{ super() }}
+<form>
+	<div class="dropdown">
+		<div>분류</div>
+	    <a href="#" data-toggle="dropdown" class="dropdown-toggle">분류<b class="caret"></b></a>
+	    <ul class="dropdown-menu">
+	        <li><a href="#">STORE</a></li>
+	        <li><a href="#">ADMIN</a></li>
+	        <li><a href="#">MOBILE</a></li>
+	    </ul>
+		<input type="text" id="idea_subject">
+		<textarea id="textarea">hi</textarea>
+		<input type="submit">
+	</div>
+</form>
+{% endblock %}

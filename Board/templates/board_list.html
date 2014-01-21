@@ -1,0 +1,23 @@
+{% extends "layout.html"%}
+
+{% block body %}
+{{ super() }}
+<table border="1">
+	<tr class="">
+		<td>분류</td>
+		<td>제목</td>
+		<td>상태</td>
+		<td>제안자</td>
+		<td>날짜</td>
+	</tr>
+</table>
+
+<ul class="pagination-sm">
+  <li><a href="#">&laquo;</a></li>
+  <li class="active"><a href="#">1</a></li>
+  <li><a href="#">2</a></li>
+  <li><a href="#">&raquo;</a></li>
+</ul>
+
+
+{% endblock %}
