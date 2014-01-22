@@ -20,5 +20,11 @@ def board_list():
 @app.route('/board_insert')
 def board_insert():
     return render_template('board_insert.html')
+
+@app.route('/editor')
+def editor():
+    return render_template('editor.html')
+
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0' ,port=int(os.environ.get('PORT',5000)))
