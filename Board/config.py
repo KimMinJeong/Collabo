@@ -13,16 +13,20 @@ import hashlib
 
 
 app = Flask(__name__)
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:1111@localhost:5432/ForFlask'
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:1111@localhost:5432/Board'
 oid = OpenID(app, join(dirname(__file__), 'openid_store'))
 app.config.update(
-        DATABASE_URI = 'postgresql://postgres:1111@localhost:5432/album',
+        DATABASE_URI = 'postgresql://postgres:1111@localhost:5432/Board',
         SECRET_KEY = 'development key',
         DEBUG = True
     )
 
 db = SQLAlchemy(app)
 app.config.from_envvar('FLASKR_SETTINGS', silent=True)
+
+#db settings
+
+
 
 
 
