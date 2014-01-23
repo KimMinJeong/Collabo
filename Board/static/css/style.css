@@ -1,11 +1,16 @@
 	.centered{
-    	float: none;
-		margin: 0 auto;      	
+		
+		padding-top:20%    
+		padding-right:100px;
+	  	padding-left:100px;
+	  		 	
     }	
-   
+   .cursor{
+   		cursor:pointer;
+   }
    	P {
 		font-size: medium;	
-		font-weight: bolder
+		font-weight: italic
 		}
 		
     .box {

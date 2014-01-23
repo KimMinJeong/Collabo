@@ -55,13 +55,11 @@ def top():
 
 @app.route('/board_list')
 def board_list():
-    g.post = Post.query.filter_by(category='store').first()
-    
-    return render_template('board_list.html')
+    post_list =  Post.query.all()
+    return render_template('board_list.html', post_list=post_list)
 
 @app.route('/board_insert', methods=['GET','POST'])
-def board_insert():
- 
+def board_insert(): 
     if request.method == 'POST':  
         category = request.form["category"]
         subject = request.form["subject"]
@@ -95,9 +93,11 @@ def after_login(resp):
     session['id'] = resp.identity_url
     if not session.get('id'):
         return redirect(oid.get_next_url())
+    return redirect(url_for('board_list'))
     g.email = resp.email
     #그라바타 url이랑 email주소 리턴!
-    gravatar = set_img(resp)    
+      
+    gravatar = set_img(resp) 
     return redirect(url_for('contents', next=oid.get_next_url(),
                             name=resp.fullname or resp.nickname,
                             email=resp.email, gravata_url=gravatar[0],
