@@ -9,17 +9,8 @@ from os.path import dirname, join
 from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
-import urllib
-import hashlib
+
 from config import *
-<<<<<<< HEAD
-from db import *
-def init_db():
-    db.create_all()
-    Base.metadata.create_all(bind=engine)    
-=======
-
-
 
 
 app = Flask(__name__)
@@ -33,34 +24,24 @@ app.config.update(
         SECRET_KEY = 'development key',
         DEBUG = True
     )
-
-
-
 # def get_user():
 #    return g.db.get('oid-' + session.get('openid', ''))
-
 
 def init_db():    
     db.create_all()
     Base.metadata.create_all(bind=engine) 
 
-  
->>>>>>> 8df0859ab6929413e4d4b4c26c75e0bf2a10095c
-
 @app.route('/')
 def index():      
     return render_template('index.html')
 
-
-<<<<<<< HEAD
-=======
 @app.route('/top')
 def top():
     return render_template('top.html')  
 
 @app.route('/board_list')
 def board_list():
-    post_list =  Post.query.all()
+    post_list = Post.query.all()
     return render_template('board_list.html', post_list=post_list)
 
 @app.route('/board_insert', methods=['GET','POST'])
@@ -82,7 +63,6 @@ def board_insert():
 def editor():
     return render_template('editor.html')   
 
->>>>>>> 8df0859ab6929413e4d4b4c26c75e0bf2a10095c
 @app.route('/login')
 @oid.loginhandler
 def login():
@@ -92,7 +72,6 @@ def login():
     ask_for=['email', 'fullname', 'nickname'])                                      
     #return render_template('example.html', next=oid.get_next_url(),
     #                       error=oid.fetch_error())
-
 
 @oid.after_login
 def after_login(resp):
@@ -119,8 +98,7 @@ def add_comm():
         db.session.commit()
     return redirect(oid.get_next_url())  
     
-
-    
+  
 def set_img(resp):
     email_gra = resp.email
     size = 40
@@ -145,7 +123,6 @@ def contents():
     comm_list = Comment.query.all()
     return render_template('contents.html', comm_list=comm_list)
     
-
 
 if __name__ == '__main__':
     init_db()
