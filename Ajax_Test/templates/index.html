@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+{% block body %}
+<script type="text/javascript">
+  $(function() {
+      $.get('/get_db', function(data) {
+       		$('p#db').text(data);
+      });
+  });
+</script>
+<h1>jQuery Example</h1>
+  <p id="db">db :</p>
+{% endblock %}

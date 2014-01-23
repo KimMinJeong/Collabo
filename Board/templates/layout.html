@@ -1,18 +1,47 @@
 <!doctype html>
 
-<title>Bootstrap Board</title>
-<link rel="stylesheet" href="{{url_for('static', filename='css/style.css')}}" type="text/css">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" type="text/css">
-<link rel="stylesheet" href="{{url_for('static', filename='css/bootstrap-responsive.css')}}" type="text/css">
-<link rel="stylesheet" href="{{url_for('static', filename='css/editor.css')}}" type="text/css">
+<!-- Always force latest IE rendering engine (even in intranet) & Chrome Frame
+Remove this if you use the .htaccess -->
+
 {% block metas %}
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="author" content="kim">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 {% endblock metas%}
-<script type=text/javascript
-  src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
-<script type="text/javascript" src="static/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/jquery-1.10.2.min.js')}}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.js')}}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/jquery-1.10.2.js')}}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/button.js')}}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/dropdown.js')}}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/editor_loader.js')}}"  charset="utf-8"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/jquery.js')}}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/jquery.dataTables.js')}}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.min.js')}}"></script>
+
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css')}}" type="text/css" media="screen" charset="UTF-8" title="notitle">
+<!-- Replace favicon.ico & apple-touch-icon.png in the root of your domain and delete these references -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.css')}}" type="text/css" media="screen" charset="UTF-8" title="notitle">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" type="text/css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/editor.css')}}" type="text/css" media="screen" charset="UTF-8">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/content_view.css')}}" type="text/css" media="screen" charset="UTF-8">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/content_wysiwyg.css')}}" type="text/css" media="screen" charset="UTF-8">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/popup.css')}}" type="text/css" media="screen" charset="UTF-8">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/jquery.dataTables.css')}}" type="text/css">
+<link rel="stylesheet" href="{{url_for('static', filename='css/bootstrap-responsive.css')}}" type="text/css">
+
+<script type="text/javascript" charset="utf-8">
+	$(document).ready(function() {
+    $('#example').dataTable({
+    	"aaSorting": [[ 4, "desc" ]]
+    });
+});
+	document.all['status'].disabled=true;
+</script>
+
 <script src="static/js/editor_loader.js?environment=development" type="text/javascript"></script>
 <script type=text/javascript>
   var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
@@ -20,4 +49,5 @@
 {% for message in get_flashed_messages() %}
   <p class=message>{{ message }}
 {% endfor %}
+
 {% block body %}{% endblock %}
