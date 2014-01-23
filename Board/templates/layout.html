@@ -14,8 +14,9 @@ Remove this if you use the .htaccess -->
 <script type="text/javascript" src="static/js/jquery-1.10.2.js"></script>
 <script type="text/javascript" src="static/js/button.js"></script>
 <script type="text/javascript" src="static/js/dropdown.js"></script>
-<script src="static/js/editor_loader.js" type="text/javascript" charset="utf-8"></script>
-
+<script type="text/javascript" src="static/js/editor_loader.js"  charset="utf-8"></script>
+<script type="text/javascript" src="static/js/jquery.js"></script>
+<script type="text/javascript" src="static/js/jquery.dataTables.js"></script>
 
 <link rel="stylesheet" href="{{STATIC_URL}}static/css/style.css" type="text/css" media="screen" charset="UTF-8" title="notitle">
 <!-- Replace favicon.ico & apple-touch-icon.png in the root of your domain and delete these references -->
@@ -24,4 +25,16 @@ Remove this if you use the .htaccess -->
 <link rel="stylesheet" href="{{STATIC_URL}}static/css/content_view.css" type="text/css" media="screen" charset="UTF-8">
 <link rel="stylesheet" href="{{STATIC_URL}}static/css/content_wysiwyg.css" type="text/css" media="screen" charset="UTF-8">
 <link rel="stylesheet" href="{{STATIC_URL}}static/css/popup.css" type="text/css" media="screen" charset="UTF-8">
+<link rel="stylesheet" href="{{STATIC_URL}}static/css/jquery.dataTables.css" type="text/css">
+
+
+<script type="text/javascript" charset="utf-8">
+	$(document).ready(function() {
+    $('#example').dataTable({
+    	"aaSorting": [[ 4, "desc" ]]
+    });
+});
+	document.all['status'].disabled=true;
+</script>
+
 {% block body %}{% endblock %}

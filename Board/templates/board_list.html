@@ -1,25 +1,44 @@
 {% extends "top.html"%}
 {% block body %}
-
 {{ super() }}
-<div align="center">
-	<table border="1" align="center" width="500" >
-		<tr class="">
-			<td>분류</td>
-			<td>제목</td>
-			<td>상태</td>
-			<td>제안자</td>
-			<td>날짜</td>
-		</tr>
-	</table>
-</div>
+<form action="" method="post">
+<table cellpadding="0" cellspacing="0" border="0" class="display" id="example" width="100%">
+    <thead>
+        <tr>
+            <th width="10%">분류</th>
+            <th width="30%">제목</th>
+            <th width="10%">상태</th>
+            <th width="10%">제안자</th>
+            <th width="20%">날짜</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>{{g.board.category}}</td>
+            <td>{{g.board.subject}}</td>
+            <td>{{g.board.status}}</td>
+            <td>{{g.board.contents}}</td>
+            <td>etc</td>
+        </tr>
+        <tr>
+            <td>Row 2 Data 1</td>
+            <td>Row 2 Data 2</td>
+            <td>Row 1 Data 1</td>
+            <td>Row 1 Data 2</td>
+            <td>etc</td>
+        </tr>
+    </tbody>
 
-<ul class="pagination-sm">
-  <li><a href="#">&laquo;</a></li>
-  <li class="active"><a href="#">1</a></li>
-  <li><a href="#">2</a></li>
-  <li><a href="#">&raquo;</a></li>
-</ul>
-
+    <tfoot>
+        <tr>
+            <th>분류</th>
+            <th>제목</th>
+            <th>상태</th>
+            <th>제안자</th>
+            <th>날짜</th>
+        </tr>
+    </tfoot>
+</table>
+</form>
 
 {% endblock %}
