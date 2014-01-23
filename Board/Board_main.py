@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 from config import *
-from db import *
+
 # def get_user():
 #    return g.db.get('oid-' + session.get('openid', ''))
 
 
+def init_db():    
+    db.create_all()
+    Base.metadata.create_all(bind=engine) 
 
-
-def init_db():
-    Base.metadata.create_all(bind=engine)    
+  
 
 @app.route('/')
 def index():      

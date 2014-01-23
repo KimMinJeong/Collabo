@@ -12,11 +12,17 @@ import urllib
 import hashlib
 
 
+
+
+
 app = Flask(__name__)
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:1111@localhost:5432/Board'
+#app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 oid = OpenID(app, join(dirname(__file__), 'openid_store'))
+#SQLALCHEMY_DATABASE_URI = 'postgres://uvkxbyzicejuyd:FzhZqstwa1YQ7FVPNAId0GO_4l@ec2-54-197-241-91.compute-1.amazonaws.com:5432/d22mrqavab61bp'
+
 app.config.update(
-        DATABASE_URI = 'postgresql://postgres:1111@localhost:5432/Board',
+        SQLALCHEMY_DATABASE_URI = 'postgres://uvkxbyzicejuyd:FzhZqstwa1YQ7FVPNAId0GO_4l@ec2-54-197-241-91.compute-1.amazonaws.com:5432/d22mrqavab61bp',
+        #'postgresql://postgres:1111@localhost:5432/Board',
         SECRET_KEY = 'development key',
         DEBUG = True
     )
@@ -26,7 +32,7 @@ app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
 #db settings
 
-engine = create_engine(app.config['DATABASE_URI'])
+engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'], convert_unicode=True)
 
 db_session =scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
@@ -34,23 +40,25 @@ db_session =scoped_session(sessionmaker(autocommit=False,
 Base = declarative_base()
 Base.query = db_session.query_property()
 
-class Comment(Base):
+ 
+    
+class Comment(db.Model):
     __tablename__ = 'comments'
-    id = Column(Integer, primary_key=True)
-    email = Column(String(200))
-    comment = Column(String(500))
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(200))
+    comment = db.Column(db.String(500))
 
     def __init__(self, email, comment):
         self.email = email
         self.comment = comment
 
-class Board(Base):
+class Board(db.Model):
     __tablename__ = 'boards'
-    id = Column(Integer, primary_key=True)
-    email = Column(String(200))
-    contents = Column(String(1000))
-    title = Column(String(100))
-    status = Column(String(50))
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(200))
+    contents = db.Column(db.String(1000))
+    title = db.Column(db.String(100))
+    status = db.Column(db.String(50))
 
 
 
