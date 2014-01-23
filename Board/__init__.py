@@ -15,7 +15,7 @@ oid = OpenID(app, join(dirname(__file__), 'openid_store'))
 
 app.config.update(
         SQLALCHEMY_DATABASE_URI = 'postgres://uvkxbyzicejuyd:FzhZqstwa1YQ7FVPNAId0GO_4l@ec2-54-197-241-91.compute-1.amazonaws.com:5432/d22mrqavab61bp',
-        #'postgresql://postgres:1111@localhost:5432/Board',
+                                    #'postgresql://postgres:1111@localhost:5432/Board',
         SECRET_KEY = 'development key',
         DEBUG = True
     )
@@ -62,13 +62,14 @@ class Post(db.Model):
     subject = db.Column(db.String(50))
     status = db.Column(db.String(20))
     contents = db.Column(db.String(500))
-   
+    author_id = db.Column(db.String(20))
     
-    def __init__(self,category,subject,status,contents):
+    def __init__(self,category,subject,status,contents, author_id):
         self.category = category
         self.subject = subject
         self.status = status
         self.contents = contents
+        self.author_id = author_id
         
     def __repr__(self):
         return '<Post %s,%s,%s,%s>' % self.category, self.subject,\

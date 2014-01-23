@@ -24,7 +24,7 @@ oid = OpenID(app, join(dirname(__file__), 'openid_store'))
 
 app.config.update(
         SQLALCHEMY_DATABASE_URI = 'postgres://uvkxbyzicejuyd:FzhZqstwa1YQ7FVPNAId0GO_4l@ec2-54-197-241-91.compute-1.amazonaws.com:5432/d22mrqavab61bp',
-        #'postgresql://postgres:1111@localhost:5432/Board',
+                                    #'postgresql://postgres:1111@localhost:5432/Board',
         SECRET_KEY = 'development key',
         DEBUG = True
     )
