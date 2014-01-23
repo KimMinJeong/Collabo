@@ -1,0 +1,37 @@
+{% extends "top.html" %}
+{% block body %}
+
+
+{{ super() }}
+<form action="" method="post">
+<div class="container" >
+        <div class="row" align="left">
+                <div class="col-md-12 col-md-offset-3">
+                        <p><strong>분류</strong>
+                        <select id="category" name="category">
+                                <option value="store">STORE</option>
+                                <option value="admin">ADMIN</option>
+                                <option value="mobile">MOBILE</option>
+                        </select></p>
+                        <br/>
+                        <p><strong>상태</strong>
+                        <select id="status" name="status">
+                                <option value="wait">대기중</option>
+                                <option value="create_wait">개발예정</option>
+                                <option value="creating">개발중</option>
+                                <option value="update">업데이트</option>
+                                <option value="rejex">반려</option>
+                        </select></p>
+                        <br/>
+                        <p><strong>제목</strong>
+                        <input type="text" size="100" name="subject"></p>
+                        <br/>
+                        <textarea rows="20" cols="105" name="contents" value="contents"></textarea>
+                        <br/>
+                        <p><input type="submit" value="작성완료"></p>
+                </div>
+        </div>
+</div>
+</form>
+{% endblock %}
+
