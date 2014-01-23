@@ -1,4 +1,5 @@
 Flask
 SQLAlchemy
 Flask-OpenID
+psycopg2
 Flask-SQLAlchemy
