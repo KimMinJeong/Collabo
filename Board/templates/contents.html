@@ -1,0 +1,61 @@
+{% extends "board_top.html" %}
+{% block body %}
+{{ super() }}
+
+<div class="container" style="padding: 0 19px">
+	<div class="row-fluid">
+		<div class="col-xs-5 col-sm-12 col-md-5 boards"> 
+		
+			<hr>
+		</div>
+		<div class="col-xs-2 col-md-2"> 
+			<p class="text-muted">뭐...스토어?</p>
+		</div>
+		<div class="col-xs-5 col-md-3 col-md-offset-2">
+			<form action="" method="post">
+				<img class="centered" src="{{request.values.gravata_url}}"> 
+				<p name="email"> {{request.values.email}}</p> 			
+			  	<!--이게 왜 필요한거지????..?? <input type="hidden" name="next" value="{{next}}"> -->
+			</form>
+			
+		</div>
+	</div>
+
+	<div class="row-fluid">
+		<div class="col-xs-12 col-sm-12 col-md-12"> 
+		
+			<form action="" method="post">
+				내용 contents....~~~~
+				
+				
+			</form>
+			<hr>
+		</div>
+	
+	</div>
+	<div class="row-fluid">
+		<div class="col-xs-12 col-sm-12 col-md-12" name="comm_list">
+			<ul class="comm_list">
+				{% for comm in comm_list%}
+				<li> {{ comm.email }} </li>
+				<li> {{ comm.comment }}</li>
+				<hr>
+				{% endfor %}
+			</ul>
+			
+			<hr>
+		</div>
+	</div>
+	<div id="comm_win" >
+		<form action="/add_comm" method="post" >
+		  <img src="{{request.values.gravata_url}}"> 	
+		  <input name="email" type="text" value="{{ request.values.email }}  ">
+		  <textarea name="comment"> </textarea>  
+		  <input type="submit" value="댓글 입력">    
+		</form>
+	</div>
+	
+	
+</div>
+{% endblock %}
+

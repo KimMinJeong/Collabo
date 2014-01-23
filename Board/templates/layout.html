@@ -1,0 +1,23 @@
+<!doctype html>
+
+<title>Bootstrap Board</title>
+<link rel="stylesheet" href="{{url_for('static', filename='css/style.css')}}" type="text/css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" type="text/css">
+<link rel="stylesheet" href="{{url_for('static', filename='css/bootstrap-responsive.css')}}" type="text/css">
+<link rel="stylesheet" href="{{url_for('static', filename='css/editor.css')}}" type="text/css">
+{% block metas %}
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% endblock metas%}
+<script type=text/javascript
+  src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+<script type="text/javascript" src="static/js/bootstrap.min.js"></script>
+<script src="static/js/editor_loader.js?environment=development" type="text/javascript"></script>
+<script type=text/javascript>
+  var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+</script>
+{% for message in get_flashed_messages() %}
+  <p class=message>{{ message }}
+{% endfor %}
+{% block body %}{% endblock %}
