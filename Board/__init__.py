@@ -1,18 +1,11 @@
-from flask import Flask, render_template, request, g, session, flash, redirect, \
-    url_for, abort, jsonify
+from flask import Flask
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask_openid import OpenID
-from openid.extensions import pape
 from os import environ
 from os.path import dirname, join
-from sqlalchemy import create_engine, Column, Integer, String
+from sqlalchemy import *
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
-import urllib
-import hashlib
-
-
-
 
 
 app = Flask(__name__)
@@ -79,5 +72,4 @@ class Post(db.Model):
         
     def __repr__(self):
         return '<Post %s,%s,%s,%s>' % self.category, self.subject,\
-        self.status, self.contents,
-
+        self.status, self.contents
