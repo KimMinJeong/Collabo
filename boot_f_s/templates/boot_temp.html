@@ -1,0 +1,48 @@
+{% extends "index.html"%}
+{% block body%}
+<script>
+		$("#menu-toggle").click(function(e) {
+	        e.preventDefault();
+	        $("#wrapper").toggleClass("active");
+	    });
+</script>
+
+
+	<div id="wrapper">
+		<div id="sidebar-wrapper">
+			<ul class="sidebar-nav">
+				<li class="sidebar-brand">
+					<a href="#">Start Bootstrap</a>
+				</li>
+				<li>
+					<a href="./">Profile</a>
+				</li>
+				<li>
+					<a href="#">Projects</a>
+				</li>
+			</ul>
+		</div>
+		
+		<div id="page-content-wrapper">
+			<div class="content-header">
+				<h1>
+					<a id="menu-toggle" href="#" class="btn btan-default"><i class="icon-reorder"></i></a>
+					Simple Sidebar
+				</h1>
+			</div>
+		<div class="page-content inset">
+			<div class="row">
+				<div class="col-md-12">
+					<p class="lead">This simple side bar</p>
+				</div>
+				<div class="col-md-6">
+					<p class="well">the template</p>
+				</div>
+				<div class="col-md-6">
+					<p class="well">the template@</p>
+				</div>
+			</div>
+		</div>
+		</div>
+	</div>
+{% endblock %}
