@@ -4,12 +4,11 @@
 Remove this if you use the .htaccess -->
 
 {% block metas %}
-<meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 <meta name="author" content="kim">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-{% endblock metas%}
+{% endblock metas %}
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-1.10.2.min.js')}}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.js')}}"></script>
@@ -22,9 +21,8 @@ Remove this if you use the .htaccess -->
 <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.min.js')}}"></script>
 
 
-<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css')}}" type="text/css" media="screen" charset="UTF-8" title="notitle">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" type="text/css" media="screen">
 <!-- Replace favicon.ico & apple-touch-icon.png in the root of your domain and delete these references -->
-<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.css')}}" type="text/css" media="screen" charset="UTF-8" title="notitle">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" type="text/css">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/editor.css')}}" type="text/css" media="screen" charset="UTF-8">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/content_view.css')}}" type="text/css" media="screen" charset="UTF-8">

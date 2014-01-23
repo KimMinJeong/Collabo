@@ -61,4 +61,23 @@ class Board(db.Model):
     status = db.Column(db.String(50))
 
 
+class Post(db.Model):
+    __tablename__='posts'
+    
+    board_id = db.Column(Integer, primary_key=True)
+    category = db.Column(db.String(10))
+    subject = db.Column(db.String(50))
+    status = db.Column(db.String(20))
+    contents = db.Column(db.String(500))
+   
+    
+    def __init__(self,category,subject,status,contents):
+        self.category = category
+        self.subject = subject
+        self.status = status
+        self.contents = contents
+        
+    def __repr__(self):
+        return '<Post %s,%s,%s,%s>' % self.category, self.subject,\
+        self.status, self.contents,
 
