@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 
+=======
+>>>>>>> master
 from flask import Flask, render_template, request,\
     flash, request, g, session, redirect, url_for
 from sqlalchemy import String, Integer, Sequence, Column

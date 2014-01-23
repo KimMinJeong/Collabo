@@ -1,4 +1,7 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> master
 /*!
  * Bootstrap v3.0.3 (http://getbootstrap.com)
  * Copyright 2013 Twitter, Inc.
@@ -64,8 +67,11 @@ if (typeof jQuery === "undefined") { throw new Error("Bootstrap requires jQuery"
 
 }(jQuery);
 
+<<<<<<< HEAD
 =======
 >>>>>>> dc7590789fc307158597964ffd8b426d32ba907b
+=======
+>>>>>>> master
 /* ========================================================================
  * Bootstrap: alert.js v3.0.3
  * http://getbootstrap.com/javascript/#alerts
@@ -501,6 +507,9 @@ if (typeof jQuery === "undefined") { throw new Error("Bootstrap requires jQuery"
 
 /* ========================================================================
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> master
  * Bootstrap: collapse.js v3.0.3
  * http://getbootstrap.com/javascript/#collapse
  * ========================================================================
@@ -681,8 +690,11 @@ if (typeof jQuery === "undefined") { throw new Error("Bootstrap requires jQuery"
 }(jQuery);
 
 /* ========================================================================
+<<<<<<< HEAD
 =======
 >>>>>>> dc7590789fc307158597964ffd8b426d32ba907b
+=======
+>>>>>>> master
  * Bootstrap: dropdown.js v3.0.3
  * http://getbootstrap.com/javascript/#dropdowns
  * ========================================================================
@@ -1591,12 +1603,17 @@ if (typeof jQuery === "undefined") { throw new Error("Bootstrap requires jQuery"
 
 /* ========================================================================
 <<<<<<< HEAD
+<<<<<<< HEAD
  * Bootstrap: scrollspy.js v3.0.3
  * http://getbootstrap.com/javascript/#scrollspy
 =======
  * Bootstrap: tab.js v3.0.3
  * http://getbootstrap.com/javascript/#tabs
 >>>>>>> dc7590789fc307158597964ffd8b426d32ba907b
+=======
+ * Bootstrap: scrollspy.js v3.0.3
+ * http://getbootstrap.com/javascript/#scrollspy
+>>>>>>> master
  * ========================================================================
  * Copyright 2013 Twitter, Inc.
  *
@@ -1617,6 +1634,9 @@ if (typeof jQuery === "undefined") { throw new Error("Bootstrap requires jQuery"
 +function ($) { "use strict";
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> master
   // SCROLLSPY CLASS DEFINITION
   // ==========================
 
@@ -1782,6 +1802,7 @@ if (typeof jQuery === "undefined") { throw new Error("Bootstrap requires jQuery"
   var Tab = function (element) {
     this.element = $(element)
   }
+<<<<<<< HEAD
 =======
   // TAB CLASS DEFINITION
   // ====================
@@ -1790,6 +1811,8 @@ if (typeof jQuery === "undefined") { throw new Error("Bootstrap requires jQuery"
     this.element = $(element)
   }
 >>>>>>> dc7590789fc307158597964ffd8b426d32ba907b
+=======
+>>>>>>> master
 
   Tab.prototype.show = function () {
     var $this    = this.element
@@ -2024,6 +2047,7 @@ if (typeof jQuery === "undefined") { throw new Error("Bootstrap requires jQuery"
   })
 
 }(jQuery);
+<<<<<<< HEAD
 <<<<<<< HEAD
 =======
 
@@ -2423,3 +2447,5 @@ if (typeof jQuery === "undefined") { throw new Error("Bootstrap requires jQuery"
 
 }(jQuery);
 >>>>>>> dc7590789fc307158597964ffd8b426d32ba907b
+=======
+>>>>>>> master
