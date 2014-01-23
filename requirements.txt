@@ -1,4 +1,13 @@
-Flask
-SQLAlchemy
-Flask-SQLAlchemy
-Flask-OpenID
+Flask==0.10.1
+Flask-Gravatar==0.4.1
+Flask-OpenID==1.1.1
+Flask-SQLAlchemy==0.15
+Jinja2==2.7.1
+MarkupSafe==0.18
+SQLAlchemy==0.7.2
+Werkzeug==0.9.4
+itsdangerous==0.23
+psycopg2==2.5.1
+python-openid==2.2.5
+virtualenv==1.11
+

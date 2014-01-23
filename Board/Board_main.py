@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 from config import *
-from db import *
+
 # def get_user():
 #    return g.db.get('oid-' + session.get('openid', ''))
 
 
+def init_db():    
+    db.create_all()
+    Base.metadata.create_all(bind=engine) 
 
-
-def init_db():
-    Base.metadata.create_all(bind=engine)    
+  
 
 @app.route('/')
 def index():      
@@ -51,8 +52,8 @@ def add_comm():
     if request.method =='POST':
         email = request.form['email']
         comment = request.form['comment']
-        db_session.add(Comment(email, comment))       
-        db_session.commit()
+        db.session.add(Comment(email, comment))       
+        db.session.commit()
     return redirect(oid.get_next_url())  
     
 
