@@ -52,8 +52,8 @@ def add_comm():
     if request.method =='POST':
         email = request.form['email']
         comment = request.form['comment']
-        db_session.add(Comment(email, comment))       
-        db_session.commit()
+        db.session.add(Comment(email, comment))       
+        db.session.commit()
     return redirect(oid.get_next_url())  
     
 
