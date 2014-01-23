@@ -1,26 +1,15 @@
 # -*- coding: utf-8 -*-
 from config import *
 from db import *
-# def get_user():
-#    return g.db.get('oid-' + session.get('openid', ''))
-
-
-
-
 def init_db():
+    db.create_all()
     Base.metadata.create_all(bind=engine)    
 
 @app.route('/')
 def index():      
     return render_template('index.html')
 
-#@app.before_request
-#def before_request():
-# if not 'id' in session:
-#     flash(u'LogIN')    
 
-   
-    
 @app.route('/login')
 @oid.loginhandler
 def login():

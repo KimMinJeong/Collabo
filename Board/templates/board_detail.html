@@ -1,0 +1,14 @@
+{% extends "top.html" %}
+{% block body %}
+{{ super() }}
+<div class="container">
+<h1>제안서 상황</h1>
+<br/><br/>
+	<div class="row">
+		<div class="col-md-12">이 제안은 {{ g.detail.status }}입니다.</div>
+		<div class="col-md-12">{{ g.detail.contents }}</div>
+	</div>
+	
+</div>
+
+{% endblock %}

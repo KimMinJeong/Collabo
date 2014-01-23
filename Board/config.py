@@ -16,7 +16,7 @@ app = Flask(__name__)
 #app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:1111@localhost:5432/Board'
 oid = OpenID(app, join(dirname(__file__), 'openid_store'))
 app.config.update(
-        DATABASE_URI = 'postgresql://postgres:1111@localhost:5432/Board',
+        DATABASE_URI = 'postgresql://postgres:1234@localhost:5432/pos',
         SECRET_KEY = 'development key',
         DEBUG = True
     )

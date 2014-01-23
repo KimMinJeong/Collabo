@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-
-=======
->>>>>>> master
 from flask import Flask, render_template, request,\
     flash, request, g, session, redirect, url_for
 from sqlalchemy import String, Integer, Sequence, Column
@@ -9,7 +5,6 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from flask.ext.sqlalchemy import SQLAlchemy
 from sqlalchemy.ext.declarative import declarative_base
-
 import os
 
 app = Flask(__name__)
@@ -26,14 +21,12 @@ Base.query = db_session.query_property()
 
 class Board(db.Model):
     __tablename__='board'
-    
     board_id = db.Column(Integer, primary_key=True)
     category = db.Column(db.String(10))
     subject = db.Column(db.String(50))
     status = db.Column(db.String(20))
     contents = db.Column(db.String(500))
    
-    
     def __init__(self,category,subject,status,contents):
         self.category = category
         self.subject = subject
@@ -42,7 +35,7 @@ class Board(db.Model):
         
     def __repr__(self):
         return '<Board %s,%s,%s,%s>' % self.category, self.subject,\
-        self.status, self.contents,
+        self.status, self.contents
         
 db.create_all()
 db.session.commit()
@@ -60,7 +53,6 @@ def board_list():
 
 @app.route('/board_insert', methods=['GET','POST'])
 def board_insert():
- 
     if request.method == 'POST':  
         category = request.form["category"]
         subject = request.form["subject"]
@@ -75,10 +67,15 @@ def board_insert():
     return render_template('board_insert.html')
 
 
+@app.route('/board_detail')
+def board_detail():
+    
+    g.detail=Board.query.filter_by(category='store').all()
+    return render_template('board_detail.html')
+
 @app.route('/editor')
 def editor():
     return render_template('editor.html')
 
-
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0' ,port=int(os.environ.get('PORT',5000)))
+    app.run(debug=True, host='0.0.0.0')
