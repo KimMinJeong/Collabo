@@ -1,7 +1,3 @@
-<!doctype html>
-<!-- Always force latest IE rendering engine (even in intranet) & Chrome Frame
-Remove this if you use the .htaccess -->
-
 {% block metas %}
 <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,14 +13,16 @@ Remove this if you use the .htaccess -->
 <script type="text/javascript" src="{{ url_for('static', filename='js/jquery.dataTables.js')}}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.min.js')}}"></script>
 
+
 <script type="text/javascript" charset="utf-8">
-	$(document).ready(function() {
+        $(document).ready(function() {
     $('#example').dataTable({
-    	"aaSorting": [[ 4, "desc" ]]
+            "aaSorting": [[ 4, "desc" ]]
     });
 });
-	document.all['status'].disabled=true;
+        document.all['status'].disabled=true;
 </script>
+
 
 <script src="static/js/editor_loader.js?environment=development" type="text/javascript"></script>
 <script type=text/javascript>
@@ -33,5 +31,6 @@ Remove this if you use the .htaccess -->
 {% for message in get_flashed_messages() %}
   <p class=message>{{ message }}
 {% endfor %}
+
 
 {% block body %}{% endblock %}

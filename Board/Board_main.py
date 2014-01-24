@@ -9,18 +9,18 @@ from os.path import dirname, join
 from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
-from sqlalchemy.sql import functions
 from sqlalchemy.types import DateTime, Boolean
+from sqlalchemy.sql import functions
+from datetime import datetime,date,time
 import hashlib
 import urllib
-
 
 
 
 app = Flask(__name__)
 #app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 oid = OpenID(app, join(dirname(__file__), 'openid_store'))
-#SQLALCHEMY_DATABASE_URI = 'postgres://uvkxbyzicejuyd:FzhZqstwa1YQ7FVPNAId0GO_4l@ec2-54-197-241-91.compute-1.amazonaws.com:5432/d22mrqavab61bp'
+
 
 app.config.update(
         SQLALCHEMY_DATABASE_URI = 'postgres://uvkxbyzicejuyd:FzhZqstwa1YQ7FVPNAId0GO_4l@ec2-54-197-241-91.compute-1.amazonaws.com:5432/d22mrqavab61bp',
@@ -29,24 +29,10 @@ app.config.update(
         DEBUG = True
     )
 
-
-app = Flask(__name__)
-#app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
-oid = OpenID(app, join(dirname(__file__), 'openid_store'))
-#SQLALCHEMY_DATABASE_URI = 'postgres://uvkxbyzicejuyd:FzhZqstwa1YQ7FVPNAId0GO_4l@ec2-54-197-241-91.compute-1.amazonaws.com:5432/d22mrqavab61bp'
-
-app.config.update(
-        SQLALCHEMY_DATABASE_URI = 'postgres://uvkxbyzicejuyd:FzhZqstwa1YQ7FVPNAId0GO_4l@ec2-54-197-241-91.compute-1.amazonaws.com:5432/d22mrqavab61bp',
-        #'postgresql://postgres:1111@localhost:5432/Board',
-        SECRET_KEY = 'development key',
-        DEBUG = True
-    )
-
 db = SQLAlchemy(app)
 app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
 #db settings
-
 engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'], convert_unicode=True)
 
 db_session =scoped_session(sessionmaker(autocommit=False,
@@ -55,7 +41,21 @@ db_session =scoped_session(sessionmaker(autocommit=False,
 Base = declarative_base()
 Base.query = db_session.query_property()
 
+
+class User(Base):
+    __tablename__ = 'admin_users'
+    id = Column(Integer, primary_key=True)
+    name = Column(String(60))
+    email = Column(String(200))
+    admin = Column(String(10))
     
+    def __init__(self, name, email,admin):
+        self.name = name
+        self.email = email
+        self.admin = admin
+    def __repr__(self):
+        return '<User %s,%s,%s,%s>' % self.name, self.email, self.admin
+
 class Comment(db.Model):
     __tablename__ = 'comments'
     id = db.Column(db.Integer, primary_key=True)
@@ -65,7 +65,6 @@ class Comment(db.Model):
     def __init__(self, email, comment):
         self.email = email
         self.comment = comment
-
 
 
 class Post(db.Model):
@@ -79,8 +78,10 @@ class Post(db.Model):
     author_id= db.Column(db.String(20))
     created_at= db.Column(DateTime(timezone=True), nullable=False,
                                      default=functions.now())
-    
+
+
     def __init__(self,category,subject,status,contents, author_id):
+
         self.category = category
         self.subject = subject
         self.status = status
@@ -89,24 +90,16 @@ class Post(db.Model):
         
     def __repr__(self):
         return '<Post %s,%s,%s,%s>' % self.category, self.subject,\
-        self.status, self.contents, self.author_id
+        self.status, self.contents
+# def get_user():
+#    return g.db.get('oid-' + session.get('openid', ''))
 
-
-class User(Base):
-    __tablename__ = 'users'
-    id = Column(Integer, primary_key=True)
-    name = Column(String(60))
-    email = Column(String(200))
-    admin = Column(Boolean(create_constraint=True, name=None))
-    def __init__(self, name, email):
-        self.name = name
-        self.email = email
 
 def init_db():    
     db.create_all()
     Base.metadata.create_all(bind=engine) 
 
- 
+
 
 @app.before_request
 def before_request():
@@ -117,6 +110,12 @@ def before_request():
 def index():      
     return render_template('index.html')
 
+@app.route('/')
+def top():
+    return render_template('board_top.html')
+
+#글쓰기 부분
+@app.route('/posts', methods=['GET','POST'])
 #@app.before_request
 #def before_request():
 # if not 'id' in session:
@@ -128,6 +127,7 @@ def index():
 def board_list():
     post_list =  Post.query.all()
     return render_template('board_list.html', post_list=post_list)
+
 
 
 @app.route('/show/<int:id>', methods=['GET'])
@@ -152,13 +152,7 @@ def register():
     flash(u'추가!')
     return render_template('signup.html')
 @app.route('/login')
-@oid.loginhandler
-def login():
-    if g.user is not None:
-        return redirect(oid.get_next_url())
-    #pape_req = pape.Request([]) #what is pape_request???
-    return oid.try_login("https://www.google.com/accounts/o8/id",
-    ask_for=['email', 'fullname', 'nickname'])     
+ 
     
 
 @oid.after_login
@@ -207,6 +201,27 @@ def board_insert():
     return render_template('board_insert.html')
 
 
+#글 디테일뷰
+@app.route('/posts/status')
+def board_detail():
+    post_detail = Post.query.all()
+    return render_template('board_detail.html', post_detail=post_detail)
+
+@app.route('/posts/id/detail/edit')
+def admin():
+    return render_template()
+
+@app.route('/login')
+@oid.loginhandler
+def login():
+   #로그인을 하게 되면 바로 google 창이 뜰꺼야.
+    pape_req = pape.Request([]) #what is pape_request???
+    return oid.try_login("https://www.google.com/accounts/o8/id",
+    ask_for=['email', 'fullname', 'nickname'])                                      
+    #return render_template('example.html', next=oid.get_next_url(),
+    #                       error=oid.fetch_error())
+
+
 @app.route('/editor')
 def editor():
     return render_template('editor.html')   
@@ -223,8 +238,7 @@ def add_comm():
         db.session.commit()
     return redirect(oid.get_next_url())  
     
-
-    
+  
 def set_img(resp):
     email_gra = resp.email
     size = 40
@@ -238,7 +252,6 @@ def set_img(resp):
 def post():
     return render_template('example.html')
 
-
 @app.route('/logout')
 def logout():
     session.pop('id', None)
@@ -246,15 +259,16 @@ def logout():
     return redirect(url_for('index'))
 
 
+#@app.route('/posts/id/detail')
+
 @app.route('/contents')
 def contents():
     comm_list = Comment.query.all()
-    
    # post_detail = Post.query.filter(Post.board_id=board_id).first()
     return render_template('contents.html',
                            # post_detail = post_detail,
                             comm_list=comm_list)
-    
+
 if __name__ == '__main__':
    
     app.run(debug=True, host='0.0.0.0', port=int(environ.get('PORT',5000)))

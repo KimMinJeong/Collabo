@@ -14,7 +14,7 @@
     </thead>
     <tbody id="post_list">
     	{% for post in post_list %}
-    	
+
         <tr class="cursor">
             <td id="category">{{post.category}}</td> 
             <td id="subject" value={{post.board_id}}><a href="{{url_for('show', id=post.board_id) }}">{{post.subject}}</a></td>
@@ -23,9 +23,9 @@
             <td id="author_id">{{ post.author_id }}</td> 
             <td id="date">{{ post.created_at.date() }}</td>  
         </tr>
-       
         {% endfor %}      
     </tbody>
+    
     <tfoot>
         <tr>
             <th>분류</th>
@@ -48,5 +48,4 @@
 	});
 </script>
 -->
-
 {% endblock %}

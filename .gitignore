@@ -1,5 +1,13 @@
+<<<<<<< HEAD
+.metadata/
+Ajax_Test/.project
+Ajax_Test/.pydevproject
+Board/openid_store/
+
+=======
 Board/openid_store/
 Board/.settings
 Board/*.pyc
 Board/.project
 Board/.pydevproject
+>>>>>>> 5e969acd86bd9f232428ce3c49e05d90ed695e63
