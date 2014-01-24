@@ -1,0 +1,5 @@
+Board/openid_store/
+Board/.settings
+Board/*.pyc
+Board/.project
+Board/.pydevproject

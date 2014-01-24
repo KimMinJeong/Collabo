@@ -9,10 +9,10 @@ from os.path import dirname, join
 from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
-import urllib
+from sqlalchemy.sql import functions
+from sqlalchemy.types import DateTime, Boolean
 import hashlib
-
-
+import urllib
 
 
 
@@ -55,7 +55,6 @@ db_session =scoped_session(sessionmaker(autocommit=False,
 Base = declarative_base()
 Base.query = db_session.query_property()
 
- 
     
 class Comment(db.Model):
     __tablename__ = 'comments'
@@ -67,13 +66,6 @@ class Comment(db.Model):
         self.email = email
         self.comment = comment
 
-class Board(db.Model):
-    __tablename__ = 'boards'
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(200))
-    contents = db.Column(db.String(1000))
-    title = db.Column(db.String(100))
-    status = db.Column(db.String(50))
 
 
 class Post(db.Model):
@@ -84,27 +76,42 @@ class Post(db.Model):
     subject = db.Column(db.String(50))
     status = db.Column(db.String(20))
     contents = db.Column(db.String(500))
-   
+    author_id= db.Column(db.String(20))
+    created_at= db.Column(DateTime(timezone=True), nullable=False,
+                                     default=functions.now())
     
-    def __init__(self,category,subject,status,contents):
+    def __init__(self,category,subject,status,contents, author_id):
         self.category = category
         self.subject = subject
         self.status = status
         self.contents = contents
+        self.author_id = author_id
         
     def __repr__(self):
         return '<Post %s,%s,%s,%s>' % self.category, self.subject,\
-        self.status, self.contents
+        self.status, self.contents, self.author_id
 
-# def get_user():
-#    return g.db.get('oid-' + session.get('openid', ''))
 
+class User(Base):
+    __tablename__ = 'users'
+    id = Column(Integer, primary_key=True)
+    name = Column(String(60))
+    email = Column(String(200))
+    admin = Column(Boolean(create_constraint=True, name=None))
+    def __init__(self, name, email):
+        self.name = name
+        self.email = email
 
 def init_db():    
     db.create_all()
     Base.metadata.create_all(bind=engine) 
 
-  
+ 
+
+@app.before_request
+def before_request():
+    g.user = None
+    
 
 @app.route('/')
 def index():      
@@ -115,18 +122,51 @@ def index():
 # if not 'id' in session:
 #     flash(u'LogIN')    
 
-@app.route('/top')
-def top():
-    return render_template('top.html')  
+
 
 @app.route('/board_list')
 def board_list():
     post_list =  Post.query.all()
     return render_template('board_list.html', post_list=post_list)
 
-@app.route('/click', methods=['GET'])
-def click():
+
+@app.route('/show', methods=['GET'])
+def show():
+    
     return redirect(url_for('contents'))
+
+@app.route('/login')
+@oid.loginhandler
+def login():
+    if g.user is not None:
+        return redirect(oid.get_next_url())
+    #pape_req = pape.Request([]) #what is pape_request???
+    return oid.try_login("https://www.google.com/accounts/o8/id",
+    ask_for=['email', 'fullname', 'nickname'])     
+    
+
+@oid.after_login
+def after_login(resp):    
+    user= User.query.filter_by(email=resp.email).first()  
+    gravatar=set_img(resp)
+    if user is not None:
+        flash(u'Successfully signed in')
+        g.user= user
+        session['name'] = user.name
+        session['email'] = resp.email
+        session['gravatar'] =gravatar[0]
+    return redirect(url_for('board_list'))
+    
+    #그라바타 url이랑 email주소 리턴!
+      
+    
+    #return redirect(url_for('contents', next=oid.get_next_url(),
+    #                        name=resp.fullname or resp.nickname,
+    #                        email=resp.email, gravata_url=gravatar[0],
+    #                        email_gra=gravatar[1]))
+
+
+
 
 @app.route('/board_insert', methods=['GET','POST'])
 def board_insert(): 
@@ -134,9 +174,9 @@ def board_insert():
         category = request.form["category"]
         subject = request.form["subject"]
         status = request.form["status"]
-        contents = request.form["contents"]
-        author_id= g.author_id
-        
+        contents = request.form["contents"]   
+        author_id = session.get('name')
+
         db_insert = Post(category, subject , status , contents, author_id)
         db.session.add(db_insert)
         db.session.commit()
@@ -144,42 +184,11 @@ def board_insert():
         return redirect(url_for('board_list'))
     return render_template('board_insert.html')
 
+
 @app.route('/editor')
 def editor():
     return render_template('editor.html')   
 
-@app.route('/login')
-@oid.loginhandler
-def login():
-   #로그인을 하게 되면 바로 google 창이 뜰꺼야.
-    pape_req = pape.Request([]) #what is pape_request???
-    return oid.try_login("https://www.google.com/accounts/o8/id",
-    ask_for=['email', 'fullname', 'nickname'])                                      
-    #return render_template('example.html', next=oid.get_next_url(),
-    #                       error=oid.fetch_error())
-
-
-@oid.after_login
-def after_login(resp):
-    session['id'] = resp.identity_url
-    temp = session['id'].split('@')
-    g.author_id = temp[0]
-    if not session.get('id'):
-        return redirect(oid.get_next_url())
-    gravatar = set_img(resp) 
-    g.name = resp.fullname or resp.nickname
-    g.email = resp.email
-    g.gravatar_url= gravatar[0]
-    g.email_gra= gravatar[1]
-    return redirect(url_for('board_list'))
-    
-    #그라바타 url이랑 email주소 리턴!
-      
-    
-    return redirect(url_for('contents', next=oid.get_next_url(),
-                            name=resp.fullname or resp.nickname,
-                            email=resp.email, gravata_url=gravatar[0],
-                            email_gra=gravatar[1]))
 
 @app.route('/add_comm', methods=['post'])
 def add_comm():
@@ -187,6 +196,7 @@ def add_comm():
     if request.method =='POST':
         email = request.form['email']
         comment = request.form['comment']
+        
         db.session.add(Comment(email, comment))       
         db.session.commit()
     return redirect(oid.get_next_url())  
@@ -206,11 +216,13 @@ def set_img(resp):
 def post():
     return render_template('example.html')
 
+
 @app.route('/logout')
 def logout():
     session.pop('id', None)
     flash(u'로그아웃!')
     return redirect(url_for('index'))
+
 
 @app.route('/contents')
 def contents():
@@ -220,8 +232,6 @@ def contents():
                             post_detail = post_detail,
                             comm_list=comm_list)
     
-
-
 if __name__ == '__main__':
-    init_db()
+   
     app.run(debug=True, host='0.0.0.0', port=int(environ.get('PORT',5000)))
