@@ -12,17 +12,20 @@
             <th width="20%">날짜</th>
         </tr>
     </thead>
-    <tbody name="post_list">
+    <tbody id="post_list">
     	{% for post in post_list %}
-        <tr>
-            <td>{{post.category}}</td>
-            <td>{{post.subject}}</td>
-            <td>{{post.status}}</td>
-            <td>{{ post.author_id }}</td>             
-            <td>{{post.created_at}}</td>  
+
+        <tr class="cursor">
+            <td id="category">{{post.category}}</td> 
+            <td id="subject" value={{post.board_id}}><a href="{{url_for('show', id=post.board_id) }}">{{post.subject}}</a></td>
+            <input type="hidden" id= {{post.board_id}}>
+            <td id="status">{{post.status}}</td>
+            <td id="author_id">{{ post.author_id }}</td> 
+            <td id="date">{{ post.created_at.date() }}</td>  
         </tr>
-        {% endfor %}
+        {% endfor %}      
     </tbody>
+    
     <tfoot>
         <tr>
             <th>분류</th>
@@ -34,4 +37,15 @@
     </tfoot>
 </table>
 </form>
+<!--
+<script type="text/javascript">
+	$('#example tr').on('click', function(){
+		var cells = new Array();
+		$('#example tbody tr').each(function(){
+			cells.push($(this).html());
+		});
+		console.log(cells);
+	});
+</script>
+-->
 {% endblock %}

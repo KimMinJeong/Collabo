@@ -3,3 +3,7 @@
 >>>>>>>=8df0859ab6929413e4d4b4c26c75e0bf2a10095c
 eclipse.preferences.version=1
 encoding/Board_main.py=utf-8
+<<<<<<< HEAD
+=======
+encoding/database.py=utf-8
+>>>>>>> 5e969acd86bd9f232428ce3c49e05d90ed695e63
