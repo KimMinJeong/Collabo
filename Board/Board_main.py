@@ -130,11 +130,27 @@ def board_list():
     return render_template('board_list.html', post_list=post_list)
 
 
-@app.route('/show', methods=['GET'])
-def show():
-    
-    return redirect(url_for('contents'))
+@app.route('/show/<int:id>', methods=['GET'])
+def show(id):
+    posts= Post.query.filter(Post.board_id==id).first()
+    comm_list = Comment.query.all()    
+    gravatar = session.get('gravatar')
+    return render_template('contents.html',
+                            posts=posts, comm_list=comm_list, gravatar=gravatar)
 
+@app.route('/signup')
+def register():
+    admin = User.query.filter(User.admin=='TRUE').all()
+    if not session['email']==admin.email:
+        abort(401)
+        return redirect(oid.get_next_url())
+    email= request.form['newEmail']
+    name= email.split('@')
+    user = User(name[0], email, False)
+    db.session.add(user)
+    db.session.commit()
+    flash(u'추가!')
+    return render_template('signup.html')
 @app.route('/login')
 @oid.loginhandler
 def login():
@@ -154,7 +170,9 @@ def after_login(resp):
         g.user= user
         session['name'] = user.name
         session['email'] = resp.email
+    
         session['gravatar'] =gravatar[0]
+        
     return redirect(url_for('board_list'))
     
     #그라바타 url이랑 email주소 리턴!
@@ -165,7 +183,11 @@ def after_login(resp):
     #                        email=resp.email, gravata_url=gravatar[0],
     #                        email_gra=gravatar[1]))
 
-
+#@app.route('/show/post')
+#def show_post():
+    #board_id??
+#    board_id= request.form["value"]
+#    return 1#redirect('contents', board_id=board_id)
 
 
 @app.route('/board_insert', methods=['GET','POST'])
@@ -227,9 +249,10 @@ def logout():
 @app.route('/contents')
 def contents():
     comm_list = Comment.query.all()
-    post_detail = Post.query.all()
+    
+   # post_detail = Post.query.filter(Post.board_id=board_id).first()
     return render_template('contents.html',
-                            post_detail = post_detail,
+                           # post_detail = post_detail,
                             comm_list=comm_list)
     
 if __name__ == '__main__':
