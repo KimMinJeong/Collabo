@@ -12,19 +12,17 @@
             <th width="20%">날짜</th>
         </tr>
     </thead>
-    <tbody name="post_list">
+    <tbody id="post_list">
     	{% for post in post_list %}
         <tr class=cursor>
-            <td class=cursor>{{post.category}}</td>
-            <td>{{post.subject}}</td>
-            <td>{{post.status}}</td>
-            <td >{{post.contents}}</td>            
-            <td>etc</td>
+            <td class="category">{{post.category}}</td>
+            <td class="subject">{{post.subject}}</td>
+            <td class="status">{{post.status}}</td>
+            <td class="author_id">{{ post.author_id }}</td> 
+            <td class="date">{{ post.created_at }}</td>  
         </tr>
-        {% endfor %}
-        
+        {% endfor %}      
     </tbody>
-
     <tfoot>
         <tr>
             <th>분류</th>
@@ -36,5 +34,15 @@
     </tfoot>
 </table>
 </form>
-<p>ㅎ이루하이루하이루</p>
+
+<script type="text/javascript">
+	$('#post_list').on('click', function(){
+		var cells = new Array();
+		$('#example tbody tr td').each(function(){
+			cells.push($(this).html());
+		});
+		console.log(cells);
+	});
+</script>
+
 {% endblock %}
