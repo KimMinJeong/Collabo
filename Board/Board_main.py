@@ -12,36 +12,44 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.types import DateTime, Boolean
 from sqlalchemy.sql import functions
 from datetime import datetime,date,time
-from config import *
-
 import hashlib
 import urllib
-
 
 app = Flask(__name__)
 #app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 oid = OpenID(app, join(dirname(__file__), 'openid_store'))
-#SQLALCHEMY_DATABASE_URI = 'postgres://uvkxbyzicejuyd:FzhZqstwa1YQ7FVPNAId0GO_4l@ec2-54-197-241-91.compute-1.amazonaws.com:5432/d22mrqavab61bp'
+
 
 app.config.update(
         SQLALCHEMY_DATABASE_URI = 'postgres://uvkxbyzicejuyd:FzhZqstwa1YQ7FVPNAId0GO_4l@ec2-54-197-241-91.compute-1.amazonaws.com:5432/d22mrqavab61bp',
-        #'postgresql://postgres:1111@localhost:5432/Board',
-        DATABASE_URI = 'postgresql://postgres:1234@localhost:5432/pos',
+                                    #'postgresql://postgres:1111@localhost:5432/Board',
         SECRET_KEY = 'development key',
         DEBUG = True
     )
 
 db = SQLAlchemy(app)
 app.config.from_envvar('FLASKR_SETTINGS', silent=True)
-
 #db settings
-
 engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'], convert_unicode=True)
 db_session =scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
                                          bind=engine))
 Base = declarative_base()
 Base.query = db_session.query_property()
+
+class User(Base):
+    __tablename__ = 'admin_users'
+    id = Column(Integer, primary_key=True)
+    name = Column(String(60))
+    email = Column(String(200))
+    admin = Column(String(10))
+    
+    def __init__(self, name, email,admin):
+        self.name = name
+        self.email = email
+        self.admin = admin
+    def __repr__(self):
+        return '<User %s,%s,%s,%s>' % self.name, self.email, self.admin
 
 class Comment(db.Model):
     __tablename__ = 'comments'
@@ -52,7 +60,6 @@ class Comment(db.Model):
     def __init__(self, email, comment):
         self.email = email
         self.comment = comment
-
 
 class Post(db.Model):
     __tablename__='posts'
@@ -77,38 +84,21 @@ class Post(db.Model):
         self.status, self.contents
 # def get_user():
 #    return g.db.get('oid-' + session.get('openid', ''))
-
-class User(Base):
-    __tablename__ = 'users'
-    id = Column(Integer, primary_key=True)
-    name = Column(String(60))
-    email = Column(String(200))
-    admin = Column(Boolean(create_constraint=True, name=None))
-    
-    def __init__(self, name, email):
-        self.name = name
-        self.email = email
-        
 def init_db():    
     db.create_all()
     Base.metadata.create_all(bind=engine) 
+
 
 @app.route('/')
 def index():      
     return render_template('index.html')
 
-@app.route('/board_top')
+@app.route('/')
 def top():
     return render_template('board_top.html')
 
-#글리스트 부분
-@app.route('/board_list')
-def board_list():
-    post_list = Post.query.all()
-    return render_template('board_list.html', post_list=post_list)
-
-#글쓰기부분
-@app.route('/board_insert', methods=['GET','POST'])
+#글쓰기 부분
+@app.route('/posts', methods=['GET','POST'])
 def board_insert(): 
     if request.method == 'POST':  
         category = request.form["category"]
@@ -123,14 +113,21 @@ def board_insert():
         return redirect(url_for('board_list'))
     return render_template('board_insert.html')
 
-@app.route('/board_detail')
+#글리스트 부분
+@app.route('/posts/lists')
+def board_list():
+    post_list = Post.query.all()
+    return render_template('board_list.html', post_list=post_list)
+
+#글 디테일뷰
+@app.route('/posts/status')
 def board_detail():
     post_detail = Post.query.all()
     return render_template('board_detail.html', post_detail=post_detail)
 
-@app.route('/editor')
-def editor():
-    return render_template('editor.html')   
+@app.route('/posts/id/detail/edit')
+def admin():
+    return render_template()
 
 @app.route('/login')
 @oid.loginhandler
@@ -182,7 +179,12 @@ def logout():
     flash(u'로그아웃!')
     return redirect(url_for('index'))
 
-@app.route('/contents')
+@app.route('/show/<int:id>')
+def show(id):
+    posts=Post.query.filter(Post.board_id==id)
+    return redirect(url_for('contents'), posts=posts)
+
+@app.route('/posts/id/detail')
 def contents():
     comm_list = Comment.query.all()
     return render_template('contents.html', comm_list=comm_list)
