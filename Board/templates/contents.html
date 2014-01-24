@@ -5,16 +5,16 @@
 <div class="container" style="padding: 0 19px">
 	<div class="row-fluid">
 		<div class="col-xs-5 col-sm-12 col-md-5 boards"> 
-		
+		{{posts.subject}}
 			<hr>
 		</div>
 		<div class="col-xs-2 col-md-2"> 
-			<p class="text-muted">뭐...스토어?</p>
+			<p class="text-muted">{{posts.category}}</p>
 		</div>
 		<div class="col-xs-5 col-md-3 col-md-offset-2">
 			<form action="" method="post">
-				<img class="centered" src="{{request.values.gravata_url}}"> 
-				<p name="email"> {{request.values.email}}</p> 			
+				<img class="centered" src={{gravatar}}> 
+				<p name="email"> {{session['email']}}</p> 			
 			  	<!--이게 왜 필요한거지????..?? <input type="hidden" name="next" value="{{next}}"> -->
 			</form>
 			
@@ -25,7 +25,7 @@
 		<div class="col-xs-12 col-sm-12 col-md-12"> 
 		
 			<form action="" method="post">
-				내용 contents....~~~~
+				{{posts.contents}}
 				
 				
 			</form>
