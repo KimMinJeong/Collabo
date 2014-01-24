@@ -15,16 +15,14 @@
     <tbody name="post_list">
     	{% for post in post_list %}
         <tr>
-            <td >{{post.category}}</td>
+            <td>{{post.category}}</td>
             <td>{{post.subject}}</td>
             <td>{{post.status}}</td>
-            <td >{{post.contents}}</td>            
-            <td>etc</td>
+            <td>{{post.contents}}</td>            
+            <td>{{post.created_at}}</td>  
         </tr>
         {% endfor %}
-        
     </tbody>
-
     <tfoot>
         <tr>
             <th>분류</th>
@@ -36,5 +34,4 @@
     </tfoot>
 </table>
 </form>
-<p>ㅎ이루하이루하이루</p>
 {% endblock %}
