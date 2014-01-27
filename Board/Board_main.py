@@ -58,7 +58,6 @@ class User(Base):
 
 
 class Post(db.Model):
-    __tablename__='posts'    
     id = db.Column(Integer, primary_key=True)
     category = db.Column(db.String(10))
     subject = db.Column(db.String(50))
@@ -70,7 +69,6 @@ class Post(db.Model):
     comment_id = db.relationship('Comment', backref='posts', lazy='dynamic')
     
     def __init__(self,category,subject,status,contents, author_id):
-
         self.category = category
         self.subject = subject
         self.status = status
