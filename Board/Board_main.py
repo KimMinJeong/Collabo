@@ -58,6 +58,7 @@ class User(Base):
 
 
 class Post(db.Model):
+    __tablename__='posts'
     id = db.Column(Integer, primary_key=True)
     category = db.Column(db.String(10))
     subject = db.Column(db.String(50))
@@ -90,12 +91,12 @@ class Comment(db.Model):
         self.email = email
         self.comment = comment
         self.post_id = post_id
-        self.status, self.contents
+        
 
 
 def init_db():    
     db.create_all()
-    Base.metadata.create_all(bind=engine) 
+    
 
 
 @app.before_request
@@ -132,8 +133,8 @@ def board_list():
 
 @app.route('/posts/<int:id>', methods=['GET'])
 def show(id):
-    posts= Post.query.filter(Post.board_id==id).first()
-    comm_list = Comment.query.all()    
+    posts= Post.query.filter(Post.id==id).first()
+    comm_list = Comment.query.filter(Comment.id==id).first()    
     gravatar = session.get('gravatar')
     return render_template('contents.html',
                             posts=posts, comm_list=comm_list, gravatar=gravatar)
@@ -152,11 +153,6 @@ def register():
     db.session.commit()
     flash(u'추가!')
     return render_template('signup.html')
-
-
-
-   
-    
 
 
 @oid.after_login
@@ -179,12 +175,6 @@ def set_img(resp):
                     hashlib.md5(email_gra.lower()).hexdigest() + "?"
     gravatar_url += urllib.urlencode( {'d': 'mm' ,'s': str(size)} )     
     return gravatar_url, email_gra  
-    #그라바타 url이랑 email주소 리턴!
-      
-    #return redirect(url_for('contents', next=oid.get_next_url(),
-    #                        name=resp.fullname or resp.nickname,
-    #                        email=resp.email, gravata_url=gravatar[0],
-    #                        email_gra=gravatar[1]))
 
 
 @app.route('/posts', methods=['GET','POST'])
@@ -215,12 +205,11 @@ def board_detail():
 def admin():
     return render_template()
 
-@app.route('/posts/<int:id>/comments', methods=['post'])
-
+@app.route('/posts/<int:id>', methods=['post'])
 def add_comm(id):#comment 추가
 
     if request.method =='POST':
-        email = request.form['email']
+        email = session.get('email')
         comment = request.form['comment']
         post_id = id
         db.session.add(Comment(email, comment, post_id))       
@@ -238,12 +227,11 @@ def logout():
 
 
 @app.route('/posts/<int:id>')
-def contents():
-    comm_list = Comment.query.all()
-# post_detail = Post.query.filter(Post.board_id=board_id).first()
+def contents(id):
+    comm_list = Comment.query.filter(Comment.id==id).first()
     return render_template('contents.html',
-                           # post_detail = post_detail,
                             comm_list=comm_list)
 
 if __name__ == '__main__':
+    init_db()
     app.run(debug=True, host='0.0.0.0', port=int(environ.get('PORT',5000)))

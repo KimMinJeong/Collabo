@@ -47,10 +47,10 @@
 			<hr>
 		</div>
 	</div>
-	<div id="comm_win" >
-		<form action="/add_comm" method="post" >
-		  <img src="{{request.values.gravata_url}}"> 	
-		  <input name="email" type="text" value="{{ request.values.email }}  ">
+	<div id="comm" >
+		<form action="{{ url_for('add_comm', id=posts.id) }}" method="post" >
+		  <img src="{{session.get('gravatar')}}">
+		  <p name="email">{{session.get('email')}}</p> 			  
 		  <textarea name="comment"> </textarea>  
 		  <input type="submit" value="댓글 입력">    
 		</form>
