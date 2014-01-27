@@ -104,7 +104,6 @@ def init_db():
 @app.before_request
 def before_request():
     g.user = None
-    
 
 @app.route('/')
 def index():      
@@ -141,26 +140,27 @@ def show(id):
 
 @app.route('/register')
 def register():
-    admin=User.query.filter(User.admin=='TRUE').all()
-    if not session['email']==admin.email:
-        abort(401)
-        return redirect(oid.get_next_url())
+    
+    return render_template('register.html')
+
+@app.route('/register', methods=['GET', 'POST'])
+def add_user():
     email=request.form['newEmail']
     name=email.split('@')
     user=User(name[0], email, False)
     db.session.add(user)
     db.session.commit()
     flash(u'추가!')
-    return render_template('signup.html')
-
-
+    return redirect(oid.get_next_url())
 @oid.after_login
 def after_login(resp):    
-    user= User.query.filter_by(email=resp.email).first()  
+    
+    user= User.query.filter_by(email=resp.email).first()      
+    if not user:
+        return redirect(oid.get_next_url()) 
     gravatar=set_img(resp)
     if user is not None:
         flash(u'Successfully signed in')
-        g.user= user
         session['name'] = user.name
         session['email'] = resp.email    
         session['gravatar'] =gravatar[0]        
