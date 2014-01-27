@@ -56,29 +56,6 @@ class User(db.Model):
         return '<User %s,%s,%s,%s>' % self.name, self.email, self.admin
 
 
-class Post(db.Model):
-    __tablename__='posts'
-    id = db.Column(Integer, primary_key=True)
-    category = db.Column(db.String(10))
-    subject = db.Column(db.String(50))
-    status = db.Column(db.String(20))
-    contents = db.Column(db.String(500))
-    author_id= db.Column(db.String(20))
-    created_at= db.Column(DateTime(timezone=True), nullable=False,
-                                     default=functions.now())
-    comment_id = db.relationship('Comment', backref='posts', lazy='dynamic')
-
-    def __init__(self,category,subject,status,contents, author_id):
-        self.category = category
-        self.subject = subject
-        self.status = status
-        self.contents = contents
-        self.author_id = author_id
-        
-    def __repr__(self):
-        return '<Post %s,%s,%s,%s, %s>' % self.category, self.subject,\
-        self.status, self.contents, self.author_id
-
 class Comment(db.Model):
     __tablename__ = 'comments'
     id = db.Column(db.Integer, primary_key=True)
@@ -92,14 +69,37 @@ class Comment(db.Model):
         self.comment = comment
         self.post_id = post_id
         
-
     def __repr__(self):
-        return '<Comment %s %s %s >' % self.email, self.comment , self.post_id
+        return '<Comment %s %s %s>' % self.email, self.comment , self.post_id
     
+
+class Post(db.Model):
+    __tablename__='posts'
+    id = db.Column(Integer, primary_key=True)
+    category = db.Column(db.String(10))
+    subject = db.Column(db.String(50))
+    status = db.Column(db.String(20))
+    contents = db.Column(db.String(500))
+    author_id= db.Column(db.String(20))
+    created_at= db.Column(DateTime(timezone=True), nullable=False,
+                                     default=functions.now())
+    comment_id = db.relationship('Comment', lazy='dynamic',backref='posts')
+
+    def __init__(self,category,subject,status,contents, author_id):
+        self.category = category
+        self.subject = subject
+        self.status = status
+        self.contents = contents
+        self.author_id = author_id
+        
+    def __repr__(self):
+        return '<Post %s,%s,%s,%s, %s>' % self.category, self.subject,\
+        self.status, self.contents, self.author_id
+
+
 def init_db():    
     db.create_all()
     
-
 
 @app.before_request
 def before_request():
@@ -133,8 +133,8 @@ def board_list():
 @app.route('/posts/<int:id>', methods=['GET'])
 def show(id):
     posts= Post.query.filter(Post.id==id).first()
-    comm_list = Comment.query.filter(Comment.post_id==id).all()
-    
+    comm_list = Comment.query.filter(Comment.post_id==id).all()    
+    gravatar = session.get('gravatar')
     return render_template('contents.html',
                             posts=posts, comm_list=comm_list)
 
@@ -216,7 +216,6 @@ def add_comm(id):#comment 추가
     return redirect(oid.get_next_url())  
 
       
-
 @app.route('/logout')
 def logout():
     session.pop('id', None)
@@ -225,12 +224,6 @@ def logout():
 
 
 
-@app.route('/modal', methods=['post'])
-def modal():
-    
-    return render_template('modal.html')
-
 
 if __name__ == '__main__':
-    init_db()
     app.run(debug=True, host='0.0.0.0', port=int(environ.get('PORT',5000)))
