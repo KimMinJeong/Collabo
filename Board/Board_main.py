@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from datetime import datetime, date, time
 from flask import Flask, render_template, request, g, session, flash, redirect, \
     url_for, abort
 from flask.ext.sqlalchemy import SQLAlchemy
@@ -6,12 +7,12 @@ from flask_openid import OpenID
 from openid.extensions import pape
 from os import environ
 from os.path import dirname, join
+from pip._vendor.distlib import metadata
 from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
-from sqlalchemy.types import DateTime, Boolean
 from sqlalchemy.sql import functions
-from datetime import datetime,date,time
+from sqlalchemy.types import DateTime, Boolean
 import hashlib
 import urllib
 
@@ -23,7 +24,6 @@ oid = OpenID(app, join(dirname(__file__), 'openid_store'))
 
 app.config.update(
         SQLALCHEMY_DATABASE_URI = 'postgres://uvkxbyzicejuyd:FzhZqstwa1YQ7FVPNAId0GO_4l@ec2-54-197-241-91.compute-1.amazonaws.com:5432/d22mrqavab61bp',
-                                    #'postgresql://postgres:1111@localhost:5432/Board',
         SECRET_KEY = 'development key',
         DEBUG = True
     )
@@ -41,7 +41,7 @@ Base = declarative_base()
 Base.query = db_session.query_property()
 
 
-class User(Base):
+class User(db.Model):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
     name = Column(String(60))
@@ -95,9 +95,6 @@ class Post(db.Model):
     def __repr__(self):
         return '<Post %s,%s,%s,%s, %s>' % self.category, self.subject,\
         self.status, self.contents, self.author_id
-        
-# def get_user():
-#    return g.db.get('oid-' + session.get('openid', ''))
 
 
 def init_db():    
@@ -122,11 +119,8 @@ def top():
 @app.route('/login', methods=['GET', 'POST'])
 @oid.loginhandler
 def login():
-    if g.user is not None:
-        return redirect(oid.get_next_url())
-    else:
-        return oid.try_login("https://www.google.com/accounts/o8/id",
-            ask_for=['email', 'fullname', 'nickname'])
+    return oid.try_login("https://www.google.com/accounts/o8/id",
+          ask_for=['email', 'fullname', 'nickname'])
         
         
 @app.route('/post/lists')
@@ -142,7 +136,7 @@ def show(id):
     comm_list = Comment.query.filter(Comment.post_id==id).all()    
     gravatar = session.get('gravatar')
     return render_template('contents.html',
-                            posts=posts, comm_list=comm_list, gravatar=gravatar)
+                            posts=posts, comm_list=comm_list)
 
 
 @app.route('/register')
@@ -227,6 +221,8 @@ def logout():
     session.pop('id', None)
     flash(u'로그아웃!')
     return redirect(url_for('index'))
+
+
 
 
 if __name__ == '__main__':

@@ -10,8 +10,8 @@
                     <p name="email"> {{session['email']}}</p>                         
                       <!--이게 왜 필요한거지????..?? <input type="hidden" name="next" value="{{next}}"> -->
             </form>
-        </div>
-    </div>
+    	</div>
+    	
     <div class="container col-md-6">{{posts.subject}}</div>
     <div class="col-md-12">
         <table class="table table-striped">
@@ -60,21 +60,20 @@
         <tbody>
                 <tr><td> {{posts.contents}} </td></tr>
         </tbody>
+        
 	</table>
     </div>
     <br/><br/><br/><br/>
-    
-    
-    <hr>
-    <!-- 댓글 부분 -->
-     <div class="row-fluid">
+        <hr>
+        <!-- 댓글 부분 -->
+        <div class="row-fluid">
                 <div class="col-md-12" name="comm_list">
                         <ul class="comm_list">
-                        	{% for comm in comm_list%}
+                               {% for comm in comm_list%}
                                 <li> {{ comm.email }} </li>
                                 <li> {{ comm.comment }}</li>
                                 <hr>
-                            {% endfor %}
+                            	{% endfor %}
                         </ul>
                         <hr>
                 </div>
@@ -92,5 +91,3 @@
 </div>
 
 {% endblock %}
-
-
