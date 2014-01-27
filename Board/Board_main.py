@@ -62,15 +62,15 @@ class Comment(db.Model):
     email = db.Column(db.String(200))
     comment = db.Column(db.String(500))
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
-    
+    created_at= db.Column(DateTime(timezone=True), nullable=False,
+                                     default=functions.now())
     def __init__(self, email, comment, post_id):
         self.email = email
         self.comment = comment
         self.post_id = post_id
-        self.status, self.contents
-
-    def __repr(self):
-        return '<Comment %s %s %s >' % self.email, self.comment , self.post_id
+        
+    def __repr__(self):
+        return '<Comment %s %s %s>' % self.email, self.comment , self.post_id
     
 
 class Post(db.Model):
@@ -83,7 +83,7 @@ class Post(db.Model):
     author_id= db.Column(db.String(20))
     created_at= db.Column(DateTime(timezone=True), nullable=False,
                                      default=functions.now())
-    comment_id = db.relationship('Comment', backref='posts', lazy='dynamic')
+    comment_id = db.relationship('Comment', lazy='dynamic',backref='posts')
 
     def __init__(self,category,subject,status,contents, author_id):
         self.category = category
@@ -95,6 +95,7 @@ class Post(db.Model):
     def __repr__(self):
         return '<Post %s,%s,%s,%s, %s>' % self.category, self.subject,\
         self.status, self.contents, self.author_id
+        
 # def get_user():
 #    return g.db.get('oid-' + session.get('openid', ''))
 
@@ -102,7 +103,6 @@ class Post(db.Model):
 def init_db():    
     db.create_all()
     
-
 
 @app.before_request
 def before_request():
@@ -139,7 +139,7 @@ def board_list():
 @app.route('/posts/<int:id>', methods=['GET'])
 def show(id):
     posts= Post.query.filter(Post.id==id).first()
-    comm_list = Comment.query.filter(Comment.id==id).first()    
+    comm_list = Comment.query.filter(Comment.post_id==id).all()    
     gravatar = session.get('gravatar')
     return render_template('contents.html',
                             posts=posts, comm_list=comm_list, gravatar=gravatar)
@@ -222,7 +222,6 @@ def add_comm(id):#comment 추가
     return redirect(oid.get_next_url())  
 
       
-
 @app.route('/logout')
 def logout():
     session.pop('id', None)
@@ -230,18 +229,5 @@ def logout():
     return redirect(url_for('index'))
 
 
-@app.route('/posts/<int:id>')
-def contents(id):
-    comm_list = Comment.query.filter(Comment.id==id).first()
-    return render_template('contents.html',
-                            comm_list=comm_list)
-
-
-@app.route('/modal', methods=['post'])
-def modal():
-    return render_template('modal.html')
-
-
 if __name__ == '__main__':
-
     app.run(debug=True, host='0.0.0.0', port=int(environ.get('PORT',5000)))
