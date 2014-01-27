@@ -42,7 +42,7 @@ Base.query = db_session.query_property()
 
 
 class User(Base):
-    __tablename__ = 'admin_users'
+    __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
     name = Column(String(60))
     email = Column(String(200))
@@ -56,24 +56,10 @@ class User(Base):
         return '<User %s,%s,%s,%s>' % self.name, self.email, self.admin
 
 
-class Comment(db.Model):
-    __tablename__ = 'comments'
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(200))
-    comment = db.Column(db.String(500))
-
-    def __init__(self, email, comment):
-        self.email = email
-        self.comment = comment
-        
-    def __repr(self):
-        return '<Comment %s %s>' % self.email, self.comment
-
 
 class Post(db.Model):
     __tablename__='posts'
-    
-    board_id = db.Column(Integer, primary_key=True)
+    id = db.Column(Integer, primary_key=True)
     category = db.Column(db.String(10))
     subject = db.Column(db.String(50))
     status = db.Column(db.String(20))
@@ -81,9 +67,9 @@ class Post(db.Model):
     author_id= db.Column(db.String(20))
     created_at= db.Column(DateTime(timezone=True), nullable=False,
                                      default=functions.now())
-
+    comment_id = db.relationship('Comment', backref='posts', lazy='dynamic')
+    
     def __init__(self,category,subject,status,contents, author_id):
-
         self.category = category
         self.subject = subject
         self.status = status
@@ -92,21 +78,30 @@ class Post(db.Model):
         
     def __repr__(self):
         return '<Post %s,%s,%s,%s>' % self.category, self.subject,\
-        self.status, self.contents
-# def get_user():
-#    return g.db.get('oid-' + session.get('openid', ''))
+        self.status, self.contents, self.author_id
+
+    
+class Comment(db.Model):
+    __tablename__ = 'comments'
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(200))
+    comment = db.Column(db.String(500))    
+    post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
+    def __init__(self, email, comment, post_id):
+        self.email = email
+        self.comment = comment
+        self.post_id = post_id
+        
 
 
 def init_db():    
     db.create_all()
-    Base.metadata.create_all(bind=engine) 
+    
 
 
 @app.before_request
 def before_request():
     g.user = None
-    if 'openid' in session:
-        g.user = User.query.filter_by(openid=session['openid']).first()
     
 
 @app.route('/')
@@ -138,14 +133,14 @@ def board_list():
 
 @app.route('/posts/<int:id>', methods=['GET'])
 def show(id):
-    posts= Post.query.filter(Post.board_id==id).first()
-    comm_list = Comment.query.all()    
+    posts= Post.query.filter(Post.id==id).first()
+    comm_list = Comment.query.filter(Comment.id==id).first()    
     gravatar = session.get('gravatar')
     return render_template('contents.html',
                             posts=posts, comm_list=comm_list, gravatar=gravatar)
 
 
-@app.route('/signup')
+@app.route('/register')
 def register():
     admin=User.query.filter(User.admin=='TRUE').all()
     if not session['email']==admin.email:
@@ -160,7 +155,6 @@ def register():
     return render_template('signup.html')
 
 
-
 @oid.after_login
 def after_login(resp):    
     user= User.query.filter_by(email=resp.email).first()  
@@ -169,9 +163,8 @@ def after_login(resp):
         flash(u'Successfully signed in')
         g.user= user
         session['name'] = user.name
-        session['email'] = resp.email
-        session['gravatar'] = gravatar[0]
-        
+        session['email'] = resp.email    
+        session['gravatar'] =gravatar[0]        
     return redirect(url_for('board_list'))
 
 
@@ -182,12 +175,7 @@ def set_img(resp):
                     hashlib.md5(email_gra.lower()).hexdigest() + "?"
     gravatar_url += urllib.urlencode( {'d': 'mm' ,'s': str(size)} )     
     return gravatar_url, email_gra  
-    #그라바타 url이랑 email주소 리턴!
-      
-    #return redirect(url_for('contents', next=oid.get_next_url(),
-    #                        name=resp.fullname or resp.nickname,
-    #                        email=resp.email, gravata_url=gravatar[0],
-    #                        email_gra=gravatar[1]))
+
 
 @app.route('/posts', methods=['GET','POST'])
 def board_insert(): 
@@ -217,14 +205,14 @@ def board_detail():
 def admin():
     return render_template()
 
-@app.route('/posts/<int:id>/comments', methods=['post'])
-def add_comm():
+@app.route('/posts/<int:id>', methods=['post'])
+def add_comm(id):#comment 추가
 
     if request.method =='POST':
-        email = request.form['email']
+        email = session.get('email')
         comment = request.form['comment']
-        
-        db.session.add(Comment(email, comment))       
+        post_id = id
+        db.session.add(Comment(email, comment, post_id))       
         db.session.commit()
     return redirect(oid.get_next_url())  
       
@@ -236,14 +224,12 @@ def logout():
     return redirect(url_for('index'))
 
 
-#@app.route('/posts/id/detail')
+
 
 @app.route('/posts/<int:id>')
-def contents():
-    comm_list = Comment.query.all()
-# post_detail = Post.query.filter(Post.board_id=board_id).first()
+def contents(id):
+    comm_list = Comment.query.filter(Comment.id==id).first()
     return render_template('contents.html',
-                           # post_detail = post_detail,
                             comm_list=comm_list)
 
 if __name__ == '__main__':
