@@ -45,7 +45,7 @@ class User(db.Model):
     id = Column(Integer, primary_key=True)
     name = Column(String(60))
     email = Column(String(200))
-    admin = Column(String(10))
+    admin = Column(Boolean)
     
     def __init__(self, name, email,admin):
         self.name = name
@@ -66,7 +66,7 @@ class Post(db.Model):
     created_at= db.Column(DateTime(timezone=True), nullable=False,
                                      default=functions.now())
     comment_id = db.relationship('Comment', backref='posts', lazy='dynamic')
-
+    admin_comment = db.relationship('Admin_Comment', backref='posts', lazy='dynamic')
     def __init__(self,category,subject,status,contents, author_id):
         self.category = category
         self.subject = subject
@@ -95,6 +95,21 @@ class Comment(db.Model):
     def __repr__(self):
         return '<Comment %s %s %s >' % self.email, self.comment , self.post_id
     
+
+class Admin_Comment(db.Model):
+    __tablename__ = 'admin_comments'
+    id = db.Column(db.Integer, primary_key=True)
+    comment = db.Column(db.String(500))
+    post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
+    created_at= db.Column(DateTime(timezone=True), nullable=False,
+                                     default=functions.now())
+    def __init__(self, comment, post_id):
+        self.comment = comment
+        self.post_id = post_id
+        
+
+    def __repr__(self):
+        return '<Admin_Comment %s %s %s >' % self.id, self.comment , self.post_id
 def init_db():    
     db.create_all()
     
@@ -158,11 +173,10 @@ def after_login(resp):
     if not user:
         return redirect(oid.get_next_url()) 
     gravatar=set_img(resp)
-    if user is not None:
-        flash(u'Successfully signed in')
-        session['name'] = user.name
-        session['email'] = resp.email    
-        session['gravatar'] =gravatar[0]        
+    flash(u'Successfully signed in')
+    session['name'] = user.name
+    session['email'] = resp.email    
+    session['gravatar'] =gravatar[0]        
     return redirect(url_for('board_list'))
 
 
