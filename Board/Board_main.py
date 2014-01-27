@@ -56,6 +56,22 @@ class User(db.Model):
         return '<User %s,%s,%s,%s>' % self.name, self.email, self.admin
 
 
+class Comment(db.Model):
+    __tablename__ = 'comments'
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(200))
+    comment = db.Column(db.String(500))
+    post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
+    
+    def __init__(self, email, comment, post_id):
+        self.email = email
+        self.comment = comment
+        self.post_id = post_id
+        self.status, self.contents
+
+    def __repr(self):
+        return '<Comment %s %s %s >' % self.email, self.comment , self.post_id
+    
 
 class Post(db.Model):
     __tablename__='posts'
@@ -68,7 +84,7 @@ class Post(db.Model):
     created_at= db.Column(DateTime(timezone=True), nullable=False,
                                      default=functions.now())
     comment_id = db.relationship('Comment', backref='posts', lazy='dynamic')
-    
+
     def __init__(self,category,subject,status,contents, author_id):
         self.category = category
         self.subject = subject
@@ -77,22 +93,8 @@ class Post(db.Model):
         self.author_id = author_id
         
     def __repr__(self):
-        return '<Post %s,%s,%s,%s>' % self.category, self.subject,\
+        return '<Post %s,%s,%s,%s, %s>' % self.category, self.subject,\
         self.status, self.contents, self.author_id
-
-    
-class Comment(db.Model):
-    __tablename__ = 'comments'
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(200))
-    comment = db.Column(db.String(500))    
-    post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
-    
-    def __init__(self, email, comment, post_id, created_at):
-        self.email = email
-        self.comment = comment
-        self.post_id = post_id
-        self.created_at = created_at        
 
 
 def init_db():    
@@ -196,7 +198,7 @@ def board_insert():
 
 
 #글 디테일뷰
-@app.route('/posts/id/status')
+@app.route('/posts/id/status', methods=['GET'])
 def board_detail():
     post_detail = Post.query.all()
     return render_template('board_detail.html', post_detail=post_detail)
@@ -206,9 +208,9 @@ def board_detail():
 def admin():
     return render_template()
 
+
 @app.route('/posts/<int:id>', methods=['post'])
 def add_comm(id):#comment 추가
-
     if request.method =='POST':
         email = session.get('email')
         comment = request.form['comment']
@@ -216,6 +218,7 @@ def add_comm(id):#comment 추가
         db.session.add(Comment(email, comment, post_id))       
         db.session.commit()
     return redirect(oid.get_next_url())  
+
       
 
 @app.route('/logout')
@@ -230,10 +233,14 @@ def contents(id):
     comm_list = Comment.query.filter(Comment.id==id).first()
     return render_template('contents.html',
                             comm_list=comm_list)
-#t= db.Table("comments", metadata, 
-#      Column("created_at", DateTime(timezone=True), nullable=False,
-#                                     default=functions.now()))
+
+
+
+@app.route('/modal', methods=['post'])
+def modal():
+    return render_template('modal.html')
+
 
 if __name__ == '__main__':
-    init_db()
+
     app.run(debug=True, host='0.0.0.0', port=int(environ.get('PORT',5000)))
