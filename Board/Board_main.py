@@ -56,23 +56,6 @@ class User(db.Model):
         return '<User %s,%s,%s,%s>' % self.name, self.email, self.admin
 
 
-class Comment(db.Model):
-    __tablename__ = 'comments'
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(200))
-    comment = db.Column(db.String(500))
-    post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
-    
-    def __init__(self, email, comment, post_id):
-        self.email = email
-        self.comment = comment
-        self.post_id = post_id
-        self.status, self.contents
-
-    def __repr(self):
-        return '<Comment %s %s %s >' % self.email, self.comment , self.post_id
-    
-
 class Post(db.Model):
     __tablename__='posts'
     id = db.Column(Integer, primary_key=True)
@@ -96,7 +79,23 @@ class Post(db.Model):
         return '<Post %s,%s,%s,%s, %s>' % self.category, self.subject,\
         self.status, self.contents, self.author_id
 
+class Comment(db.Model):
+    __tablename__ = 'comments'
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(200))
+    comment = db.Column(db.String(500))
+    post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
+    created_at= db.Column(DateTime(timezone=True), nullable=False,
+                                     default=functions.now())
+    def __init__(self, email, comment, post_id):
+        self.email = email
+        self.comment = comment
+        self.post_id = post_id
+        
 
+    def __repr__(self):
+        return '<Comment %s %s %s >' % self.email, self.comment , self.post_id
+    
 def init_db():    
     db.create_all()
     
@@ -120,11 +119,8 @@ def top():
 @app.route('/login', methods=['GET', 'POST'])
 @oid.loginhandler
 def login():
-    if g.user is not None:
-        return redirect(oid.get_next_url())
-    else:
-        return oid.try_login("https://www.google.com/accounts/o8/id",
-            ask_for=['email', 'fullname', 'nickname'])
+    return oid.try_login("https://www.google.com/accounts/o8/id",
+          ask_for=['email', 'fullname', 'nickname'])
         
         
 @app.route('/post/lists')
@@ -137,10 +133,10 @@ def board_list():
 @app.route('/posts/<int:id>', methods=['GET'])
 def show(id):
     posts= Post.query.filter(Post.id==id).first()
-    comm_list = Comment.query.filter(Comment.id==id).first()    
-    gravatar = session.get('gravatar')
+    comm_list = Comment.query.filter(Comment.post_id==id).all()
+    
     return render_template('contents.html',
-                            posts=posts, comm_list=comm_list, gravatar=gravatar)
+                            posts=posts, comm_list=comm_list)
 
 
 @app.route('/register')
@@ -228,19 +224,13 @@ def logout():
     return redirect(url_for('index'))
 
 
-@app.route('/posts/<int:id>')
-def contents(id):
-    comm_list = Comment.query.filter(Comment.id==id).first()
-    return render_template('contents.html',
-                            comm_list=comm_list)
-
-
 
 @app.route('/modal', methods=['post'])
 def modal():
+    
     return render_template('modal.html')
 
 
 if __name__ == '__main__':
-
+    init_db()
     app.run(debug=True, host='0.0.0.0', port=int(environ.get('PORT',5000)))
