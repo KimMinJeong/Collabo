@@ -55,23 +55,11 @@ db_session =scoped_session(sessionmaker(autocommit=False,
 Base = declarative_base()
 Base.query = db_session.query_property()
 
-    
-class Comment(db.Model):
-    __tablename__ = 'comments'
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(200))
-    comment = db.Column(db.String(500))
-
-    def __init__(self, email, comment):
-        self.email = email
-        self.comment = comment
-
-
 
 class Post(db.Model):
     __tablename__='posts'
     
-    board_id = db.Column(Integer, primary_key=True)
+    id = db.Column(Integer, primary_key=True)
     category = db.Column(db.String(10))
     subject = db.Column(db.String(50))
     status = db.Column(db.String(20))
@@ -79,6 +67,7 @@ class Post(db.Model):
     author_id= db.Column(db.String(20))
     created_at= db.Column(DateTime(timezone=True), nullable=False,
                                      default=functions.now())
+    comment_id = db.relationship('Comment', backref='posts', lazy='dynamic')
     
     def __init__(self,category,subject,status,contents, author_id):
         self.category = category
@@ -90,6 +79,18 @@ class Post(db.Model):
     def __repr__(self):
         return '<Post %s,%s,%s,%s>' % self.category, self.subject,\
         self.status, self.contents, self.author_id
+
+    
+class Comment(db.Model):
+    __tablename__ = 'comments'
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(200))
+    comment = db.Column(db.String(500))    
+    post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
+    def __init__(self, email, comment, post_id):
+        self.email = email
+        self.comment = comment
+        self.post_id = post_id
 
 
 class User(Base):
@@ -117,20 +118,14 @@ def before_request():
 def index():      
     return render_template('index.html')
 
-#@app.before_request
-#def before_request():
-# if not 'id' in session:
-#     flash(u'LogIN')    
 
-
-
-@app.route('/board_list')
+@app.route('/posts/lists')
 def board_list():
     post_list =  Post.query.all()
     return render_template('board_list.html', post_list=post_list)
 
 
-@app.route('/show/<int:id>', methods=['GET'])
+@app.route('/posts/<int:id>', methods=['GET'])
 def show(id):
     posts= Post.query.filter(Post.board_id==id).first()
     comm_list = Comment.query.all()    
@@ -138,7 +133,8 @@ def show(id):
     return render_template('contents.html',
                             posts=posts, comm_list=comm_list, gravatar=gravatar)
 
-@app.route('/signup')
+
+@app.route('/register')
 def register():
     admin = User.query.filter(User.admin=='TRUE').all()
     if not session['email']==admin.email:
@@ -151,11 +147,13 @@ def register():
     db.session.commit()
     flash(u'추가!')
     return render_template('signup.html')
+
+
 @app.route('/login')
 @oid.loginhandler
 def login():
-    if g.user is not None:
-        return redirect(oid.get_next_url())
+    #if g.user is not None:
+    #    return redirect(oid.get_next_url())
     #pape_req = pape.Request([]) #what is pape_request???
     return oid.try_login("https://www.google.com/accounts/o8/id",
     ask_for=['email', 'fullname', 'nickname'])     
@@ -169,28 +167,13 @@ def after_login(resp):
         flash(u'Successfully signed in')
         g.user= user
         session['name'] = user.name
-        session['email'] = resp.email
-    
+        session['email'] = resp.email    
         session['gravatar'] =gravatar[0]
         
     return redirect(url_for('board_list'))
-    
-    #그라바타 url이랑 email주소 리턴!
-      
-    
-    #return redirect(url_for('contents', next=oid.get_next_url(),
-    #                        name=resp.fullname or resp.nickname,
-    #                        email=resp.email, gravata_url=gravatar[0],
-    #                        email_gra=gravatar[1]))
-
-#@app.route('/show/post')
-#def show_post():
-    #board_id??
-#    board_id= request.form["value"]
-#    return 1#redirect('contents', board_id=board_id)
 
 
-@app.route('/board_insert', methods=['GET','POST'])
+@app.route('/posts', methods=['GET','POST'])
 def board_insert(): 
     if request.method == 'POST':  
         category = request.form["category"]
@@ -212,14 +195,14 @@ def editor():
     return render_template('editor.html')   
 
 
-@app.route('/add_comm', methods=['post'])
-def add_comm():
+@app.route('/posts/<int:id>/comments', methods=['post'])
+def add_comm(id):#comment 추가
 
     if request.method =='POST':
         email = request.form['email']
         comment = request.form['comment']
-        
-        db.session.add(Comment(email, comment))       
+        post_id = id
+        db.session.add(Comment(email, comment, post_id))       
         db.session.commit()
     return redirect(oid.get_next_url())  
     
@@ -246,7 +229,7 @@ def logout():
     return redirect(url_for('index'))
 
 
-@app.route('/contents')
+@app.route('/posts/<int:id>')
 def contents():
     comm_list = Comment.query.all()
     
