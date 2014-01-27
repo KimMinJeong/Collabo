@@ -230,9 +230,9 @@ def contents(id):
     comm_list = Comment.query.filter(Comment.id==id).first()
     return render_template('contents.html',
                             comm_list=comm_list)
-t= db.Table("comments", metadata, 
-      Column("created_at", DateTime(timezone=True), nullable=False,
-                                     default=functions.now()))
+#t= db.Table("comments", metadata, 
+#      Column("created_at", DateTime(timezone=True), nullable=False,
+#                                     default=functions.now()))
 
 if __name__ == '__main__':
     init_db()
