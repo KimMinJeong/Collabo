@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from flask import Flask, render_template, request, g, session, flash, redirect, \
-    url_for, abort, jsonify
+    url_for, abort
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask_openid import OpenID
 from openid.extensions import pape
@@ -20,7 +20,6 @@ import urllib
 app = Flask(__name__)
 #app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 oid = OpenID(app, join(dirname(__file__), 'openid_store'))
-
 
 app.config.update(
         SQLALCHEMY_DATABASE_URI = 'postgres://uvkxbyzicejuyd:FzhZqstwa1YQ7FVPNAId0GO_4l@ec2-54-197-241-91.compute-1.amazonaws.com:5432/d22mrqavab61bp',
@@ -56,6 +55,7 @@ class User(Base):
     def __repr__(self):
         return '<User %s,%s,%s,%s>' % self.name, self.email, self.admin
 
+
 class Comment(db.Model):
     __tablename__ = 'comments'
     id = db.Column(db.Integer, primary_key=True)
@@ -65,6 +65,9 @@ class Comment(db.Model):
     def __init__(self, email, comment):
         self.email = email
         self.comment = comment
+        
+    def __repr(self):
+        return '<Comment %s %s>' % self.email, self.comment
 
 
 class Post(db.Model):
@@ -78,7 +81,6 @@ class Post(db.Model):
     author_id= db.Column(db.String(20))
     created_at= db.Column(DateTime(timezone=True), nullable=False,
                                      default=functions.now())
-
 
     def __init__(self,category,subject,status,contents, author_id):
 
@@ -100,37 +102,41 @@ def init_db():
     Base.metadata.create_all(bind=engine) 
 
 
-
 @app.before_request
 def before_request():
     g.user = None
+    if 'openid' in session:
+        g.user = User.query.filter_by(openid=session['openid']).first()
     
 
 @app.route('/')
 def index():      
     return render_template('index.html')
 
-@app.route('/')
+
+@app.route('/board_top')
 def top():
     return render_template('board_top.html')
 
-#글쓰기 부분
-@app.route('/posts', methods=['GET','POST'])
-#@app.before_request
-#def before_request():
-# if not 'id' in session:
-#     flash(u'LogIN')    
 
-
-
-@app.route('/board_list')
+@app.route('/login', methods=['GET', 'POST'])
+@oid.loginhandler
+def login():
+    if g.user is not None:
+        return redirect(oid.get_next_url())
+    else:
+        return oid.try_login("https://www.google.com/accounts/o8/id",
+            ask_for=['email', 'fullname', 'nickname'])
+        
+        
+@app.route('/post/lists')
 def board_list():
     post_list =  Post.query.all()
     return render_template('board_list.html', post_list=post_list)
 
 
 
-@app.route('/show/<int:id>', methods=['GET'])
+@app.route('/posts/<int:id>', methods=['GET'])
 def show(id):
     posts= Post.query.filter(Post.board_id==id).first()
     comm_list = Comment.query.all()    
@@ -138,22 +144,22 @@ def show(id):
     return render_template('contents.html',
                             posts=posts, comm_list=comm_list, gravatar=gravatar)
 
+
 @app.route('/signup')
 def register():
-    admin = User.query.filter(User.admin=='TRUE').all()
+    admin=User.query.filter(User.admin=='TRUE').all()
     if not session['email']==admin.email:
         abort(401)
         return redirect(oid.get_next_url())
-    email= request.form['newEmail']
-    name= email.split('@')
-    user = User(name[0], email, False)
+    email=request.form['newEmail']
+    name=email.split('@')
+    user=User(name[0], email, False)
     db.session.add(user)
     db.session.commit()
     flash(u'추가!')
     return render_template('signup.html')
-@app.route('/login')
- 
-    
+
+
 
 @oid.after_login
 def after_login(resp):    
@@ -164,27 +170,26 @@ def after_login(resp):
         g.user= user
         session['name'] = user.name
         session['email'] = resp.email
-    
-        session['gravatar'] =gravatar[0]
+        session['gravatar'] = gravatar[0]
         
     return redirect(url_for('board_list'))
-    
+
+
+def set_img(resp):
+    email_gra = resp.email
+    size = 40
+    gravatar_url = "http://www.gravatar.com/avatar/" + \
+                    hashlib.md5(email_gra.lower()).hexdigest() + "?"
+    gravatar_url += urllib.urlencode( {'d': 'mm' ,'s': str(size)} )     
+    return gravatar_url, email_gra  
     #그라바타 url이랑 email주소 리턴!
       
-    
     #return redirect(url_for('contents', next=oid.get_next_url(),
     #                        name=resp.fullname or resp.nickname,
     #                        email=resp.email, gravata_url=gravatar[0],
     #                        email_gra=gravatar[1]))
 
-#@app.route('/show/post')
-#def show_post():
-    #board_id??
-#    board_id= request.form["value"]
-#    return 1#redirect('contents', board_id=board_id)
-
-
-@app.route('/board_insert', methods=['GET','POST'])
+@app.route('/posts', methods=['GET','POST'])
 def board_insert(): 
     if request.method == 'POST':  
         category = request.form["category"]
@@ -202,32 +207,17 @@ def board_insert():
 
 
 #글 디테일뷰
-@app.route('/posts/status')
+@app.route('/posts/id/status')
 def board_detail():
     post_detail = Post.query.all()
     return render_template('board_detail.html', post_detail=post_detail)
 
-@app.route('/posts/id/detail/edit')
+
+@app.route('/posts/<int:id>/detail/edit')
 def admin():
     return render_template()
 
-@app.route('/login')
-@oid.loginhandler
-def login():
-   #로그인을 하게 되면 바로 google 창이 뜰꺼야.
-    pape_req = pape.Request([]) #what is pape_request???
-    return oid.try_login("https://www.google.com/accounts/o8/id",
-    ask_for=['email', 'fullname', 'nickname'])                                      
-    #return render_template('example.html', next=oid.get_next_url(),
-    #                       error=oid.fetch_error())
-
-
-@app.route('/editor')
-def editor():
-    return render_template('editor.html')   
-
-
-@app.route('/add_comm', methods=['post'])
+@app.route('/posts/<int:id>/comments', methods=['post'])
 def add_comm():
 
     if request.method =='POST':
@@ -237,20 +227,7 @@ def add_comm():
         db.session.add(Comment(email, comment))       
         db.session.commit()
     return redirect(oid.get_next_url())  
-    
-  
-def set_img(resp):
-    email_gra = resp.email
-    size = 40
-    gravatar_url = "http://www.gravatar.com/avatar/" + \
-                    hashlib.md5(email_gra.lower()).hexdigest() + "?"
-    gravatar_url += urllib.urlencode( {'d': 'mm' ,'s': str(size)} )     
-    return gravatar_url, email_gra     
       
-      
-@app.route('/post')
-def post():
-    return render_template('example.html')
 
 @app.route('/logout')
 def logout():
@@ -261,15 +238,14 @@ def logout():
 
 #@app.route('/posts/id/detail')
 
-@app.route('/contents')
+@app.route('/posts/<int:id>')
 def contents():
     comm_list = Comment.query.all()
-   # post_detail = Post.query.filter(Post.board_id=board_id).first()
+# post_detail = Post.query.filter(Post.board_id=board_id).first()
     return render_template('contents.html',
                            # post_detail = post_detail,
                             comm_list=comm_list)
 
 if __name__ == '__main__':
-   
+    init_db()
     app.run(debug=True, host='0.0.0.0', port=int(environ.get('PORT',5000)))
-
