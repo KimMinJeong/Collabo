@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from flask import Flask, render_template, request, g, session, flash, redirect, \
-    url_for, abort, jsonify
+    url_for, abort
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask_openid import OpenID
 from openid.extensions import pape
@@ -9,18 +9,17 @@ from os.path import dirname, join
 from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
-from sqlalchemy.sql import functions
 from sqlalchemy.types import DateTime, Boolean
+from sqlalchemy.sql import functions
+from datetime import datetime,date,time
 import hashlib
 import urllib
-
 
 
 
 app = Flask(__name__)
 #app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 oid = OpenID(app, join(dirname(__file__), 'openid_store'))
-#SQLALCHEMY_DATABASE_URI = 'postgres://uvkxbyzicejuyd:FzhZqstwa1YQ7FVPNAId0GO_4l@ec2-54-197-241-91.compute-1.amazonaws.com:5432/d22mrqavab61bp'
 
 app.config.update(
         SQLALCHEMY_DATABASE_URI = 'postgres://uvkxbyzicejuyd:FzhZqstwa1YQ7FVPNAId0GO_4l@ec2-54-197-241-91.compute-1.amazonaws.com:5432/d22mrqavab61bp',
@@ -29,24 +28,10 @@ app.config.update(
         DEBUG = True
     )
 
-
-app = Flask(__name__)
-#app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
-oid = OpenID(app, join(dirname(__file__), 'openid_store'))
-#SQLALCHEMY_DATABASE_URI = 'postgres://uvkxbyzicejuyd:FzhZqstwa1YQ7FVPNAId0GO_4l@ec2-54-197-241-91.compute-1.amazonaws.com:5432/d22mrqavab61bp'
-
-app.config.update(
-        SQLALCHEMY_DATABASE_URI = 'postgres://uvkxbyzicejuyd:FzhZqstwa1YQ7FVPNAId0GO_4l@ec2-54-197-241-91.compute-1.amazonaws.com:5432/d22mrqavab61bp',
-        #'postgresql://postgres:1111@localhost:5432/Board',
-        SECRET_KEY = 'development key',
-        DEBUG = True
-    )
-
 db = SQLAlchemy(app)
 app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
 #db settings
-
 engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'], convert_unicode=True)
 
 db_session =scoped_session(sessionmaker(autocommit=False,
@@ -56,9 +41,24 @@ Base = declarative_base()
 Base.query = db_session.query_property()
 
 
-class Post(db.Model):
-    __tablename__='posts'
+class User(Base):
+    __tablename__ = 'users'
+    id = Column(Integer, primary_key=True)
+    name = Column(String(60))
+    email = Column(String(200))
+    admin = Column(String(10))
     
+    def __init__(self, name, email,admin):
+        self.name = name
+        self.email = email
+        self.admin = admin
+    def __repr__(self):
+        return '<User %s,%s,%s,%s>' % self.name, self.email, self.admin
+
+
+
+class Post(db.Model):
+    __tablename__='posts'    
     id = db.Column(Integer, primary_key=True)
     category = db.Column(db.String(10))
     subject = db.Column(db.String(50))
@@ -70,6 +70,7 @@ class Post(db.Model):
     comment_id = db.relationship('Comment', backref='posts', lazy='dynamic')
     
     def __init__(self,category,subject,status,contents, author_id):
+
         self.category = category
         self.subject = subject
         self.status = status
@@ -91,23 +92,13 @@ class Comment(db.Model):
         self.email = email
         self.comment = comment
         self.post_id = post_id
+        self.status, self.contents
 
-
-class User(Base):
-    __tablename__ = 'users'
-    id = Column(Integer, primary_key=True)
-    name = Column(String(60))
-    email = Column(String(200))
-    admin = Column(Boolean(create_constraint=True, name=None))
-    def __init__(self, name, email):
-        self.name = name
-        self.email = email
 
 def init_db():    
     db.create_all()
     Base.metadata.create_all(bind=engine) 
 
- 
 
 @app.before_request
 def before_request():
@@ -119,10 +110,26 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/posts/lists')
+@app.route('/board_top')
+def top():
+    return render_template('board_top.html')
+
+
+@app.route('/login', methods=['GET', 'POST'])
+@oid.loginhandler
+def login():
+    if g.user is not None:
+        return redirect(oid.get_next_url())
+    else:
+        return oid.try_login("https://www.google.com/accounts/o8/id",
+            ask_for=['email', 'fullname', 'nickname'])
+        
+        
+@app.route('/post/lists')
 def board_list():
     post_list =  Post.query.all()
     return render_template('board_list.html', post_list=post_list)
+
 
 
 @app.route('/posts/<int:id>', methods=['GET'])
@@ -136,28 +143,23 @@ def show(id):
 
 @app.route('/register')
 def register():
-    admin = User.query.filter(User.admin=='TRUE').all()
+    admin=User.query.filter(User.admin=='TRUE').all()
     if not session['email']==admin.email:
         abort(401)
         return redirect(oid.get_next_url())
-    email= request.form['newEmail']
-    name= email.split('@')
-    user = User(name[0], email, False)
+    email=request.form['newEmail']
+    name=email.split('@')
+    user=User(name[0], email, False)
     db.session.add(user)
     db.session.commit()
     flash(u'추가!')
     return render_template('signup.html')
 
 
-@app.route('/login')
-@oid.loginhandler
-def login():
-    #if g.user is not None:
-    #    return redirect(oid.get_next_url())
-    #pape_req = pape.Request([]) #what is pape_request???
-    return oid.try_login("https://www.google.com/accounts/o8/id",
-    ask_for=['email', 'fullname', 'nickname'])     
+
+   
     
+
 
 @oid.after_login
 def after_login(resp):    
@@ -168,9 +170,23 @@ def after_login(resp):
         g.user= user
         session['name'] = user.name
         session['email'] = resp.email    
-        session['gravatar'] =gravatar[0]
-        
+        session['gravatar'] =gravatar[0]        
     return redirect(url_for('board_list'))
+
+
+def set_img(resp):
+    email_gra = resp.email
+    size = 40
+    gravatar_url = "http://www.gravatar.com/avatar/" + \
+                    hashlib.md5(email_gra.lower()).hexdigest() + "?"
+    gravatar_url += urllib.urlencode( {'d': 'mm' ,'s': str(size)} )     
+    return gravatar_url, email_gra  
+    #그라바타 url이랑 email주소 리턴!
+      
+    #return redirect(url_for('contents', next=oid.get_next_url(),
+    #                        name=resp.fullname or resp.nickname,
+    #                        email=resp.email, gravata_url=gravatar[0],
+    #                        email_gra=gravatar[1]))
 
 
 @app.route('/posts', methods=['GET','POST'])
@@ -190,12 +206,19 @@ def board_insert():
     return render_template('board_insert.html')
 
 
-@app.route('/editor')
-def editor():
-    return render_template('editor.html')   
+#글 디테일뷰
+@app.route('/posts/id/status')
+def board_detail():
+    post_detail = Post.query.all()
+    return render_template('board_detail.html', post_detail=post_detail)
 
+
+@app.route('/posts/<int:id>/detail/edit')
+def admin():
+    return render_template()
 
 @app.route('/posts/<int:id>/comments', methods=['post'])
+
 def add_comm(id):#comment 추가
 
     if request.method =='POST':
@@ -205,22 +228,7 @@ def add_comm(id):#comment 추가
         db.session.add(Comment(email, comment, post_id))       
         db.session.commit()
     return redirect(oid.get_next_url())  
-    
-
-    
-def set_img(resp):
-    email_gra = resp.email
-    size = 40
-    gravatar_url = "http://www.gravatar.com/avatar/" + \
-                    hashlib.md5(email_gra.lower()).hexdigest() + "?"
-    gravatar_url += urllib.urlencode( {'d': 'mm' ,'s': str(size)} )     
-    return gravatar_url, email_gra     
       
-      
-@app.route('/post')
-def post():
-    return render_template('example.html')
-
 
 @app.route('/logout')
 def logout():
@@ -229,15 +237,15 @@ def logout():
     return redirect(url_for('index'))
 
 
+
+
 @app.route('/posts/<int:id>')
 def contents():
     comm_list = Comment.query.all()
-    
-   # post_detail = Post.query.filter(Post.board_id=board_id).first()
+# post_detail = Post.query.filter(Post.board_id=board_id).first()
     return render_template('contents.html',
                            # post_detail = post_detail,
                             comm_list=comm_list)
-    
+
 if __name__ == '__main__':
-   
     app.run(debug=True, host='0.0.0.0', port=int(environ.get('PORT',5000)))
