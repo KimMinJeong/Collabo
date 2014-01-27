@@ -42,7 +42,7 @@ Base.query = db_session.query_property()
 
 
 class User(Base):
-    __tablename__ = 'admin_users'
+    __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
     name = Column(String(60))
     email = Column(String(200))
@@ -61,19 +61,22 @@ class Comment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(200))
     comment = db.Column(db.String(500))
-
-    def __init__(self, email, comment):
+    post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
+    
+    def __init__(self, email, comment, post_id):
         self.email = email
         self.comment = comment
+        self.post_id = post_id
+        self.status, self.contents
+
         
     def __repr(self):
-        return '<Comment %s %s>' % self.email, self.comment
+        return '<Comment %s %s %s >' % self.email, self.comment , self.post_id
 
 
 class Post(db.Model):
     __tablename__='posts'
-    
-    board_id = db.Column(Integer, primary_key=True)
+    id = db.Column(Integer, primary_key=True)
     category = db.Column(db.String(10))
     subject = db.Column(db.String(50))
     status = db.Column(db.String(20))
@@ -81,9 +84,9 @@ class Post(db.Model):
     author_id= db.Column(db.String(20))
     created_at= db.Column(DateTime(timezone=True), nullable=False,
                                      default=functions.now())
+    comment_id = db.relationship('Comment', backref='posts', lazy='dynamic')
 
     def __init__(self,category,subject,status,contents, author_id):
-
         self.category = category
         self.subject = subject
         self.status = status
@@ -91,8 +94,8 @@ class Post(db.Model):
         self.author_id = author_id
         
     def __repr__(self):
-        return '<Post %s,%s,%s,%s>' % self.category, self.subject,\
-        self.status, self.contents
+        return '<Post %s,%s,%s,%s, %s>' % self.category, self.subject,\
+        self.status, self.contents, self.author_id
 # def get_user():
 #    return g.db.get('oid-' + session.get('openid', ''))
 
@@ -138,7 +141,7 @@ def board_list():
 
 @app.route('/posts/<int:id>', methods=['GET'])
 def show(id):
-    posts= Post.query.filter(Post.board_id==id).first()
+    posts= Post.query.filter(Post.id==id).first()
     comm_list = Comment.query.all()    
     gravatar = session.get('gravatar')
     return render_template('contents.html',
@@ -207,7 +210,7 @@ def board_insert():
 
 
 #글 디테일뷰
-@app.route('/posts/id/status')
+@app.route('/posts/id/status', methods=['GET'])
 def board_detail():
     post_detail = Post.query.all()
     return render_template('board_detail.html', post_detail=post_detail)
@@ -217,16 +220,17 @@ def board_detail():
 def admin():
     return render_template()
 
-@app.route('/posts/<int:id>/comments', methods=['post'])
-def add_comm():
 
+@app.route('/posts/<int:id>', methods=['post'])
+def add_comm(id):#comment 추가
     if request.method =='POST':
-        email = request.form['email']
+        email = session.get('email')
         comment = request.form['comment']
-        
-        db.session.add(Comment(email, comment))       
+        post_id = id
+        db.session.add(Comment(email, comment, post_id))       
         db.session.commit()
     return redirect(oid.get_next_url())  
+
       
 
 @app.route('/logout')
@@ -236,16 +240,18 @@ def logout():
     return redirect(url_for('index'))
 
 
-#@app.route('/posts/id/detail')
-
 @app.route('/posts/<int:id>')
-def contents():
-    comm_list = Comment.query.all()
-# post_detail = Post.query.filter(Post.board_id=board_id).first()
+def contents(id):
+    comm_list = Comment.query.filter(Comment.id==id).first()
     return render_template('contents.html',
-                           # post_detail = post_detail,
                             comm_list=comm_list)
 
+
+@app.route('/modal', methods=['post'])
+def modal():
+    return render_template('modal.html')
+
+
 if __name__ == '__main__':
-    init_db()
+
     app.run(debug=True, host='0.0.0.0', port=int(environ.get('PORT',5000)))

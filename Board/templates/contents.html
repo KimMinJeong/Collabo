@@ -3,62 +3,83 @@
 {{ super() }}
 
 <div class="container" style="padding: 0 19px">
-	<div class="row-fluid">
-		<div class="col-xs-5 col-md-3 col-md-offset-2">
-			<form action="" method="post">
-				<img class="centered" src={{gravatar}}> 
-				<p name="email"> {{session['email']}}</p> 			
-			  	<!--이게 왜 필요한거지????..?? <input type="hidden" name="next" value="{{next}}"> -->
-			</form>
-			
-		</div>
-	</div>
-	<div class="container col-md-6">
-		<div class="">
-			{{posts.subject}}
-	
-	<div class="col-md-12">
-		<table class="table table-striped">
-		<thead><p class="text-muted">{{posts.category}}</p><button class="btn-primary">상태변경</button></thead>
-		<tbody>
-			<tr><td>
-				{{posts.contents}}
-			</td></tr>
-		</tbody>
+        <div class="row-fluid">
+                <div class="col-xs-5 col-md-3 col-md-offset-2">
+                        <form action="" method="post">
+                                <img class="centered" src={{gravatar}}> 
+                                <p name="email"> {{session['email']}}</p>                         
+                                  <!--이게 왜 필요한거지????..?? <input type="hidden" name="next" value="{{next}}"> -->
+                        </form>
+                </div>
+        </div>
+        <div class="container col-md-6">
+
+                        {{posts.subject}}
+        </div>
+        <div class="col-md-12">
+                <table class="table table-striped">
+                <thead>
+                	<p>{{posts.category}}</p>
+                	<button class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">
+                	제안상태변경
+					</button>
+					<!-- Modal -->
+					<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+					  <div class="modal-dialog">
+					    <div class="modal-content">
+					      <div class="modal-header">
+					        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					        <h4 class="modal-title" id="myModalLabel">제안상태변경하기</h4>
+					      </div>
+					      <div class="modal-body">
+					        
+					      </div>
+					      <div class="modal-footer">
+					        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+					        <button type="button" class="btn btn-primary">변경완료</button>
+					      </div>
+					    </div><!-- /.modal-content -->
+					  </div><!-- /.modal-dialog -->
+					</div><!-- /.modal -->
+                </thead>
+                
+                
+                <tbody>
+                        <tr><td>
+                                {{posts.contents}}
+                        </td></tr>
+                </tbody>
+       		</table>
+        </div>
+        
 		
-	</table>
-	</div>
-	<br/>
-	<br/>
-	<br/>
-	<br/>
-	<hr>
-	<!-- 댓글 부분 -->
-	<div class="row-fluid">
-		<div class="col-md-12" name="comm_list">
-			<ul class="comm_list">
-				{% for comm in comm_list%}
-				<li> {{ comm.email }} </li>
-				<li> {{ comm.comment }}</li>
-				<hr>
-				{% endfor %}
-			</ul>
 		
-			<hr>
-		</div>
-	</div>
-	<div id="comm_win" >
-		<form action="/add_comm" method="post" >
-		  <img src="{{request.values.gravata_url}}"> 	
-		  <input name="email" type="text" value="{{ request.values.email }}  ">
-		  <textarea name="comment"> </textarea>  
-		  <input type="submit" value="댓글 입력">    
-		</form>
-	</div>
+        <br/><br/><br/><br/>
+        <hr>
+        <!-- 댓글 부분 -->
+        <div class="row-fluid">
+                <div class="col-md-12" name="comm_list">
+                        <ul class="comm_list">
+                                {% for comm in comm_list%}
+                                <li> {{ comm.email }} </li>
+                                <li> {{ comm.comment }}</li>
+                                <hr>
+                                {% endfor %}
+                        </ul>
+                        <hr>
+                </div>
+        </div>
+        <div id="comm" >
+                <form action="{{ url_for('add_comm', id=posts.id) }}" method="post" >
+                  <img src="{{session.get('gravatar')}}">
+                  <p name="email">{{session.get('email')}}</p>                           
+                  <textarea name="comment"> </textarea>  
+                  <input type="submit" value="댓글 입력">    
+                </form>
+        </div>
 </div>
 
-<script>
-	
-</script>
+
 {% endblock %}
+
 
