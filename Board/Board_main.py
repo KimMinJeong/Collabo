@@ -69,10 +69,9 @@ class Comment(db.Model):
         self.post_id = post_id
         self.status, self.contents
 
-        
     def __repr(self):
         return '<Comment %s %s %s >' % self.email, self.comment , self.post_id
-
+    
 
 class Post(db.Model):
     __tablename__='posts'
@@ -102,14 +101,12 @@ class Post(db.Model):
 
 def init_db():    
     db.create_all()
-    Base.metadata.create_all(bind=engine) 
+    
 
 
 @app.before_request
 def before_request():
     g.user = None
-    if 'openid' in session:
-        g.user = User.query.filter_by(openid=session['openid']).first()
     
 
 @app.route('/')
@@ -142,13 +139,13 @@ def board_list():
 @app.route('/posts/<int:id>', methods=['GET'])
 def show(id):
     posts= Post.query.filter(Post.id==id).first()
-    comm_list = Comment.query.all()    
+    comm_list = Comment.query.filter(Comment.id==id).first()    
     gravatar = session.get('gravatar')
     return render_template('contents.html',
                             posts=posts, comm_list=comm_list, gravatar=gravatar)
 
 
-@app.route('/signup')
+@app.route('/register')
 def register():
     admin=User.query.filter(User.admin=='TRUE').all()
     if not session['email']==admin.email:
@@ -163,7 +160,6 @@ def register():
     return render_template('signup.html')
 
 
-
 @oid.after_login
 def after_login(resp):    
     user= User.query.filter_by(email=resp.email).first()  
@@ -172,9 +168,8 @@ def after_login(resp):
         flash(u'Successfully signed in')
         g.user= user
         session['name'] = user.name
-        session['email'] = resp.email
-        session['gravatar'] = gravatar[0]
-        
+        session['email'] = resp.email    
+        session['gravatar'] =gravatar[0]        
     return redirect(url_for('board_list'))
 
 
@@ -185,12 +180,7 @@ def set_img(resp):
                     hashlib.md5(email_gra.lower()).hexdigest() + "?"
     gravatar_url += urllib.urlencode( {'d': 'mm' ,'s': str(size)} )     
     return gravatar_url, email_gra  
-    #그라바타 url이랑 email주소 리턴!
-      
-    #return redirect(url_for('contents', next=oid.get_next_url(),
-    #                        name=resp.fullname or resp.nickname,
-    #                        email=resp.email, gravata_url=gravatar[0],
-    #                        email_gra=gravatar[1]))
+
 
 @app.route('/posts', methods=['GET','POST'])
 def board_insert(): 
