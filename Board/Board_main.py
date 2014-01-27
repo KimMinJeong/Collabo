@@ -7,7 +7,6 @@ from flask_openid import OpenID
 from openid.extensions import pape
 from os import environ
 from os.path import dirname, join
-from pip._vendor.distlib import metadata
 from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
