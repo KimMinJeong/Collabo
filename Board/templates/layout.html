@@ -12,6 +12,10 @@
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/jquery.dataTables.js')}}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.min.js')}}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/tab.js')}}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.js')}}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/dropdown.js')}}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/button.js')}}"></script>
 
 
 <script type="text/javascript" charset="utf-8">
@@ -28,9 +32,12 @@
 <script type=text/javascript>
   var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
 </script>
+
+
 {% for message in get_flashed_messages() %}
   <p class=message>{{ message }}
 {% endfor %}
 
 
 {% block body %}{% endblock %}
+
