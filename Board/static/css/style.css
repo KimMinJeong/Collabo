@@ -65,4 +65,7 @@ P {
 	height:300px;
 	overflow: hidden;
 }
-
+textarea
+{
+	resize:none;
+}

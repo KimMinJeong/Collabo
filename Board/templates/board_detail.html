@@ -2,15 +2,23 @@
 {% block body %}
 {{ super() }}
 <div class="container">
-	<h1>제안서 상황</h1>
-	<br/><br/>
-	<table class="table table-striped">
-		{% for post in post_detail %}
-		<thead> 이 제안은 {{ post.status }} 입니다.</thead>
-		<tbody>
-			<tr><td>{{ post.contents }}</td></tr>
-		</tbody>
+	<div class="row-fluid">
+		<h1>제안서 상황</h1>
+		<br/><br/>
+		{% for post in post%}
+		<div class="panel panel-primary">
+	    <div class="panel-heading">이 제안은 현재 {{post.status}} 상태입니다.</div>
+	    <div class="panel-body"> {{post.contents}} </div>
+	    <br/>
+	    <br/>
+		</div>
 		{% endfor %}
-	</table>
+	</div>
 </div>
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		var wait = $('#status').val()
+	});
+</script>
 {% endblock %}
