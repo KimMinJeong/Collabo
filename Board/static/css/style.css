@@ -25,6 +25,19 @@
          cursor:pointer;
          
         }
+        
+   .comment{
+   		 max-height:200px; min-height:100px; max-width: 400px; min-width:300px;
+   }
+   
+   .center-block {
+ 		display: block;
+  		margin-left: auto;
+  		margin-right: auto;
+		#background:#C6CFFE;
+		height:300px;
+		padding: 0 19px;
+		}
    .pTitle{
               font-size:20pt;
                font-weight:bolder;

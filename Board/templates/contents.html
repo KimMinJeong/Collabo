@@ -2,7 +2,7 @@
 {% block body %}
 {{ super() }}
 
-<div class="container" style="padding: 0 19px">
+<div class="container center-block"> <!--style="padding: 0 19px">-->
 		<div class="col-xs-5 col-md-4">
                {{posts.subject}}
         </div>
@@ -59,35 +59,40 @@
 
         <br/><br/><br/><br/>
         <hr>
+         </div>
+
         <!-- 댓글 부분 -->
+        <div class="container center-block">
         <div class="row-fluid">
                 <div class="col-md-12" name="comm_list">
                         <ul class="comm_list">
                                {% for comm in comm_list%}
                                 <li> {{ comm.email }} </li>
-                                <li> {{ comm.created_at}}</li>
+                                <li> {{ comm.created_at.date()}}</li>
                                 <li> {{ comm.comment }}</li>
-                                
+                                <a class="btn btn-default" href="{{ url_for('del_comm', 
+                                 id=comm.id ) }}" role="button">삭제</a>
                                 <hr>
-                                <input type="button" value="삭제"/>                                
-                                <input type="button" value="삭제"/>
+                                                            
+                  
                                 {% endfor %}
                         </ul>
                         <hr>
                 </div>
+       
         </div>
         <div id="add_comm">
                 <form action="{{ url_for('add_comm', id=posts.id) }}" method="post" >
                   <img src="{{session.get('gravatar')}}">
                   <p name="email">{{session.get('email')}}</p>                           
-                  <textarea name="comment"> </textarea>  
+                  <textarea class="form-control" rows="3" > </textarea>  
                   <input type="submit" value="댓글 입력">    
                 </form>
         </div>
+          </div>
                         <hr>
-                </div>
-
-       
+        
+      
         
 
 
