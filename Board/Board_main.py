@@ -64,8 +64,8 @@ class Comment(db.Model):
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
     created_at= db.Column(DateTime(timezone=True), nullable=False,
                                      default=functions.now())
-    comment_id = db.relationship('Comment', backref='posts', lazy='dynamic')
-    admin_comments_id= db.relationship('Admin_Comments', lazy='dynamic', backref='posts')
+    
+   # admin_comments_id= db.relationship('Admin_Comments', lazy='dynamic', backref='posts')
     def __init__(self, email, comment, post_id):
         self.email = email
         self.comment = comment
@@ -85,7 +85,7 @@ class Post(db.Model):
     author_id= db.Column(db.String(20))
     created_at= db.Column(DateTime(timezone=True), nullable=False,
                                      default=functions.now())
-
+    comment_id = db.relationship('Comment', backref='posts', lazy='dynamic')
     def __init__(self,category,subject,status,contents, author_id):
         self.category = category
         self.subject = subject
@@ -246,9 +246,15 @@ def admin_detail(id):
     return render_template('contents.html', admin=admin)
 
 
+@app.route('/posts/comments/<int:id>', methods=['POST'])
+def update_comm(id):
+   
+    update= Comment.query.filter(Comment.id==id).first()
+    update.comment= request.form['comment_modify']
+    db.session.commit()    
+    return redirect(oid.get_next_url())
 
-
-@app.route('/posts/comments/<int:id>', methods=['GET'])
+@app.route('/posts/comments/<int:id>', methods=['DELETE'])
 def del_comm(id):
     comment = Comment.query.filter(Comment.id==id).first()
     db.session.delete(comment)
@@ -261,13 +267,6 @@ def logout():
     session.pop('id', None)
     flash(u'로그아웃!')
     return redirect(url_for('index'))
-
-
-
-@app.route('/modal', methods=['post'])
-def modal():
-    
-    return render_template('modal.html')
 
 
 
