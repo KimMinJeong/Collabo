@@ -44,14 +44,14 @@ class User(db.Model):
     id = Column(Integer, primary_key=True)
     name = Column(String(60))
     email = Column(String(200))
-    
-    def __init__(self, name, email,admin):
+    posts = db.relationship('Post', backref='author')
+
+    def __init__(self, name, email):
         self.name = name
         self.email = email
-        self.admin = admin
         
     def __repr__(self):
-        return '<User %s,%s,%s,%s>' % self.name, self.email, self.admin
+        return '<User %s,%s,%s>' % self.name, self.email
 
 
 class Comment(db.Model):
@@ -59,6 +59,7 @@ class Comment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(200))
     comment = db.Column(db.String(500))
+    post = db.relationship('Post', backref='comments')
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
     created_at= db.Column(DateTime(timezone=True), nullable=False,
                                      default=functions.now())
@@ -80,11 +81,11 @@ class Post(db.Model):
     subject = db.Column(db.String(50))
     status = db.Column(db.String(20))
     contents = db.Column(db.String(500))
-    author_id= db.Column(db.String(20))
-    created_at= db.Column(DateTime(timezone=True), nullable=False,
-                                     default=functions.now())
-    comment_id = db.relationship('Comment', lazy='dynamic',backref='posts')
-    admin_comments_id= db.relationship('Admin_Comments', lazy='dynamic', backref='posts')
+    author_id = db.Column(db.String(20), db.ForeignKey('users.id'))
+    created_at = db.Column(DateTime(timezone=True),
+                           nullable=False,
+                           default=functions.now())
+    admin_comments = db.relationship('Admin_Comments', backref='post')
     
     def __init__(self,category,subject,status,contents, author_id):
         self.category = category
@@ -104,21 +105,21 @@ class Admin_Comments(db.Model):
     id = db.Column(Integer, primary_key=True)
     email = db.Column(db.String(200))
     comment = db.Column(db.String(500))
-    post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
     created_at= db.Column(DateTime(timezone=True), nullable=False,
                                      default=functions.now())
-    def __init__(self, email, comment, post_id):
+    post_id = db.Column(Integer, db.ForeignKey('posts.id'))
+
+    def __init__(self, email, comment):
         self.email = email
         self.comment = comment
-        self.post_id = post_id
         
     def __repr__(self):
-        return '<Comment %s %s %s>' % self.email, self.comment , self.post_id
+        return '<Comment %s %s>' % self.email, self.comment
     
     
-
-def init_db():    
+def init_db():
     db.create_all()
+    
 
 @app.before_request
 def before_request():
@@ -146,25 +147,25 @@ def board_list():
 @app.route('/posts/<int:id>', methods=['GET'])
 def show(id):
     post= Post.query.filter(Post.id==id).first()
-    comm_list = Comment.query.filter(Comment.post_id==id).all()    
+    comm_list = Comment.query.filter(Comment.post_id==id).all()
+    gravatar = session.get('gravatar')
     return render_template('contents.html',
                             post=post, comm_list=comm_list)
+
+
+@app.route('/posts/<int:id>', methods=['POST'])
+def put_post(id):
+    post= Post.query.get(id)
+    post.status = request.values.get('status')
+    post.admin_comments.append(Admin_Comments(email=session.get('email'), comment=request.form['comment']))
+    db.session.commit()
+    return redirect(oid.get_next_url())
 
 
 @app.route('/posts/status', methods=['GET'])
 def board_detail():
     post = Post.query.all()
     return render_template('board_detail.html', post=post)
-
-
-@app.route('/posts/<int:id>', methods=['POST'])
-def put_post(id):
-    post = Post.query.get(id)
-    post.status = request.values.get('status')
-    post.comment = request.values.get('comment')
- 
-    db.session.commit()
-    return redirect(oid.get_next_url())
 
 
 @app.route('/register')
@@ -214,7 +215,7 @@ def board_insert():
         status = request.form["status"]
         contents = request.form["contents"]   
         author_id = session.get('name')
-
+        
         db_insert = Post(category, subject , status , contents, author_id)
         db.session.add(db_insert)
         db.session.commit()
@@ -223,7 +224,7 @@ def board_insert():
     return render_template('board_insert.html')
 
 
-@app.route('/posts/<int:id>', methods=['post'])
+@app.route('/posts/<int:id>', methods=['POST'])
 def add_comm(id):#comment 추가
     if request.method =='POST':
         email = session.get('email')
