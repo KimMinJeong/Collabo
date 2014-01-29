@@ -29,7 +29,7 @@
     <div class="col-md-12">
         <table class="table table-striped" border="1">
         <thead>
-			<p>현재 제안서는 상태입니다.
+			<p>현재 제안서는 {{post.status}} 상태입니다.
         	<button class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">
         	제안상태변경
 			</button></p>
@@ -42,27 +42,25 @@
 			        <h2 class="modal-title" id="myModalLabel">제안상태변경하기</h2>
 	 </div>
 			      
-		 <div class="modal-body">
-		    	<div  class="btn-group">
-			  		<div class="dropdown">
-			  			<p>상태</p>
-                  		<a href="#" data-toggle="dropdown" class="dropdown-toggle">제안상태<b class="caret"></b></a>
-                   		<ul class="dropdown-menu" id="status" name="status">
-                       		<li><a href="#" value="develope_wait">개발예정</a></li>
-                       		<li><a href="#" value="developing">개발중</a></li>
-                      		<li><a href="#" value="update">업데이트</a></li>
-                       		<li><a href="#" value="reject">반려</a></li>
-                   		</ul>
-            		</div>
-            		<div>
-            		<p>의견</p>
-            		<textarea rows="8" cols="50" value="comment" name="comment"> </textarea>
-            		</div>
-			   	</div>
-			</div>
-			 <div class="modal-footer">
-			      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-			        <input type="submit" class="btn btn-primary" value="변경완료">
+			      <div class="modal-body">
+			      	<div  class="btn-group">
+			      		<p>상태 </p>
+			      		<select id="status" name="status">
+							<option value="wait">대기중</option>
+							<option value="create_wait">개발예정</option>
+							<option value="creating">개발중</option>
+							<option value="update">업데이트</option>
+							<option value="reject">반려</option>
+						</select>
+	            		<div>
+	    				<p>의견</p>
+	    				<textarea rows="8" cols="50" value="comment" name="comment"> </textarea>
+	            		</div>
+			      	</div>
+			      </div>
+			      <div class="modal-footer">
+			        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+			        <input type="submit" value="변경완료">
 			      </div>
 			    </div><!-- /.modal-content -->
 			  </div><!-- /.modal-dialog -->
@@ -70,9 +68,8 @@
         </thead> 
         
         <tbody>
-        	<tr><td> 이곳에 제안서에 대한 의견을 작성해주세요</td></tr>
-        	<tr><td> 이곳에 제안서에 대한 의견을 작성해주세요</td></tr>
-        	<tr><td> </td></tr>
+        	<tr><td class="error"> 이곳에 제안서에 대한 의견을 작성해주세요</td></tr>
+        	<tr><td class="result"> {{post.comment}}</td></tr>
         </tbody>
 		</table>
 	</div>
@@ -117,11 +114,13 @@
 	    </ul>                            
 	       <textarea class="form-control" name="comment" rows="3" > </textarea>  
 	      <input type="submit" class="pull-right" value="댓글 입력">    
+
 	    </form>
 	</div>
 	<hr>
 </div>
 </div>
+
 
 
 
@@ -174,3 +173,4 @@
 </script>
 
 {% endblock %}
+

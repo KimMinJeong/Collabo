@@ -16,7 +16,6 @@ import hashlib
 import urllib
 
 
-
 app = Flask(__name__)
 #app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 oid = OpenID(app, join(dirname(__file__), 'openid_store'))
@@ -45,7 +44,6 @@ class User(db.Model):
     id = Column(Integer, primary_key=True)
     name = Column(String(60))
     email = Column(String(200))
-    admin = Column(Boolean)
     
     def __init__(self, name, email,admin):
         self.name = name
@@ -85,7 +83,9 @@ class Post(db.Model):
     author_id= db.Column(db.String(20))
     created_at= db.Column(DateTime(timezone=True), nullable=False,
                                      default=functions.now())
-    comment_id = db.relationship('Comment', backref='posts', lazy='dynamic')
+    comment_id = db.relationship('Comment', lazy='dynamic',backref='posts')
+    admin_comments_id= db.relationship('Admin_Comments', lazy='dynamic', backref='posts')
+    
     def __init__(self,category,subject,status,contents, author_id):
         self.category = category
         self.subject = subject
@@ -107,7 +107,6 @@ class Admin_Comments(db.Model):
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
     created_at= db.Column(DateTime(timezone=True), nullable=False,
                                      default=functions.now())
-    
     def __init__(self, email, comment, post_id):
         self.email = email
         self.comment = comment
@@ -146,10 +145,26 @@ def board_list():
 
 @app.route('/posts/<int:id>', methods=['GET'])
 def show(id):
-    posts= Post.query.filter(Post.id==id).first()
+    post= Post.query.filter(Post.id==id).first()
     comm_list = Comment.query.filter(Comment.post_id==id).all()    
     return render_template('contents.html',
-                            posts=posts, comm_list=comm_list)
+                            post=post, comm_list=comm_list)
+
+
+@app.route('/posts/status', methods=['GET'])
+def board_detail():
+    post = Post.query.all()
+    return render_template('board_detail.html', post=post)
+
+
+@app.route('/posts/<int:id>', methods=['POST'])
+def put_post(id):
+    post = Post.query.get(id)
+    post.status = request.values.get('status')
+    post.comment = request.values.get('comment')
+ 
+    db.session.commit()
+    return redirect(oid.get_next_url())
 
 
 @app.route('/register')
@@ -208,13 +223,6 @@ def board_insert():
     return render_template('board_insert.html')
 
 
-#글 디테일뷰
-@app.route('/posts/id/status', methods=['GET'])
-def board_detail():
-    post_detail = Post.query.all()
-    return render_template('board_detail.html', post_detail=post_detail)
-
-
 @app.route('/posts/<int:id>', methods=['post'])
 def add_comm(id):#comment 추가
     if request.method =='POST':
@@ -230,11 +238,10 @@ def add_comm(id):#comment 추가
 def admin(id):
     if request.method == 'POST':
         email = session.get('email')
-        status = request.form['status']
         comment = request.form['comment']
         post_id = id
         
-        db_insert = Admin_Comments(email, status, comment, post_id)
+        db_insert = Admin_Comments(email, comment,post_id)
         db.session.add(db_insert)
         db.session.commit()
     return redirect(oid.get_next_url())
@@ -253,6 +260,7 @@ def update_comm(id):
     update.comment= request.form['comment_modify']
     db.session.commit()    
     return redirect(oid.get_next_url())
+
 
 @app.route('/posts/comments/<int:id>', methods=['DELETE'])
 def del_comm(id):
