@@ -7,7 +7,6 @@ from flask_openid import OpenID
 from openid.extensions import pape
 from os import environ
 from os.path import dirname, join
-from pip._vendor.distlib import metadata
 from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -46,7 +45,7 @@ class User(db.Model):
     name = Column(String(60))
     email = Column(String(200))
     posts = db.relationship('Post', backref='author')
-    
+
     def __init__(self, name, email):
         self.name = name
         self.email = email
@@ -64,6 +63,8 @@ class Comment(db.Model):
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
     created_at= db.Column(DateTime(timezone=True), nullable=False,
                                      default=functions.now())
+    
+   # admin_comments_id= db.relationship('Admin_Comments', lazy='dynamic', backref='posts')
     def __init__(self, email, comment, post_id):
         self.email = email
         self.comment = comment
@@ -98,6 +99,7 @@ class Post(db.Model):
         self.status, self.contents, self.author_id
 
 
+
 class Admin_Comments(db.Model):
     __tablename__="admin_comments"
     id = db.Column(Integer, primary_key=True)
@@ -116,22 +118,17 @@ class Admin_Comments(db.Model):
     
     
 def init_db():
-    db.drop_all()
     db.create_all()
     
+
 @app.before_request
 def before_request():
     g.user = None
-    
+
 
 @app.route('/')
 def index():      
     return render_template('index.html')
-
-
-@app.route('/board_top')
-def top():
-    return render_template('board_top.html')
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -141,7 +138,7 @@ def login():
           ask_for=['email', 'fullname', 'nickname'])
         
         
-@app.route('/post/lists')
+@app.route('/posts/lists')
 def board_list():
     post_list = Post.query.all()
     return render_template('board_list.html', post_list=post_list)
@@ -172,30 +169,32 @@ def board_detail():
 
 
 @app.route('/register')
-def register():
-    admin=User.query.filter(User.admin=='TRUE').all()
-    if not session['email']==admin.email:
-        abort(401)
-        return redirect(oid.get_next_url())
+def register():    
+    return render_template('register.html')
+
+
+@app.route('/register', methods=['GET', 'POST'])
+def add_user():
     email=request.form['newEmail']
     name=email.split('@')
     user=User(name[0], email, False)
     db.session.add(user)
     db.session.commit()
     flash(u'추가!')
-    return render_template('signup.html')
+    return redirect(oid.get_next_url())
 
 
 @oid.after_login
 def after_login(resp):    
-    user= User.query.filter_by(email=resp.email).first()  
+    
+    user= User.query.filter_by(email=resp.email).first()      
+    if not user:
+        return redirect(oid.get_next_url()) 
     gravatar=set_img(resp)
-    if user is not None:
-        flash(u'Successfully signed in')
-        g.user= user
-        session['name'] = user.name
-        session['email'] = resp.email    
-        session['gravatar'] =gravatar[0]        
+    flash(u'Successfully signed in')
+    session['name'] = user.name
+    session['email'] = resp.email    
+    session['gravatar'] =gravatar[0]        
     return redirect(url_for('board_list'))
 
 
@@ -249,11 +248,35 @@ def admin(id):
     return redirect(oid.get_next_url())
 
 
+@app.route('/posts/<int:id>/detail', methods=['POST','GET'])
+def admin_detail(id):
+    admin = Admin_Comments.query.filter(post_id=id).first()
+    return render_template('contents.html', admin=admin)
+
+
+@app.route('/posts/comments/<int:id>', methods=['POST'])
+def update_comm(id):
+   
+    update= Comment.query.filter(Comment.id==id).first()
+    update.comment= request.form['comment_modify']
+    db.session.commit()    
+    return redirect(oid.get_next_url())
+
+
+@app.route('/posts/comments/<int:id>', methods=['DELETE'])
+def del_comm(id):
+    comment = Comment.query.filter(Comment.id==id).first()
+    db.session.delete(comment)
+    db.session.commit()
+    return redirect(oid.get_next_url())
+    
+    
 @app.route('/logout')
 def logout():
     session.pop('id', None)
     flash(u'로그아웃!')
     return redirect(url_for('index'))
+
 
 
 if __name__ == '__main__':

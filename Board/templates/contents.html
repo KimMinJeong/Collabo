@@ -2,22 +2,30 @@
 {% block body %}
 {{ super() }}
 
-<div class="container" style="padding: 0 19px">
-    <div class="row-fluid">
-	    <div class="col-md-12 container">
-        	<!--이메일 -->
-            <p name="email" align="right"> {{session['email']}}</p>
-            <!-- 사진 -->
-            <img src={{session.get('gravatar')}} align="right">
-            <!-- 제목 -->
-            <h2 align="left" class="col-md-6">{{post.subject}}</h2>
-            <h4 class="col-md-6">{{post.category}}</h4>
-            <!--카테고리 -->
-            <!-- 내용 -->
-    		<div class="container" id="container"> {{post.contents}} </div>
-		</div>
-	    	
-	<form action="{{ url_for('.put_post', id=post.id)}}" method="POST">
+<div class="container center-block">
+    <div class="row-fluid ">
+	    <div class="col-sm-5 col-md-5">
+	        <h2 align="left">{{posts.subject}}</h2>
+	    </div>
+	    <div class="col-sm-2 col-md-2" >
+	        <h4 class="text-muted page-bottom" align="center">
+	        	{{posts.category}}
+	        </h4>
+	    </div>    	
+	    <div class="col-sm-2 col-md-3 col-md-offset-2">
+	    	 <img src={{session.get('gravatar')}} align="right">
+	         <h4 name="email" align="right"> {{session['email']}}</h4>
+	    </div>           
+	   
+	   <div class="col-md-12 col-sm-12 center-block">
+	    	 {{ posts.contents }} 
+	    </div>
+	    
+	   </div>    
+		
+	</div> 
+<div class="container center-block">  	
+	<form action="{{ url_for('admin', id=posts.id)}}" method="post">
     <div class="col-md-12">
         <table class="table table-striped" border="1">
         <thead>
@@ -41,7 +49,7 @@
 			      <div class="modal-header">
 			        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
 			        <h2 class="modal-title" id="myModalLabel">제안상태변경하기</h2>
-			      </div>
+	 </div>
 			      
 			      <div class="modal-body">
 			      	<div  class="btn-group">
@@ -80,28 +88,98 @@
     <br/>
     <br/>
     <hr>
+	</div>
+	
+	
     <!-- 댓글 부분 -->
+    <div class="container center-block">
     <div class="row-fluid">
         <div class="col-md-12" name="comm_list">
-            <ul class="comm_list">
+            <ul class="list-unstyled list-inline">
+            	<hr>
                	{% for comm in comm_list %}
-                <li> {{ comm.email }} </li>
-                <li> {{ comm.comment }}</li>
+                <li > {{ comm.email }} </li>
+                <li> {{ comm.created_at.date() }}</li><br>
+                <li id={{comm.id}}> {{ comm.comment }}</li>
+                <div class={{comm.id}}>
+                	<form action="{{url_for('update_comm', id=comm.id)}}" method="post">
+						<span class="error"> 댓글을 입력하세요 </span>
+                	</form>
+                </div>
+                {%if comm.email==session.get('email') %}
+                <a class="btn btn-default modify" data-id={{comm.id}} role="button">수정</a>
+                <a class="btn btn-default" href="{{ url_for('del_comm', id=comm.id ) }}" role="button">삭제</a>
+                {% endif %}
                 <hr>
             	{% endfor %}
             </ul>
-            <hr>
         </div>
     </div>
 	<div id="add_comm">
-	    <form action="{{ url_for('add_comm', id=post.id) }}" method="post" >
-	      <img src="{{session.get('gravatar')}}">
-	      <p name="email">{{session.get('email')}}</p>                           
-	      <textarea name="comment" rows="5" cols="50"> </textarea>  
-	      <input type="submit" value="댓글 입력">    
+	    <form action="{{ url_for('add_comm', id=posts.id) }}" method="post" >
+	    <ul class="list-inline">
+	      <li><img src="{{session.get('gravatar')}}"></li>
+	      <li><p class="form-control-static" name="email">{{session.get('email')}}</p></li>
+	    </ul>                            
+	       <textarea class="form-control" name="comment" rows="3" > </textarea>  
+	      <input type="submit" class="pull-right" value="댓글 입력">    
+
 	    </form>
 	</div>
 	<hr>
 </div>
+</div>
+
+
+
+
+<script type="text/javascript">
+	$('.dropdown-toggle').dropdown();
+	$(".dropdown-menu li a").click(function(){
+  var selText = $(this).text();
+  $(this).parents('.btn-group').find('.dropdown-toggle').html(selText+'<span class="caret"></span>');
+});
+</script>
+
+<script type="text/javascript">
+
+	$('.modify').on('click', function(){
+		var data=$(this).data('id');
+		var str= $('#' + data).text();
+		
+		$('.'+data)
+			.html(
+				"<form method='post'>" +
+				"<textarea class='form-control' rows=3 name='comment_modify'>" + str + "</textarea>"
+			+ "<input type='submit' value='수정'/>" + "</form>")	
+			.find('form')
+			.attr('action', {{ url_for('update_comm', id=-1 )|tojson }}.replace('-1', data));
+		
+	});
+
+	
+</script>
+
+<script type="text/javascript">
+	$(document).on('ready', function(){
+		$('.error').hide();
+		$('.pull-right').on('click', function(e){		
+		var data= $('.form-control').val();
+		var len= data.length;
+		if(len < 1)
+		{
+			$('.error').show();
+			e.preventDefault();	
+		}
+		else
+		{
+			$('.error').hide();
+		}
+		
+	});
+	
+	});
+</script>
 
 {% endblock %}
+
