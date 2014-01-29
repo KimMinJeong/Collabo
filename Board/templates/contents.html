@@ -95,24 +95,21 @@
     <div class="container center-block">
     <div class="row-fluid">
         <div class="col-md-12" name="comm_list">
-            <ul class="list-unstyled list-inline">
-            	<hr>
-               	{% for comm in comm_list %}
+        	{% for comm in comm_list %}
+            <ul class="list-unstyled list-inline" data-id={{comm.id}}>
+               	
                 <li > {{ comm.email }} </li>
                 <li> {{ comm.created_at.date() }}</li><br>
                 <li id={{comm.id}}> {{ comm.comment }}</li>
-                <div class={{comm.id}}>
-                	<form action="{{url_for('update_comm', id=comm.id)}}" method="post">
-						<span class="error"> 댓글을 입력하세요 </span>
-                	</form>
+                <div class='edit_box'>
+                	<span class="error"> 댓글을 입력하세요 </span>
                 </div>
                 {%if comm.email==session.get('email') %}
-                <a class="btn btn-default modify" data-id={{comm.id}} role="button">수정</a>
+                <a class="btn btn-default modify" role="button">수정</a>
                 <a class="btn btn-default" href="{{ url_for('del_comm', id=comm.id ) }}" role="button">삭제</a>
                 {% endif %}
-                <hr>
-            	{% endfor %}
             </ul>
+            {% endfor %}
         </div>
     </div>
 	<div id="addComm">
@@ -133,22 +130,49 @@
 <script type="text/javascript">
 
 	$('.modify').on('click', function(){
-		var data=$(this).data('id');
+		var data=$(this).closest('ul').data('id');
 		var str= $('#' + data).text();
 		
-		$('.'+data)
+		$(this).closest('ul').find('.edit_box')
 			.html(
-				"<form method='post'>" +
 				"<textarea class='form-control' rows=3 name='comment_modify'>" + str + "</textarea>"
-			+ "<input type='submit' value='수정'/>" + "</form>")	
-			.find('form')
-			.attr('action', {{ url_for('update_comm', id=-1 )|tojson }}.replace('-1', data));
-		
+			+ "<button type='button' class='comment_modify'>버튼</button>")	
+			.find('form');
 	});
-
+	$(document).on('click', '.comment_modify', function() {
+		var id = $(this).closest('ul').data('id');
+		var result_value =  $(this).parent().find('textarea').val();
+		$.ajax({
+			url: {{ url_for('update_comm', id=-1 )|tojson }}.replace('-1', id),
+			type: 'PUT',
+			data: 'comment_modify=' + result_value
+		}).done(function () {
+			$('#' + id).html(result_value);
+		});
+	});
 	
 </script>
 
+<script type="text/javascript">
+	$(document).on('ready', function(){
+		$('.error').hide();
+		$('.pull-right').on('click', function(e){		
+		var data= $('.form-control').val();
+		var len= data.length;
+		if(len < 1)
+		{
+			$('.error').show();
+			e.preventDefault();	
+		}
+		else
+		{
+			$('.error').hide();
+		}
+		
+	});
+	
+	});
+</script>
 
 
 {% endblock %}

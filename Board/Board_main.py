@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime, date, time
 from flask import Flask, render_template, request, g, session, flash, redirect, \
-    url_for, abort
+    url_for, abort, jsonify
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask_openid import OpenID
 from openid.extensions import pape
@@ -233,13 +233,12 @@ def add_comm(id):
     return redirect(oid.get_next_url())
 
 
-@app.route('/posts/comments/<int:id>', methods=['POST'])
+@app.route('/posts/comments/<int:id>', methods=['PUT'])
 def update_comm(id):
-   
     update= Comment.query.filter(Comment.id==id).first()
     update.comment= request.form['comment_modify']
     db.session.commit()    
-    return redirect(oid.get_next_url())
+    return jsonify(dict(result='success'))
 
 
 @app.route('/posts/comments/<int:id>', methods=['DELETE'])
