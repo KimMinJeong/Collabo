@@ -59,12 +59,14 @@ class Comment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(200))
     comment = db.Column(db.String(500))
+    img = db.Column(db.String(500))
     post = db.relationship('Post', backref='comments')
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
     created_at= db.Column(DateTime(timezone=True), nullable=False,
                                      default=functions.now())
     
-    def __init__(self, email, comment, post_id):
+    def __init__(self, img, email, comment, post_id):
+        self.img = img
         self.email = email
         self.comment = comment
         self.post_id = post_id
@@ -227,7 +229,9 @@ def add_comm(id):#comment 추가
         email = session.get('email')
         comment = request.form['reply']
         post_id = id
-        db.session.add(Comment(email, comment, post_id))       
+        img = session.get('gravatar')
+        comment = Comment(img, email, comment, post_id)
+        db.session.add(comment)       
         db.session.commit()
     return redirect(oid.get_next_url())
 
@@ -237,6 +241,7 @@ def add_comm(id):#comment 추가
 def update_comm(id):
     update= Comment.query.filter(Comment.id==id).first()
     update.comment= request.form['comment_modify']
+    update.img=session.get('gravatar')
     db.session.commit()    
     return jsonify(dict(result='success'))
 
@@ -257,4 +262,5 @@ def logout():
 
 
 if __name__ == '__main__':
+    init_db()
     app.run(debug=True, host='0.0.0.0', port=int(environ.get('PORT',5000)))

@@ -93,20 +93,28 @@
     <div class="row-fluid">
         <div class="col-md-12" name="comm_list">
         	{% for comm in comm_list %}
-            <ul class="list-unstyled list-inline" data-id={{comm.id}}>
-               	
-                <li > {{ comm.email }} </li>
-                <li> {{ comm.created_at.date() }}</li><br>
-                <li id={{comm.id}}> {{ comm.comment }}</li>
-                <div class='edit_box'>
+        	<table class="table table-striped" data-id={{comm.id}}>
+        		<th> <p><img src={{comm.img}} /> </p>
+        			 <p> {{comm.email}} </p>
+        			 <p> {{comm.created_at.date()}}</p>
+        			 <p id={{comm.id}}> {{ comm.comment }}</p>
+        		</th>
+        		
+        		 <td>
+        		 	<div class='edit_box'>
                 	<span class="error"> 댓글을 입력하세요 </span>
-                </div>
-                {%if comm.email==session.get('email') %}
-                <a class="btn btn-default modify" role="button">수정</a>
-                <a class="btn btn-default delete" role="button">삭제</a>
+                	</div>
+                </td>
+                 {% if comm.email==session.get('email') %}
+                <td>
+                	<a class="btn btn-default modify" role="button">수정</a>
+                	<a class="btn btn-default delete" role="button">삭제</a>
+                </td>
                 {% endif %}
-            </ul>
-            {% endfor %}
+               
+            </table>
+             {% endfor %}
+          
         </div>
     </div>
 	<div id="addComm">
@@ -115,7 +123,7 @@
 	      <li><img src="{{session.get('gravatar')}}"></li>
 	      <li><p class="form-control-static" name="email">{{session.get('email')}}</p></li>
 	    </ul>                      
-	    <textarea class="form-control" name="reply" rows="3"> </textarea>  
+	    <textarea class="form-control reply" name="reply" rows="3"> </textarea>  
 	    <input type="submit" class="pull-right" value="댓글 입력">    
 	  </form>
 	</div>
@@ -125,10 +133,11 @@
 
 <script type="text/javascript">
 	$('.modify').on('click', function(){
-		var data=$(this).closest('ul').data('id');
+		var data=$(this).closest('table').data('id');
 		var str= $('#' + data).text();
-
-		$(this).closest('ul').find('.edit_box')
+		console.log(data);
+		console.log(str);
+		$(this).closest('table').find('.edit_box')
 			.html(
 				"<textarea class='form-control' rows=3 name='comment_modify'>" + str + "</textarea>"
 			+ "<button type='button' class='comment_modify'>수정</button>")	
@@ -136,7 +145,7 @@
 	});
 	
 	$(document).on('click', '.comment_modify', function() {
-		var id = $(this).closest('ul').data('id');
+		var id = $(this).closest('table').data('id');
 		var $textarea = $(this).parent().find('textarea');
 		var result_value =  $(this).parent().find('textarea').val();
 		$.ajax({
@@ -158,10 +167,11 @@
 		$('.error').hide();
 		$('.pull-right').on('click', function(e){	
 			
-		var data= $( "textarea[name='reply']" ).val();//$('.form-control').val();
+		var data= $('.reply').val();//$('.form-control').val();
 		var len= data.length;
 		if(len < 1)
 		{
+			alert('댓글을 입력하십시오');
 			$('.error').show();
 			e.preventDefault();	
 		}
@@ -176,7 +186,7 @@
 
 <script type="text/javascript">
 	$('.delete').on('click', function(){
-		var closestUl = $(this).closest('ul');
+		var closestUl = $(this).closest('table');
 		var del_id= closestUl.data('id');
 		$.ajax({
 			url: {{ url_for('del_comm', id=-1 )|tojson }}.replace('-1', del_id),
