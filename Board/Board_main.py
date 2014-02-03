@@ -26,18 +26,18 @@ SQLALCHEMY_DATABASE_URI = os.environ.get(
     'DATABASE_URL','postgresql://postgres:1234@localhost/pos')
 
 db = SQLAlchemy(app)
-
-app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 app.config['SQLALCHEMY_DATABASE_URI']=SQLALCHEMY_DATABASE_URI
+app.config['SECRET_KEY']='development keys'
+app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
 
 class User(db.Model):
     __tablename__ = 'users'
-    id = Column(Integer, primary_key=True)
-    name = Column(String(60))
-    email = Column(String(30))
+    id = db.Column(Integer, primary_key=True)
+    name = db.Column(String(60))
+    email = db.Column(String(60))
     posts = db.relationship('Post', backref='author')
-    comments = db.relationship('Comment', backref='comment')
+    comments = db.relationship('Comment', backref='reply')
     
     def __init__(self,name,email):
         self.name = name
@@ -45,50 +45,50 @@ class User(db.Model):
         
     def __repr__(self):
         return "<User id={0!r}, name={1!r}, email={2!r}>".\
-                format(self.id, self.name,self.email)
+                format(self.id, self.name, self.email)
 
 
 class Comment(db.Model):
     __tablename__ = 'comments'
     id = db.Column(db.Integer, primary_key=True)
     comment = db.Column(db.Text, nullable=False)
-    author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
-    created_at= db.Column(DateTime(timezone=True), nullable=False,
+    created_at = db.Column(DateTime(timezone=True), nullable=False,
                                      default=functions.now())
     
-    def __init__(self, comment, author_id, post_id):
+    def __init__(self, comment, user_id, post_id):
         self.comment = comment
-        self.author_id = author_id
+        self.user_id = user_id
         self.post_id = post_id
 
     def __repr__(self):
-        return "<Comment id={0!r},comment={1!r}, author_id={2!r}, post_id={3!r}>".\
-                format(self.id, self.comment, self.author_id, self.post_id)
+        return "<Comment id={0!r},comment={1!r}, user_id={2!r}, post_id={3!r}>".\
+                format(self.id, self.comment, self.user_id, self.post_id)
 
 class Post(db.Model):
     __tablename__='posts'
-    id = db.Column(Integer,primary_key=True)
+    id = db.Column(Integer, primary_key=True)
     category = db.Column(db.String(10))
     subject = db.Column(db.String(50))
     status = db.Column(db.String(20))
     contents = db.Column(db.Text, nullable=False)
-    author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     created_at = db.Column(DateTime(timezone=True),
                            nullable=False,
                            default=functions.now())
-    comments = db.relationship('Comments', backref='post')
+    comments = db.relationship('Comment', backref='post')
     
-    def __init__(self,category,subject,status,contents,author_id):
+    def __init__(self, category, subject, status, contents, user_id):
         self.category = category
         self.subject = subject
         self.status = status
         self.contents = contents
-        self.author_id = author_id
+        self.user_id = user_id
         
     def __repr__(self):
-        return "<Post id={0!r}, category={1!r}, subject={2!r}, status={3!r}, contents={4!r}> author_id={5!r}".\
-                format(self.id, self.category, self.subject, self.status, self.contents, self.author_id)
+        return "<Post id={0!r}, category={1!r}, subject={2!r}, status={3!r}, contents={4!r}> user_id={5!r}".\
+                format(self.id, self.category, self.subject, self.status, self.contents, self.user_id)
 
 
 def init_db():
@@ -100,8 +100,7 @@ def index():
     return render_template('index.html')
 
 
-
-@app.route('/login', methods=['POST'])
+@app.route('/login', methods=['get', 'POST'])
 @oid.loginhandler
 def login():
     return oid.try_login("https://www.google.com/accounts/o8/id",
@@ -111,7 +110,7 @@ def login():
 @app.route('/posts/lists')
 def board_list():
     post_list = Post.query.all()
-    return render_template('board_list.html',post_list=post_list)
+    return render_template('board_list.html', post_list=post_list)
 
 
 @app.route('/posts/<int:id>', methods=['GET'])
@@ -181,9 +180,9 @@ def board_insert():
     subject = request.form["subject"]
     status = request.form["status"]
     contents = request.form["contents"]   
-    author_id = session.get('name')
+    user_id = session.get(User.id)
     
-    db_insert = Post(category, subject, status, contents, author_id)
+    db_insert = Post(category, subject, status, contents, user_id)
     db.session.add(db_insert)
     db.session.commit()
     return redirect(url_for('board_list'))
@@ -197,11 +196,11 @@ def board_get():
 @app.route('/posts/<int:id>/comment', methods=['POST'])
 def add_comm(id):#comment 추가
     if request.method =='POST':
-        email = session.get('email')
+        user_id = session.get('User.id')
         comment = request.form['reply']
         post_id = id
         img = session.get('gravatar')
-        comment = Comment(img,email,comment,post_id)
+        comment = Comment(comment, user_id, post_id)
         db.session.add(comment)       
         db.session.commit()
     return redirect(oid.get_next_url())
