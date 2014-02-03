@@ -86,7 +86,7 @@ class Post(db.Model):
                            default=functions.now())
     admin_comments = db.relationship('Admin_Comments', backref='post')
     
-    def __init__(self,category,subject,status,contents, author_id):
+    def __init__(self,category, subject, status, contents, author_id):
         self.category = category
         self.subject = subject
         self.status = status
@@ -95,7 +95,10 @@ class Post(db.Model):
         
     def __repr__(self):
         return '<Post %s,%s,%s,%s, %s>' % self.category, self.subject, self.status, self.contents, self.author_id
+<<<<<<< HEAD
+=======
 
+>>>>>>> 2101ac946ef984ac7d285454dc9a411da932503d
 
 
 class Admin_Comments(db.Model):
@@ -214,7 +217,7 @@ def board_insert():
         contents = request.form["contents"]   
         author_id = session.get('name')
         
-        db_insert = Post(category, subject , status , contents, author_id)
+        db_insert = Post(category, subject, status, contents, author_id)
         db.session.add(db_insert)
         db.session.commit()
         
@@ -223,7 +226,11 @@ def board_insert():
 
 
 @app.route('/posts/<int:id>/comment', methods=['POST'])
+<<<<<<< HEAD
+def add_comm(id):#comment 추가
+=======
 def add_comm(id):
+>>>>>>> 2101ac946ef984ac7d285454dc9a411da932503d
     if request.method =='POST':
         email = session.get('email')
         comment = request.form['reply']
@@ -233,7 +240,11 @@ def add_comm(id):
     return redirect(oid.get_next_url())
 
 
+<<<<<<< HEAD
+@app.route('/posts/comments/<int:id>', methods=['POST'])
+=======
 @app.route('/posts/comments/<int:id>', methods=['PUT'])
+>>>>>>> 2101ac946ef984ac7d285454dc9a411da932503d
 def update_comm(id):
     update= Comment.query.filter(Comment.id==id).first()
     update.comment= request.form['comment_modify']
@@ -254,7 +265,6 @@ def logout():
     session.pop('id', None)
     flash(u'로그아웃!')
     return redirect(url_for('index'))
-
 
 
 if __name__ == '__main__':
