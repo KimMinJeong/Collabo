@@ -118,11 +118,7 @@ class Admin_Comments(db.Model):
     
 def init_db():
     db.create_all()
-    
 
-@app.before_request
-def before_request():
-    g.user = None
 
 
 @app.route('/')
