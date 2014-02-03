@@ -18,6 +18,7 @@ import os
 
 
 app = Flask(__name__)
+
 #app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 oid = OpenID(app, join(dirname(__file__), 'openid_store'))
 
@@ -38,7 +39,7 @@ class User(db.Model):
     posts = db.relationship('Post', backref='author')
     comments = db.relationship('Comment', backref='comment')
     
-    def __init__(self, name, email):
+    def __init__(self,name,email):
         self.name = name
         self.email = email
         
@@ -56,20 +57,18 @@ class Comment(db.Model):
     created_at= db.Column(DateTime(timezone=True), nullable=False,
                                      default=functions.now())
     
-    def __init__(self, comment, comment_id, author_id, post_id):
+    def __init__(self, comment, author_id, post_id):
         self.comment = comment
-        self.comment_id = comment_id
         self.author_id = author_id
         self.post_id = post_id
-        
-    def __repr__(self):
-        return "<Comment id={0!r},comment={1!r}, author_id={2!r}, comment_id={3!r}>".\
-                format(self.id, self.comment_id, self.author_id, self.comment)
 
+    def __repr__(self):
+        return "<Comment id={0!r},comment={1!r}, author_id={2!r}, post_id={3!r}>".\
+                format(self.id, self.comment, self.author_id, self.post_id)
 
 class Post(db.Model):
     __tablename__='posts'
-    id = db.Column(Integer, primary_key=True)
+    id = db.Column(Integer,primary_key=True)
     category = db.Column(db.String(10))
     subject = db.Column(db.String(50))
     status = db.Column(db.String(20))
@@ -80,7 +79,7 @@ class Post(db.Model):
                            default=functions.now())
     comments = db.relationship('Comments', backref='post')
     
-    def __init__(self,category, subject, status, contents, author_id):
+    def __init__(self,category,subject,status,contents,author_id):
         self.category = category
         self.subject = subject
         self.status = status
@@ -91,27 +90,28 @@ class Post(db.Model):
         return "<Post id={0!r}, category={1!r}, subject={2!r}, status={3!r}, contents={4!r}> author_id={5!r}".\
                 format(self.id, self.category, self.subject, self.status, self.contents, self.author_id)
 
-    
+
 def init_db():
     db.create_all()
-    
-    
+
+
 @app.route('/')
 def index():      
     return render_template('index.html')
+
 
 
 @app.route('/login', methods=['POST'])
 @oid.loginhandler
 def login():
     return oid.try_login("https://www.google.com/accounts/o8/id",
-          ask_for=['email', 'fullname', 'nickname'])
+          ask_for=['email','fullname','nickname'])
         
         
 @app.route('/posts/lists')
 def board_list():
     post_list = Post.query.all()
-    return render_template('board_list.html', post_list=post_list)
+    return render_template('board_list.html',post_list=post_list)
 
 
 @app.route('/posts/<int:id>', methods=['GET'])
@@ -120,7 +120,7 @@ def show(id):
     comm_list = Comment.query.filter(Comment.post_id==id).all()
     gravatar = session.get('gravatar')
     return render_template('contents.html',
-                            post=post, comm_list=comm_list)
+                            post=post,comm_list=comm_list)
 
 
 @app.route('/posts/<int:id>', methods=['POST'])
@@ -135,7 +135,7 @@ def put_post(id):
 @app.route('/posts/status', methods=['GET'])
 def board_detail():
     post = Post.query.all()
-    return render_template('board_detail.html', post=post)
+    return render_template('board_detail.html',post=post)
 
 
 @app.route('/register', methods=['GET'])
@@ -147,7 +147,7 @@ def register():
 def add_user():
     email=request.form['newEmail']
     name=email.split('@')
-    user=User(name[0], email, False)
+    user=User(name[0],email)
     db.session.add(user)
     db.session.commit()
     flash(u'추가!')
@@ -155,7 +155,7 @@ def add_user():
 
 
 @oid.after_login
-def after_login(resp):    
+def after_login(resp):      
     user= User.query.filter_by(email=resp.email).first()      
     if not user:
         return redirect(oid.get_next_url()) 
@@ -165,7 +165,6 @@ def after_login(resp):
     session['email'] = resp.email    
     session['gravatar'] =gravatar[0]        
     return redirect(url_for('board_list'))
-
 
 def set_img(resp):
     email_gra = resp.email
@@ -201,7 +200,9 @@ def add_comm(id):#comment 추가
         email = session.get('email')
         comment = request.form['reply']
         post_id = id
-        db.session.add(Comment(email, comment, post_id))       
+        img = session.get('gravatar')
+        comment = Comment(img,email,comment,post_id)
+        db.session.add(comment)       
         db.session.commit()
     return redirect(oid.get_next_url())
 
@@ -210,6 +211,7 @@ def add_comm(id):#comment 추가
 def update_comm(id):
     update= Comment.query.filter(Comment.id==id).first()
     update.comment= request.form['comment_modify']
+    update.img=session.get('gravatar')
     db.session.commit()    
     return jsonify(dict(result='success'))
 
@@ -219,7 +221,7 @@ def del_comm(id):
     comment = Comment.query.filter(Comment.id==id).first()
     db.session.delete(comment)
     db.session.commit()
-    return redirect(oid.get_next_url())
+    return jsonify(dict(result='success'))
     
     
 @app.route('/logout')
@@ -235,5 +237,4 @@ def edit():
 
 
 if __name__ == '__main__':
-    init_db()
     app.run(debug=True, host='0.0.0.0', port=int(environ.get('PORT',5000)))
