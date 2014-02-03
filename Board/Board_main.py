@@ -87,7 +87,7 @@ class Post(db.Model):
                            default=functions.now())
     admin_comments = db.relationship('Admin_Comments', backref='post')
     
-    def __init__(self,category,subject,status,contents, author_id):
+    def __init__(self,category, subject, status, contents, author_id):
         self.category = category
         self.subject = subject
         self.status = status
@@ -95,9 +95,7 @@ class Post(db.Model):
         self.author_id = author_id
         
     def __repr__(self):
-        return '<Post %s,%s,%s,%s, %s>' % self.category, self.subject,\
-        self.status, self.contents, self.author_id
-
+        return '<Post %s,%s,%s,%s, %s>' % self.category, self.subject, self.status, self.contents, self.author_id
 
 
 class Admin_Comments(db.Model):
@@ -216,7 +214,7 @@ def board_insert():
         contents = request.form["contents"]   
         author_id = session.get('name')
         
-        db_insert = Post(category, subject , status , contents, author_id)
+        db_insert = Post(category, subject, status, contents, author_id)
         db.session.add(db_insert)
         db.session.commit()
         
@@ -224,7 +222,7 @@ def board_insert():
     return render_template('board_insert.html')
 
 
-@app.route('/posts/<int:id>', methods=['POST'])
+@app.route('/posts/<int:id>/comment', methods=['POST'])
 def add_comm(id):#comment 추가
     if request.method =='POST':
         email = session.get('email')
@@ -235,28 +233,8 @@ def add_comm(id):#comment 추가
     return redirect(oid.get_next_url())
 
 
-@app.route('/posts/<int:id>/detail/edit' , methods=['GET','POST'])
-def admin(id):
-    if request.method == 'POST':
-        email = session.get('email')
-        comment = request.form['comment']
-        post_id = id
-        
-        db_insert = Admin_Comments(email, comment,post_id)
-        db.session.add(db_insert)
-        db.session.commit()
-    return redirect(oid.get_next_url())
-
-
-@app.route('/posts/<int:id>/detail', methods=['POST','GET'])
-def admin_detail(id):
-    admin = Admin_Comments.query.filter(post_id=id).first()
-    return render_template('contents.html', admin=admin)
-
-
 @app.route('/posts/comments/<int:id>', methods=['POST'])
 def update_comm(id):
-   
     update= Comment.query.filter(Comment.id==id).first()
     update.comment= request.form['comment_modify']
     db.session.commit()    
@@ -276,7 +254,6 @@ def logout():
     session.pop('id', None)
     flash(u'로그아웃!')
     return redirect(url_for('index'))
-
 
 
 if __name__ == '__main__':
