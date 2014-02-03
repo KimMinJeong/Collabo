@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime, date, time
 from flask import Flask, render_template, request, g, session, flash, redirect, \
-    url_for, abort
+    url_for, abort, jsonify
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask_openid import OpenID
 from openid.extensions import pape
@@ -64,7 +64,6 @@ class Comment(db.Model):
     created_at= db.Column(DateTime(timezone=True), nullable=False,
                                      default=functions.now())
     
-   # admin_comments_id= db.relationship('Admin_Comments', lazy='dynamic', backref='posts')
     def __init__(self, email, comment, post_id):
         self.email = email
         self.comment = comment
@@ -95,8 +94,7 @@ class Post(db.Model):
         self.author_id = author_id
         
     def __repr__(self):
-        return '<Post %s,%s,%s,%s, %s>' % self.category, self.subject,\
-        self.status, self.contents, self.author_id
+        return '<Post %s,%s,%s,%s, %s>' % self.category, self.subject, self.status, self.contents, self.author_id
 
 
 
@@ -224,43 +222,23 @@ def board_insert():
     return render_template('board_insert.html')
 
 
-@app.route('/posts/<int:id>', methods=['POST'])
-def add_comm(id):#comment 추가
+@app.route('/posts/<int:id>/comment', methods=['POST'])
+def add_comm(id):
     if request.method =='POST':
         email = session.get('email')
-        comment = request.form['comment']
+        comment = request.form['reply']
         post_id = id
         db.session.add(Comment(email, comment, post_id))       
         db.session.commit()
     return redirect(oid.get_next_url())
 
 
-@app.route('/posts/<int:id>/detail/edit' , methods=['GET','POST'])
-def admin(id):
-    if request.method == 'POST':
-        email = session.get('email')
-        comment = request.form['comment']
-        post_id = id
-        
-        db_insert = Admin_Comments(email, comment,post_id)
-        db.session.add(db_insert)
-        db.session.commit()
-    return redirect(oid.get_next_url())
-
-
-@app.route('/posts/<int:id>/detail', methods=['POST','GET'])
-def admin_detail(id):
-    admin = Admin_Comments.query.filter(post_id=id).first()
-    return render_template('contents.html', admin=admin)
-
-
-@app.route('/posts/comments/<int:id>', methods=['POST'])
+@app.route('/posts/comments/<int:id>', methods=['PUT'])
 def update_comm(id):
-   
     update= Comment.query.filter(Comment.id==id).first()
     update.comment= request.form['comment_modify']
     db.session.commit()    
-    return redirect(oid.get_next_url())
+    return jsonify(dict(result='success'))
 
 
 @app.route('/posts/comments/<int:id>', methods=['DELETE'])
