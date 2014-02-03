@@ -20,8 +20,8 @@
   <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav">
-                		{% if session.get('email') in "jc@spoqa.com" or
-                								  "richard@spoqa.com" or					
+                		{% if session.get('email') in "jc@spoqa.com" ,
+                								  "richard@spoqa.com" ,					
                 								  "grant@spoqa.com"
                 													 %}
                         <li class="active"><a href="{{ url_for('register') }}"> 사용자등록</a></li>
