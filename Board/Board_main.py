@@ -11,6 +11,7 @@ from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.sql import functions
+from sqlalchemy.sql.expression import case
 from sqlalchemy.types import DateTime, Boolean
 import hashlib
 import urllib
@@ -29,11 +30,13 @@ app.config.from_envvar('FLASKR_SETTINGS',silent=True)
 
 class User(db.Model):
     __tablename__ = 'users'
-    id = Column(Integer, primary_key=True)
-    name = Column(String(60))
-    email = Column(db.text,nullable=False)
-    posts = db.relationship('Post',backref='author')
-    comments = db.relationship('Comment',backref='comment')
+    id = Column(db.Integer, primary_key=True)
+    name = Column(db.String(60))
+    email = Column(db.String(20))
+    posts = db.relationship('Post',backref='author', \
+                            cascade="all, delete-orphan", passive_deletes=True)
+    replys = db.relationship('Comment',backref='reply', \
+                               cascade="all, delete-orphan", passive_deletes=True)
     
     def __init__(self,name,email):
         self.name = name
@@ -47,22 +50,23 @@ class User(db.Model):
 class Comment(db.Model):
     __tablename__ = 'comments'
     id = db.Column(db.Integer,primary_key=True)
-    comment_id = db.Column(db.String(50),db.ForeignKey('users.id'))
-    comment = db.Column(db.text,nullable=False)
-    post = db.relationship('Post',backref='comments')
-    post_id = db.Column(db.Integer,db.ForeignKey('posts.id'))
+    user_id = db.Column(db.Integer,
+                           db.ForeignKey('users.id',ondelete='CASCADE'))
+    comment = db.Column(db.Text,nullable=False)
+    post = db.relationship('Post',backref='comments', \
+                           cascade="all, delete-orphan", passive_deletes=True)
+    post_id = db.Column(db.Integer,db.ForeignKey('posts.id',ondelete='CASCADE'))
     created_at= db.Column(DateTime(timezone=True),nullable=False,
                                      default=functions.now())
     
-    def __init__(self,img,email,comment,post_id):
-        self.img = img
-        self.email = email
+    def __init__(self,user_id,comment,post_id):
+        self.user_id = user_id
         self.comment = comment
         self.post_id = post_id
         
     def __repr__(self):
-        return "<Comment id={0!r}, email={1!r}, comment_id={2!r}, comment={3!r}>"\
-            .format(self.id, self.email, self.comment_id, self.comment)
+        return "<Comment id={0!r}, email={1!r}, user_id={2!r}, comment={3!r}>"\
+            .format(self.id, self.email, self.user_id, self.comment)
     
 
 class Post(db.Model):
@@ -71,12 +75,13 @@ class Post(db.Model):
     category = db.Column(db.String(10))
     subject = db.Column(db.String(50))
     status = db.Column(db.String(20))
-    contents = db.Column(db.text, nullable=False)
-    author_id = db.Column(db.String(20), db.ForeignKey('users.id'))
+    contents = db.Column(db.Text,nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id',ondelete='CASCADE'))
     created_at = db.Column(DateTime(timezone=True),
                            nullable=False,
                            default=functions.now())
-    comments = db.relationship('Comments', backref='post')
+    comments = db.relationship('Comment', backref='post', \
+                               cascade="all, delete-orphan", passive_deletes=True)
     
     def __init__(self,category,subject,status,contents,author_id):
         self.category = category
@@ -88,7 +93,7 @@ class Post(db.Model):
     def __repr__(self):
         return "<Post id={0!r}, category={1!r}, subject={2!r}, status={3!r}, contents={4!r}>".\
                 format(self.id, self.category, self.subject, self.status, self.contents)
-    
+
     
 def init_db():
     db.create_all()
@@ -114,13 +119,13 @@ def board_list():
 
 @app.route('/posts/<int:id>',methods=['GET'])
 def show(id):
-    post= Post.query.filter(Post.id==id).first()
+    post= Post.query.get(id) 
     comm_list = Comment.query.filter(Comment.post_id==id).all()
     gravatar = session.get('gravatar')
     return render_template('contents.html',
                             post=post,comm_list=comm_list)
 
-
+"""
 @app.route('/posts/<int:id>',methods=['POST'])
 def put_post(id):
     post= Post.query.get(id)
@@ -129,7 +134,7 @@ def put_post(id):
                                                comment=request.form['comment']))
     db.session.commit()
     return redirect(oid.get_next_url())
-
+"""
 
 @app.route('/posts/status',methods=['GET'])
 def board_detail():
@@ -154,19 +159,20 @@ def add_user():
 
 
 @oid.after_login
-def after_login(resp):      
-    user= User.query.filter_by(email=resp.email).first()      
-    if not user:
-        return redirect(oid.get_next_url()) 
-    gravatar=set_img(resp)
-    flash(u'Successfully signed in')
+def after_login(resp):
+    gravatar=set_img(resp.email)
+    user = User.query.filter_by(email=resp.email).first()
     session['name'] = user.name
-    session['email'] = resp.email    
+    session['email'] = user.email
+    flash(u'Successfully signed in')
+    """
+    session['user'] = User.query.filter_by(email=resp.email).first()      
+    """
     session['gravatar'] =gravatar[0]        
     return redirect(url_for('board_list'))
 
-def set_img(resp):
-    email_gra = resp.email
+def set_img(s):
+    email_gra = s
     size = 40
     gravatar_url = "http://www.gravatar.com/avatar/" + \
                     hashlib.md5(email_gra.lower()).hexdigest() + "?"
@@ -197,7 +203,7 @@ def add_comm(id):#comment 추가
         comment = request.form['reply']
         post_id = id
         img = session.get('gravatar')
-        comment = Comment(img,email,comment,post_id)
+        comment = Comment(email,comment,post_id)
         db.session.add(comment)       
         db.session.commit()
     return redirect(oid.get_next_url())
@@ -207,7 +213,6 @@ def add_comm(id):#comment 추가
 def update_comm(id):
     update= Comment.query.filter(Comment.id==id).first()
     update.comment= request.form['comment_modify']
-    update.img=session.get('gravatar')
     db.session.commit()    
     return jsonify(dict(result='success'))
 
