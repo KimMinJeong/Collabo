@@ -86,7 +86,7 @@ class Post(db.Model):
                            default=functions.now())
     admin_comments = db.relationship('Admin_Comments', backref='post')
     
-    def __init__(self,category,subject,status,contents, author_id):
+    def __init__(self,category, subject, status, contents, author_id):
         self.category = category
         self.subject = subject
         self.status = status
@@ -95,7 +95,6 @@ class Post(db.Model):
         
     def __repr__(self):
         return '<Post %s,%s,%s,%s, %s>' % self.category, self.subject, self.status, self.contents, self.author_id
-
 
 
 class Admin_Comments(db.Model):
@@ -214,7 +213,7 @@ def board_insert():
         contents = request.form["contents"]   
         author_id = session.get('name')
         
-        db_insert = Post(category, subject , status , contents, author_id)
+        db_insert = Post(category, subject, status, contents, author_id)
         db.session.add(db_insert)
         db.session.commit()
         
@@ -223,7 +222,7 @@ def board_insert():
 
 
 @app.route('/posts/<int:id>/comment', methods=['POST'])
-def add_comm(id):
+def add_comm(id):#comment 추가
     if request.method =='POST':
         email = session.get('email')
         comment = request.form['reply']
@@ -231,6 +230,7 @@ def add_comm(id):
         db.session.add(Comment(email, comment, post_id))       
         db.session.commit()
     return redirect(oid.get_next_url())
+
 
 
 @app.route('/posts/comments/<int:id>', methods=['PUT'])
@@ -254,7 +254,6 @@ def logout():
     session.pop('id', None)
     flash(u'로그아웃!')
     return redirect(url_for('index'))
-
 
 
 if __name__ == '__main__':

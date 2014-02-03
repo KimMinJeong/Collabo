@@ -16,13 +16,12 @@
 	    	 <img src={{session.get('gravatar')}} align="right">
 	         <h4 name="email" align="right"> {{session['email']}}</h4>
 	    </div>           
-	   
-	   <div class="col-md-12 col-sm-12 center-block">
+	    <div class="col-md-12 col-sm-12 center-block">
 	    	 {{ post.contents }} 
 	    </div>
-	    
-	   </div>    
-		
+	</div>    
+
+
 	</div> 
 <div class="container center-block">  	
 	<form action="{{ url_for('put_post', id=post.id)}}" method="post">
@@ -40,7 +39,6 @@
         	제안상태변경
 			</button>
 			{% endif %}
-			
 			</p>
 			<!-- Modal -->
 			<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -49,8 +47,8 @@
 			      <div class="modal-header">
 			        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
 			        <h2 class="modal-title" id="myModalLabel">제안상태변경하기</h2>
-	 </div>
-			      
+	 			</div>
+
 			      <div class="modal-body">
 			      	<div  class="btn-group">
 			      		<p>상태 </p>
@@ -90,7 +88,6 @@
     <hr>
 	</div>
 
-	
     <!-- 댓글 부분 -->
     <div class="container center-block">
     <div class="row-fluid">
@@ -126,13 +123,11 @@
 </div>
 
 
-
 <script type="text/javascript">
-
 	$('.modify').on('click', function(){
 		var data=$(this).closest('ul').data('id');
 		var str= $('#' + data).text();
-		
+
 		$(this).closest('ul').find('.edit_box')
 			.html(
 				"<textarea class='form-control' rows=3 name='comment_modify'>" + str + "</textarea>"
@@ -156,7 +151,6 @@
     		$textarea.hide();
  		 });
 	});
-	
 </script>
 <!-- 댓글 유효성 검사를 하려고해요 -->
 <script type="text/javascript">
@@ -192,10 +186,9 @@
 				alert('댓글이 삭제되었습니다.');
 			}			
 		});
-		
+
 	});
+
 </script>
 
-
 {% endblock %}
-
