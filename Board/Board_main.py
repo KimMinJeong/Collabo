@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime, date, time
 from flask import Flask, render_template, request, g, session, flash, redirect, \
-    url_for, abort
+    url_for, abort, jsonify
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask_openid import OpenID
 from openid.extensions import pape
@@ -64,7 +64,6 @@ class Comment(db.Model):
     created_at= db.Column(DateTime(timezone=True), nullable=False,
                                      default=functions.now())
     
-   # admin_comments_id= db.relationship('Admin_Comments', lazy='dynamic', backref='posts')
     def __init__(self, email, comment, post_id):
         self.email = email
         self.comment = comment
@@ -96,6 +95,10 @@ class Post(db.Model):
         
     def __repr__(self):
         return '<Post %s,%s,%s,%s, %s>' % self.category, self.subject, self.status, self.contents, self.author_id
+<<<<<<< HEAD
+=======
+
+>>>>>>> 2101ac946ef984ac7d285454dc9a411da932503d
 
 
 class Admin_Comments(db.Model):
@@ -223,22 +226,30 @@ def board_insert():
 
 
 @app.route('/posts/<int:id>/comment', methods=['POST'])
+<<<<<<< HEAD
 def add_comm(id):#comment 추가
+=======
+def add_comm(id):
+>>>>>>> 2101ac946ef984ac7d285454dc9a411da932503d
     if request.method =='POST':
         email = session.get('email')
-        comment = request.form['comment']
+        comment = request.form['reply']
         post_id = id
         db.session.add(Comment(email, comment, post_id))       
         db.session.commit()
     return redirect(oid.get_next_url())
 
 
+<<<<<<< HEAD
 @app.route('/posts/comments/<int:id>', methods=['POST'])
+=======
+@app.route('/posts/comments/<int:id>', methods=['PUT'])
+>>>>>>> 2101ac946ef984ac7d285454dc9a411da932503d
 def update_comm(id):
     update= Comment.query.filter(Comment.id==id).first()
     update.comment= request.form['comment_modify']
     db.session.commit()    
-    return redirect(oid.get_next_url())
+    return jsonify(dict(result='success'))
 
 
 @app.route('/posts/comments/<int:id>', methods=['DELETE'])
