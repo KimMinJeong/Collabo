@@ -106,7 +106,7 @@
                 </div>
                 {%if comm.email==session.get('email') %}
                 <a class="btn btn-default modify" role="button">수정</a>
-                <a class="btn btn-default" href="{{ url_for('del_comm', id=comm.id ) }}" role="button">삭제</a>
+                <a class="btn btn-default delete" role="button">삭제</a>
                 {% endif %}
             </ul>
             {% endfor %}
@@ -136,11 +136,13 @@
 		$(this).closest('ul').find('.edit_box')
 			.html(
 				"<textarea class='form-control' rows=3 name='comment_modify'>" + str + "</textarea>"
-			+ "<button type='button' class='comment_modify'>버튼</button>")	
+			+ "<button type='button' class='comment_modify'>수정</button>")	
 			.find('form');
 	});
+	
 	$(document).on('click', '.comment_modify', function() {
 		var id = $(this).closest('ul').data('id');
+		var $textarea = $(this).parent().find('textarea');
 		var result_value =  $(this).parent().find('textarea').val();
 		$.ajax({
 			url: {{ url_for('update_comm', id=-1 )|tojson }}.replace('-1', id),
@@ -148,16 +150,21 @@
 			data: 'comment_modify=' + result_value
 		}).done(function () {
 			$('#' + id).html(result_value);
-		});
+			
+		}).always(function() {
+			$('.comment_modify').hide();
+    		$textarea.hide();
+ 		 });
 	});
 	
 </script>
-
+<!-- 댓글 유효성 검사를 하려고해요 -->
 <script type="text/javascript">
-	$(document).on('ready', function(){
+	
 		$('.error').hide();
-		$('.pull-right').on('click', function(e){		
-		var data= $('.form-control').val();
+		$('.pull-right').on('click', function(e){	
+			
+		var data= $( "textarea[name='reply']" ).val();//$('.form-control').val();
 		var len= data.length;
 		if(len < 1)
 		{
@@ -171,6 +178,21 @@
 		
 	});
 	
+</script>
+
+<script type="text/javascript">
+	$('.delete').on('click', function(){
+		var closestUl = $(this).closest('ul');
+		var del_id= closestUl.data('id');
+		$.ajax({
+			url: {{ url_for('del_comm', id=-1 )|tojson }}.replace('-1', del_id),
+			type: 'DELETE',
+			success:function(){
+				closestUl.remove();
+				alert('댓글이 삭제되었습니다.');
+			}			
+		});
+		
 	});
 </script>
 

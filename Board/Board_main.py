@@ -246,7 +246,7 @@ def del_comm(id):
     comment = Comment.query.filter(Comment.id==id).first()
     db.session.delete(comment)
     db.session.commit()
-    return redirect(oid.get_next_url())
+    return jsonify(dict(result='success'))
     
     
 @app.route('/logout')
