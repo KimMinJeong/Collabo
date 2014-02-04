@@ -26,8 +26,8 @@ SQLALCHEMY_DATABASE_URI = os.environ.get(
     'DATABASE_URL','postgresql://postgres:1111@localhost/fortest')
 
 db = SQLAlchemy(app)
-app.config['SQLALCHEMY_DATABASE_URI']=SQLALCHEMY_DATABASE_URI
-app.config['SECRET_KEY']='development keys'
+app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
+app.config['SECRET_KEY'] = 'development keys'
 app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
 
@@ -36,6 +36,7 @@ class User(db.Model):
     id = db.Column(Integer, primary_key=True)
     name = db.Column(String(60))
     email = db.Column(String(60))
+
     posts = db.relationship('Post', backref='author', \
                             cascade="all, delete-orphan", passive_deletes=True)
     comments = db.relationship('Comment', backref='author', \
@@ -70,7 +71,7 @@ class Comment(db.Model):
 
 
 class Post(db.Model):
-    __tablename__='posts'
+    __tablename__ = 'posts'
     id = db.Column(Integer, primary_key=True)
     category = db.Column(db.String(10))
     subject = db.Column(db.String(50))
@@ -105,7 +106,7 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/login', methods=['get', 'POST'])
+@app.route('/login', methods=['GET', 'POST'])
 @oid.loginhandler
 def login():
     return oid.try_login("https://www.google.com/accounts/o8/id",
@@ -120,8 +121,7 @@ def board_list():
 
 
 @app.route('/posts/<int:id>', methods=['GET'])
-def show(id):
-    
+def show(id):    
     post= db.session.query(Post).get(id)
     comm_list = db.session.query(Comment).filter(Comment.post_id==id).all()
     
@@ -129,12 +129,22 @@ def show(id):
                             post=post, comm_list=comm_list)
 
 
+@app.route('/posts/<int:id>', methods=['POST'])
+def put_post(id):
+    post = Post.query.get(id)
+    post.status = request.values.get('status')
+    post.comments.append(Comment(user_id=session.get('user_id'),
+                                 post_id=session.get('post_id'),
+                                 comment=request.form['opinion']))
+
+    db.session.commit()
+    return redirect(oid.get_next_url())
 
 
 @app.route('/posts/status', methods=['GET'])
 def board_detail():
     post = Post.query.all()
-    return render_template('board_detail.html',post=post)
+    return render_template('board_detail.html', post=post)
 
 
 @app.route('/register', methods=['GET'])
@@ -144,9 +154,9 @@ def register():
 
 @app.route('/register', methods=['POST'])
 def add_user():
-    email=request.form['newEmail']
-    name=email.split('@')
-    user=User(name[0],email)
+    email = request.form['newEmail']
+    name = email.split('@')
+    user = User(name[0],email)
     db.session.add(user)
     db.session.commit()
     flash(u'추가!')
@@ -155,7 +165,7 @@ def add_user():
 
 @oid.after_login
 def after_login(resp):
-    gravatar=set_img(resp.email)
+    gravatar = set_img(resp.email)
     user = User.query.filter_by(email=resp.email).first()
     user = { "id" : user.id,
               "name" : user.name,
@@ -163,8 +173,9 @@ def after_login(resp):
             }
     session['user'] = user
     flash(u'Successfully signed in')
-    session['gravatar'] =gravatar        
+    session['gravatar'] =gravatar              
     return redirect(url_for('board_list'))
+
 
 def set_img(s):
     email_gra = s
@@ -177,13 +188,12 @@ app.jinja_env.globals.update(set_img=set_img)
 
 
 @app.route('/posts', methods=['POST'])
-def board_insert(): 
+def board_insert():
     category = request.form["category"]
     subject = request.form["subject"]
     status = request.form["status"]
     contents = request.form["contents"]   
     user_id = session['user']['id']
-    
     db_insert = Post(category, subject, status, contents, user_id)
     db.session.add(db_insert)
     db.session.commit()
@@ -211,6 +221,7 @@ def add_comm(id):#comment 추가
 def update_comm(id):
     update= Comment.query.get(id)
     update.comment= request.form['comment_modify'] 
+    db.session.commit()    
     return jsonify(dict(result='success'))
 
 
