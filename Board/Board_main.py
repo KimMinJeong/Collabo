@@ -125,6 +125,7 @@ def show(id):
     post= db.session.query(Post).get(id)
     comm_list = db.session.query(Comment).filter(Comment.post_id==id).all()
     
+    
     return render_template('contents.html',
                             post=post, comm_list=comm_list)
 
@@ -133,9 +134,10 @@ def show(id):
 def put_post(id):
     post = Post.query.get(id)
     post.status = request.values.get('status')
-    post.comments.append(Comment(user_id=session.get('user_id'),
-                                 post_id=session.get('post_id'),
-                                 comment=request.form['opinion']))
+    post.comments.append(Comment( comment=request.form['opinion'],
+                                 user_id=session.get('user_id'),
+                                 post_id=session.get('post_id')
+                                ))
 
     db.session.commit()
     return redirect(oid.get_next_url())

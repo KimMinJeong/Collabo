@@ -33,7 +33,8 @@
 										'jc@spoqa.com',
 										'grant@spoqa.com',
 										'richard@spoqa.com',
-										'zooey@spoqa.com') 
+										'anny@spoqa.com'
+										) 
            	%}
         	<button class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">
         	제안상태변경
@@ -76,7 +77,14 @@
         
         <tbody>
         	<tr><td> 이곳에 제안서에 대한 의견을 작성해주세요</td></tr>
-        	<tr><td class="result"> {{comm_list.comment}}</td></tr>
+        	{% for comm in comm_list%}
+        	{% if comm.author.email in ('jc@spoqa.com' , 
+        								'richard@spoqa.com' ,
+        								'anny@spoqa.com')
+        							%}
+        	<tr><td class="result">{{comm.comment}} </td></tr>
+        	{% endif %}
+        	{% endfor %}
         </tbody>
 		</table>
 	</div>
@@ -94,10 +102,16 @@
     <div class="row-fluid">
         <div class="col-md-12" name="comm_list">
         	<form action="" method="post">
-        	{% for comm in comm_list %}
+        	{% for comm in post.comments %}
+        	{% if not comm.author.email in ('jc@spoqa.com' ,
+        									'richard@spoqa.com' ,
+        									'anny@spoqa.com')
+        									
+        							 %}
         	<table class="table table-striped" data-id={{comm.id}}>        		
-        		<th> <p><img src={{set_img( comm.author.email )}}></p>
-        			 <p>{{comm.author.email}}</p>
+        		
+        		<th> <p><img src={{set_img('comm.author.email')}}></p>
+        			 <p>{{comm.author.email}} comm.author.name</p>
         			 <p> {{comm.created_at.date()}}</p>
         			 <p id={{comm.id}}> {{ comm.comment }}</p>
         		</th>
@@ -114,6 +128,7 @@
                 </td>
               {%endif%}
             </table>
+            {%endif%}
             {%endfor%}
          
           </form>
