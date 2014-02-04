@@ -26,8 +26,8 @@ SQLALCHEMY_DATABASE_URI = os.environ.get(
     'DATABASE_URL','postgresql://postgres:1234@localhost/pos')
 
 db = SQLAlchemy(app)
-app.config['SQLALCHEMY_DATABASE_URI']=SQLALCHEMY_DATABASE_URI
-app.config['SECRET_KEY']='development keys'
+app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
+app.config['SECRET_KEY'] = 'development keys'
 app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
 
@@ -67,7 +67,7 @@ class Comment(db.Model):
                 format(self.id, self.comment, self.user_id, self.post_id)
 
 class Post(db.Model):
-    __tablename__='posts'
+    __tablename__ = 'posts'
     id = db.Column(Integer, primary_key=True)
     category = db.Column(db.String(10))
     subject = db.Column(db.String(50))
@@ -115,7 +115,7 @@ def board_list():
 
 @app.route('/posts/<int:id>', methods=['GET'])
 def show(id):
-    post= Post.query.filter(Post.id==id).first()
+    post = Post.query.filter(Post.id==id).first()
     comm_list = Comment.query.filter(Comment.post_id==id).all()
     gravatar = session.get('gravatar')
     return render_template('contents.html',
@@ -124,7 +124,7 @@ def show(id):
 
 @app.route('/posts/<int:id>', methods=['POST'])
 def put_post(id):
-    post= Post.query.get(id)
+    post = Post.query.get(id)
     post.status = request.values.get('status')
     post.admin_comments.append(Comment(email=session.get('email'), comment=request.form['comment']))
     db.session.commit()
@@ -144,9 +144,9 @@ def register():
 
 @app.route('/register', methods=['POST'])
 def add_user():
-    email=request.form['newEmail']
-    name=email.split('@')
-    user=User(name[0],email)
+    email = request.form['newEmail']
+    name = email.split('@')
+    user = User(name[0],email)
     db.session.add(user)
     db.session.commit()
     flash(u'추가!')
@@ -155,14 +155,14 @@ def add_user():
 
 @oid.after_login
 def after_login(resp):      
-    user= User.query.filter_by(email=resp.email).first()      
+    user = User.query.filter_by(email=resp.email).first()      
     if not user:
         return redirect(oid.get_next_url()) 
-    gravatar=set_img(resp)
+    gravatar = set_img(resp)
     flash(u'Successfully signed in')
     session['name'] = user.name
     session['email'] = resp.email    
-    session['gravatar'] =gravatar[0]        
+    session['gravatar'] = gravatar[0]        
     return redirect(url_for('board_list'))
 
 def set_img(resp):
@@ -208,8 +208,8 @@ def add_comm(id):#comment 추가
 
 @app.route('/posts/comments/<int:id>', methods=['PUT'])
 def update_comm(id):
-    update= Comment.query.filter(Comment.id==id).first()
-    update.comment= request.form['comment_modify']
+    update = Comment.query.filter(Comment.id==id).first()
+    update.comment = request.form['comment_modify']
     update.img=session.get('gravatar')
     db.session.commit()    
     return jsonify(dict(result='success'))
