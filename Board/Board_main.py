@@ -158,7 +158,8 @@ def add_user():
 
 
 @oid.after_login
-def after_login(resp):      
+def after_login(resp):
+    gravatar = set_img(resp.email)     
     user = User.query.filter_by(email=resp.email).first()
     user = { "id" : user.id,
               "name" : user.name,
@@ -167,9 +168,8 @@ def after_login(resp):
     session['user'] = user      
     if not user:
         return redirect(oid.get_next_url()) 
-    gravatar = set_img(resp)
     flash(u'Successfully signed in')   
-    session['gravatar'] = gravatar[0]       
+    session['gravatar'] = gravatar       
     return redirect(url_for('board_list'))
 
 def set_img(resp):
