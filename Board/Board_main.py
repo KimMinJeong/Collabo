@@ -15,86 +15,88 @@ from sqlalchemy.sql.expression import case
 from sqlalchemy.types import DateTime, Boolean
 import hashlib
 import urllib
+import os
 
 
 app = Flask(__name__)
-oid = OpenID(app, join(dirname(__file__),'openid_store'))
-app.config.update(
-        SQLALCHEMY_DATABASE_URI = 'postgres://uvkxbyzicejuyd:FzhZqstwa1YQ7FVPNAId0GO_4l@ec2-54-197-241-91.compute-1.amazonaws.com:5432/d22mrqavab61bp',
-        SECRET_KEY = 'development key',
-        DEBUG = True
-)
+
+#app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
+oid = OpenID(app, join(dirname(__file__), 'openid_store'))
+
+SQLALCHEMY_DATABASE_URI = os.environ.get(
+    'DATABASE_URL','postgresql://postgres:1234@localhost/fortest')
+
 db = SQLAlchemy(app)
-app.config.from_envvar('FLASKR_SETTINGS',silent=True)
+app.config['SQLALCHEMY_DATABASE_URI']=SQLALCHEMY_DATABASE_URI
+app.config['SECRET_KEY']='development keys'
+app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
 
 class User(db.Model):
     __tablename__ = 'users'
-    id = Column(db.Integer, primary_key=True)
-    name = Column(db.String(60))
-    email = Column(db.String(20))
-    posts = db.relationship('Post',backref='author', \
+    id = db.Column(Integer, primary_key=True)
+    name = db.Column(String(60))
+    email = db.Column(String(60))
+    posts = db.relationship('Post', backref='author', \
                             cascade="all, delete-orphan", passive_deletes=True)
-    replys = db.relationship('Comment',backref='reply', \
+    comments = db.relationship('Comment', backref='reply', \
                                cascade="all, delete-orphan", passive_deletes=True)
-    
+
     def __init__(self,name,email):
         self.name = name
         self.email = email
         
     def __repr__(self):
-        return "<User id={0!r}, name={1!r}, email={2!r}>"\
-            .format(self.id, self.name,self.email)
+        return "<User id={0!r}, name={1!r}, email={2!r}>".\
+                format(self.id, self.name, self.email)
 
 
 class Comment(db.Model):
     __tablename__ = 'comments'
-    id = db.Column(db.Integer,primary_key=True)
-    user_id = db.Column(db.Integer,
-                           db.ForeignKey('users.id',ondelete='CASCADE'))
-    comment = db.Column(db.Text,nullable=False)
-    post = db.relationship('Post',backref='comments', \
-                           cascade="all, delete-orphan", passive_deletes=True)
-    post_id = db.Column(db.Integer,db.ForeignKey('posts.id',ondelete='CASCADE'))
-    created_at= db.Column(DateTime(timezone=True),nullable=False,
+    id = db.Column(db.Integer, primary_key=True)
+    comment = db.Column(db.Text, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id',ondelete='cascade'))
+    post_id = db.Column(db.Integer, db.ForeignKey('posts.id',ondelete='cascade'))
+    created_at = db.Column(DateTime(timezone=True), nullable=False,
                                      default=functions.now())
     
-    def __init__(self,user_id,comment,post_id):
-        self.user_id = user_id
+    def __init__(self, comment, user_id, post_id):
         self.comment = comment
+        self.user_id = user_id
         self.post_id = post_id
-        
+
     def __repr__(self):
-        return "<Comment id={0!r}, email={1!r}, user_id={2!r}, comment={3!r}>"\
-            .format(self.id, self.email, self.user_id, self.comment)
-    
+        return "<Comment id={0!r},comment={1!r}, user_id={2!r}, post_id={3!r}>".\
+                format(self.id, self.comment, self.user_id, self.post_id)
+
 
 class Post(db.Model):
     __tablename__='posts'
-    id = db.Column(Integer,primary_key=True)
+    id = db.Column(Integer, primary_key=True)
     category = db.Column(db.String(10))
     subject = db.Column(db.String(50))
     status = db.Column(db.String(20))
-    contents = db.Column(db.Text,nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id',ondelete='CASCADE'))
+    contents = db.Column(db.Text, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id',ondelete='cascade'))
     created_at = db.Column(DateTime(timezone=True),
                            nullable=False,
                            default=functions.now())
     comments = db.relationship('Comment', backref='post', \
                                cascade="all, delete-orphan", passive_deletes=True)
+
     
-    def __init__(self,category,subject,status,contents,author_id):
+    def __init__(self, category, subject, status, contents, user_id):
         self.category = category
         self.subject = subject
         self.status = status
         self.contents = contents
-        self.author_id = author_id
+        self.user_id = user_id
         
     def __repr__(self):
-        return "<Post id={0!r}, category={1!r}, subject={2!r}, status={3!r}, contents={4!r}>".\
-                format(self.id, self.category, self.subject, self.status, self.contents)
+        return "<Post id={0!r}, category={1!r}, subject={2!r}, status={3!r}, contents={4!r}> user_id={5!r}".\
+                format(self.id, self.category, self.subject, self.status, self.contents, self.user_id)
 
-    
+
 def init_db():
     db.create_all()
 
@@ -104,7 +106,7 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/login', methods=['GET','POST'])
+@app.route('/login', methods=['get', 'POST'])
 @oid.loginhandler
 def login():
     return oid.try_login("https://www.google.com/accounts/o8/id",
@@ -114,10 +116,10 @@ def login():
 @app.route('/posts/lists')
 def board_list():
     post_list = Post.query.all()
-    return render_template('board_list.html',post_list=post_list)
+    return render_template('board_list.html', post_list=post_list)
 
 
-@app.route('/posts/<int:id>',methods=['GET'])
+@app.route('/posts/<int:id>', methods=['GET'])
 def show(id):
     post= Post.query.get(id) 
     comm_list = Comment.query.filter(Comment.post_id==id).all()
@@ -125,29 +127,34 @@ def show(id):
     return render_template('contents.html',
                             post=post,comm_list=comm_list)
 
+
 """
 @app.route('/posts/<int:id>',methods=['POST'])
+=======
+
+@app.route('/posts/<int:id>', methods=['POST'])
+>>>>>>> 81415d49021225e2f27fc3e3c3c287c6193ec893
 def put_post(id):
     post= Post.query.get(id)
     post.status = request.values.get('status')
-    post.admin_comments.append(Admin_Comments(email=session.get('email'),\
-                                               comment=request.form['comment']))
+    post.admin_comments.append(Comment(email=session.get('email'), comment=request.form['comment']))
     db.session.commit()
     return redirect(oid.get_next_url())
 """
 
-@app.route('/posts/status',methods=['GET'])
+
+@app.route('/posts/status', methods=['GET'])
 def board_detail():
     post = Post.query.all()
     return render_template('board_detail.html',post=post)
 
 
-@app.route('/register',methods=['GET'])
+@app.route('/register', methods=['GET'])
 def register():    
     return render_template('register.html')
 
 
-@app.route('/register',methods=['POST'])
+@app.route('/register', methods=['POST'])
 def add_user():
     email=request.form['newEmail']
     name=email.split('@')
@@ -180,36 +187,39 @@ def set_img(s):
     return gravatar_url, email_gra  
 
 
-@app.route('/posts', methods=['GET','POST'])
+@app.route('/posts', methods=['POST'])
 def board_insert(): 
-    if request.method == 'POST':  
-        category = request.form["category"]
-        subject = request.form["subject"]
-        status = request.form["status"]
-        contents = request.form["contents"]   
-        author_id = session.get('name')        
-        db_insert = Post(category,subject,status,\
-                         contents,author_id)
-        db.session.add(db_insert)
-        db.session.commit()        
-        return redirect(url_for('board_list'))
+    category = request.form["category"]
+    subject = request.form["subject"]
+    status = request.form["status"]
+    contents = request.form["contents"]   
+    user_id = session.get(User.id)
+    
+    db_insert = Post(category, subject, status, contents, user_id)
+    db.session.add(db_insert)
+    db.session.commit()
+    return redirect(url_for('board_list'))
+
+
+@app.route('/posts', methods=['GET'])
+def board_get():
     return render_template('board_insert.html')
 
 
-@app.route('/posts/<int:id>/comment',methods=['POST'])
+@app.route('/posts/<int:id>/comment', methods=['POST'])
 def add_comm(id):#comment 추가
     if request.method =='POST':
-        email = session.get('email')
+        user_id = session.get('User.id')
         comment = request.form['reply']
         post_id = id
         img = session.get('gravatar')
-        comment = Comment(email,comment,post_id)
+        comment = Comment(comment, user_id, post_id)
         db.session.add(comment)       
         db.session.commit()
     return redirect(oid.get_next_url())
 
 
-@app.route('/posts/comments/<int:id>',methods=['PUT'])
+@app.route('/posts/comments/<int:id>', methods=['PUT'])
 def update_comm(id):
     update= Comment.query.filter(Comment.id==id).first()
     update.comment= request.form['comment_modify']
@@ -217,7 +227,7 @@ def update_comm(id):
     return jsonify(dict(result='success'))
 
 
-@app.route('/posts/comments/<int:id>',methods=['DELETE'])
+@app.route('/posts/comments/<int:id>', methods=['DELETE'])
 def del_comm(id):
     comment = Comment.query.filter(Comment.id==id).first()
     db.session.delete(comment)
@@ -232,6 +242,10 @@ def logout():
     return redirect(url_for('index'))
 
 
+@app.route('/edit')
+def edit():
+    return render_template('edit.html')
+
+
 if __name__ == '__main__':
-    init_db()
     app.run(debug=True, host='0.0.0.0', port=int(environ.get('PORT',5000)))
