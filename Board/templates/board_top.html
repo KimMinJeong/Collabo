@@ -1,7 +1,5 @@
 {% extends "layout.html" %}
 {% block body %}
-
-
          
 <nav class="navbar navbar-inverse" role="navigation">
   <!-- Brand and toggle get grouped for better mobile display -->
@@ -20,10 +18,11 @@
   <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav">
-                		{% if session.get('email') in "jc@spoqa.com" ,
-                								  "richard@spoqa.com" ,					
-                								  "grant@spoqa.com"
-                													 %}
+                	{% if session['email'] in (
+										'jc@spoqa.com',
+										'grant@spoqa.com',
+										'richard@spoqa.com',
+										'zooey@spoqa.com')  %}
                         <li class="active"><a href="{{ url_for('register') }}"> 사용자등록</a></li>
                    		 {% endif %}
                         <li><a href="{{ url_for('board_list') }}">목록보기</a></li>

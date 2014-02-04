@@ -37,7 +37,7 @@ class User(db.Model):
     name = db.Column(String(60))
     email = db.Column(String(60))
     posts = db.relationship('Post', backref='author')
-    comments = db.relationship('Comment', backref='reply')
+    comments = db.relationship('Comment', backref='author')
     
     def __init__(self,name,email):
         self.name = name
@@ -65,6 +65,7 @@ class Comment(db.Model):
     def __repr__(self):
         return "<Comment id={0!r},comment={1!r}, user_id={2!r}, post_id={3!r}>".\
                 format(self.id, self.comment, self.user_id, self.post_id)
+
 
 class Post(db.Model):
     __tablename__ = 'posts'
@@ -100,7 +101,7 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/login', methods=['get', 'POST'])
+@app.route('/login', methods=['GET', 'POST'])
 @oid.loginhandler
 def login():
     return oid.try_login("https://www.google.com/accounts/o8/id",
@@ -115,18 +116,21 @@ def board_list():
 
 @app.route('/posts/<int:id>', methods=['GET'])
 def show(id):
-    post = Post.query.filter(Post.id==id).first()
+    post = Post.query.get(id)
     comm_list = Comment.query.filter(Comment.post_id==id).all()
     gravatar = session.get('gravatar')
     return render_template('contents.html',
-                            post=post,comm_list=comm_list)
+                             post=post, comm_list=comm_list)
 
 
 @app.route('/posts/<int:id>', methods=['POST'])
 def put_post(id):
     post = Post.query.get(id)
     post.status = request.values.get('status')
-    post.admin_comments.append(Comment(email=session.get('email'), comment=request.form['comment']))
+    post.comments.append(Comment(user_id=session.get('user_id'),
+                                 post_id=session.get('post_id'),
+                                 comment=request.form['opinion']))
+
     db.session.commit()
     return redirect(oid.get_next_url())
 
@@ -134,7 +138,7 @@ def put_post(id):
 @app.route('/posts/status', methods=['GET'])
 def board_detail():
     post = Post.query.all()
-    return render_template('board_detail.html',post=post)
+    return render_template('board_detail.html', post=post)
 
 
 @app.route('/register', methods=['GET'])
@@ -155,14 +159,17 @@ def add_user():
 
 @oid.after_login
 def after_login(resp):      
-    user = User.query.filter_by(email=resp.email).first()      
+    user = User.query.filter_by(email=resp.email).first()
+    user = { "id" : user.id,
+              "name" : user.name,
+              "email" : user.email
+            }
+    session['user'] = user      
     if not user:
         return redirect(oid.get_next_url()) 
     gravatar = set_img(resp)
-    flash(u'Successfully signed in')
-    session['name'] = user.name
-    session['email'] = resp.email    
-    session['gravatar'] = gravatar[0]        
+    flash(u'Successfully signed in')   
+    session['gravatar'] = gravatar[0]       
     return redirect(url_for('board_list'))
 
 def set_img(resp):
@@ -175,13 +182,13 @@ def set_img(resp):
 
 
 @app.route('/posts', methods=['POST'])
-def board_insert(): 
+def board_insert():
     category = request.form["category"]
     subject = request.form["subject"]
     status = request.form["status"]
     contents = request.form["contents"]   
-    user_id = session.get(User.id)
-    
+    user_id = session['user']['id']
+   
     db_insert = Post(category, subject, status, contents, user_id)
     db.session.add(db_insert)
     db.session.commit()
@@ -196,10 +203,9 @@ def board_get():
 @app.route('/posts/<int:id>/comment', methods=['POST'])
 def add_comm(id):#comment 추가
     if request.method =='POST':
-        user_id = session.get('User.id')
+        user_id = session['user']['id']
         comment = request.form['reply']
         post_id = id
-        img = session.get('gravatar')
         comment = Comment(comment, user_id, post_id)
         db.session.add(comment)       
         db.session.commit()
@@ -208,7 +214,7 @@ def add_comm(id):#comment 추가
 
 @app.route('/posts/comments/<int:id>', methods=['PUT'])
 def update_comm(id):
-    update = Comment.query.filter(Comment.id==id).first()
+    update = Comment.query.get(id)
     update.comment = request.form['comment_modify']
     update.img=session.get('gravatar')
     db.session.commit()    
@@ -217,7 +223,7 @@ def update_comm(id):
 
 @app.route('/posts/comments/<int:id>', methods=['DELETE'])
 def del_comm(id):
-    comment = Comment.query.filter(Comment.id==id).first()
+    comment = Comment.query.get(id)
     db.session.delete(comment)
     db.session.commit()
     return jsonify(dict(result='success'))
@@ -236,4 +242,5 @@ def edit():
 
 
 if __name__ == '__main__':
+    init_db()
     app.run(debug=True, host='0.0.0.0', port=int(environ.get('PORT',5000)))

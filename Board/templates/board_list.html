@@ -21,7 +21,8 @@
             <input type="hidden" id= {{post.board_id}}>
 
             <td id="status">{{post.status}}</td>
-            <td id="author_id">{{ post.author_id }}</td> 
+            
+            <td id="name">{{ post.author.name }}</td> 
             <td id="date">{{ post.created_at.date() }}</td>  
         </tr>
         {% endfor %}      
