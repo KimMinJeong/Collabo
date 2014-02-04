@@ -78,7 +78,12 @@
         <tbody>
         	<tr><td> 이곳에 제안서에 대한 의견을 작성해주세요</td></tr>
         	{% for comm in comm_list%}
+        	{% if comm.author.email in ('jc@spoqa.com' , 
+        								'richard@spoqa.com' ,
+        								'anny@spoqa.com')
+        							%}
         	<tr><td class="result">{{comm.comment}} </td></tr>
+        	{% endif %}
         	{% endfor %}
         </tbody>
 		</table>
@@ -98,6 +103,11 @@
         <div class="col-md-12" name="comm_list">
         	<form action="" method="post">
         	{% for comm in post.comments %}
+        	{% if not comm.author.email in ('jc@spoqa.com' ,
+        									'richard@spoqa.com' ,
+        									'anny@spoqa.com')
+        									
+        							 %}
         	<table class="table table-striped" data-id={{comm.id}}>        		
         		
         		<th> <p><img src={{set_img('comm.author.email')}}></p>
@@ -118,6 +128,7 @@
                 </td>
               {%endif%}
             </table>
+            {%endif%}
             {%endfor%}
          
           </form>
