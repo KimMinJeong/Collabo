@@ -34,6 +34,7 @@
 										'grant@spoqa.com',
 										'richard@spoqa.com',
 										'zooey@spoqa.com'
+
 										) 
            	%}
         	<button class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">
@@ -105,8 +106,7 @@
         	{% for comm in post.comments %}
         	{% if not comm.author.email in ('jc@spoqa.com' ,
         									'richard@spoqa.com' ,
-        									'zooey@spoqa.com')
-        									
+        									'zooey@spoqa.com')									
         							 %}
         	<table class="table table-striped" data-id={{comm.id}}>        		
         		
