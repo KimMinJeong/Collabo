@@ -38,7 +38,7 @@ class User(db.Model):
     email = db.Column(String(60))
     posts = db.relationship('Post', backref='author', \
                             cascade="all, delete-orphan", passive_deletes=True)
-    comments = db.relationship('Comment', backref='reply', \
+    comments = db.relationship('Comment', backref='author', \
                                cascade="all, delete-orphan", passive_deletes=True)
 
     def __init__(self,name,email):
@@ -121,20 +121,12 @@ def board_list():
 
 @app.route('/posts/<int:id>', methods=['GET'])
 def show(id):
-    user= User.query.filter(User.posts.any(id=id))
-    user.posts.append(
-                      User(name = session.get('name'),
-                            email=session.get('email'),
-                             posts=request.form[]))
-    user= User.query.filter(User.posts.any(id=id))
-    import pdb
-    pdb.set_trace()
-    for users in user:
-        gravatar_list= set_img(users.email)
-    user=User.posts
-    post= user.posts
+    
+    post= db.session.query(Post).get(id)
+    comm_list = db.session.query(Comment).filter(Comment.post_id==id).all()
+    
     return render_template('contents.html',
-                            post=post,user=user, gravatar_list=gravatar_list)
+                            post=post, comm_list=comm_list)
 
 
 

@@ -93,12 +93,11 @@
     <div class="row-fluid">
         <div class="col-md-12" name="comm_list">
         	<form action="" method="post">
-        	{% for comm in post.comments %}{% for users in user %}
+        	{% for comm in comm_list %}
         	<table class="table table-striped" data-id={{comm.id}}>
         		
-        		<th> <p><img src="{{ set_img(users.email) }}" /> </p>
-        		
-        			 <p> {{users.email}} </p>
+        		<th> <p><img src={{set_img( comm.author.email )}}></p>
+        			 <p>{{comm.author.email}}</p>
         			 <p> {{comm.created_at.date()}}</p>
         			 <p id={{comm.id}}> {{ comm.comment }}</p>
         		</th>
@@ -108,16 +107,15 @@
                 	<span class="error"> 댓글을 입력하세요 </span>
                 	</div>
                 </td>
-                 {% if users.email==session['user']['email'] %}
+                {% if comm.author.email == session['user']['email']%}
                 <td>
                 	<a class="btn btn-default modify" role="button">수정</a>
                 	<a class="btn btn-default delete" role="button">삭제</a>
                 </td>
-                {% endif %}
-               
+              {%endif%}
             </table>
-             {% endfor %}
-          {%endfor%}
+            {%endfor%}
+         
           </form>
         </div>
     </div>
