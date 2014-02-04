@@ -20,11 +20,10 @@ import os
 
 app = Flask(__name__)
 
-#app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 oid = OpenID(app, join(dirname(__file__), 'openid_store'))
 
 SQLALCHEMY_DATABASE_URI = os.environ.get(
-    'DATABASE_URL','postgresql://postgres:1234@localhost/fortest')
+    'DATABASE_URL','postgresql://postgres:1111@localhost/fortest')
 
 db = SQLAlchemy(app)
 app.config['SQLALCHEMY_DATABASE_URI']=SQLALCHEMY_DATABASE_URI
@@ -115,32 +114,29 @@ def login():
         
 @app.route('/posts/lists')
 def board_list():
+    
     post_list = Post.query.all()
     return render_template('board_list.html', post_list=post_list)
 
 
 @app.route('/posts/<int:id>', methods=['GET'])
 def show(id):
-    post= Post.query.get(id) 
-    comm_list = Comment.query.filter(Comment.post_id==id).all()
-    gravatar = session.get('gravatar')
+    user= User.query.filter(User.posts.any(id=id))
+    user.posts.append(
+                      User(name = session.get('name'),
+                            email=session.get('email'),
+                             posts=request.form[]))
+    user= User.query.filter(User.posts.any(id=id))
+    import pdb
+    pdb.set_trace()
+    for users in user:
+        gravatar_list= set_img(users.email)
+    user=User.posts
+    post= user.posts
     return render_template('contents.html',
-                            post=post,comm_list=comm_list)
+                            post=post,user=user, gravatar_list=gravatar_list)
 
 
-"""
-@app.route('/posts/<int:id>',methods=['POST'])
-=======
-
-@app.route('/posts/<int:id>', methods=['POST'])
->>>>>>> 81415d49021225e2f27fc3e3c3c287c6193ec893
-def put_post(id):
-    post= Post.query.get(id)
-    post.status = request.values.get('status')
-    post.admin_comments.append(Comment(email=session.get('email'), comment=request.form['comment']))
-    db.session.commit()
-    return redirect(oid.get_next_url())
-"""
 
 
 @app.route('/posts/status', methods=['GET'])
@@ -169,13 +165,13 @@ def add_user():
 def after_login(resp):
     gravatar=set_img(resp.email)
     user = User.query.filter_by(email=resp.email).first()
-    session['name'] = user.name
-    session['email'] = user.email
+    user = { "id" : user.id,
+              "name" : user.name,
+              "email" : user.email
+            }
+    session['user'] = user
     flash(u'Successfully signed in')
-    """
-    session['user'] = User.query.filter_by(email=resp.email).first()      
-    """
-    session['gravatar'] =gravatar[0]        
+    session['gravatar'] =gravatar        
     return redirect(url_for('board_list'))
 
 def set_img(s):
@@ -184,7 +180,8 @@ def set_img(s):
     gravatar_url = "http://www.gravatar.com/avatar/" + \
                     hashlib.md5(email_gra.lower()).hexdigest() + "?"
     gravatar_url += urllib.urlencode( {'d': 'mm' ,'s': str(size)} )     
-    return gravatar_url, email_gra  
+    return gravatar_url 
+app.jinja_env.globals.update(set_img=set_img)
 
 
 @app.route('/posts', methods=['POST'])
@@ -193,7 +190,7 @@ def board_insert():
     subject = request.form["subject"]
     status = request.form["status"]
     contents = request.form["contents"]   
-    user_id = session.get(User.id)
+    user_id = session['user']['id']
     
     db_insert = Post(category, subject, status, contents, user_id)
     db.session.add(db_insert)
@@ -209,10 +206,9 @@ def board_get():
 @app.route('/posts/<int:id>/comment', methods=['POST'])
 def add_comm(id):#comment 추가
     if request.method =='POST':
-        user_id = session.get('User.id')
+        user_id = session['user']['id']
         comment = request.form['reply']
         post_id = id
-        img = session.get('gravatar')
         comment = Comment(comment, user_id, post_id)
         db.session.add(comment)       
         db.session.commit()
@@ -221,15 +217,14 @@ def add_comm(id):#comment 추가
 
 @app.route('/posts/comments/<int:id>', methods=['PUT'])
 def update_comm(id):
-    update= Comment.query.filter(Comment.id==id).first()
-    update.comment= request.form['comment_modify']
-    db.session.commit()    
+    update= Comment.query.get(id)
+    update.comment= request.form['comment_modify'] 
     return jsonify(dict(result='success'))
 
 
 @app.route('/posts/comments/<int:id>', methods=['DELETE'])
 def del_comm(id):
-    comment = Comment.query.filter(Comment.id==id).first()
+    comment = Comment.query.get(id)
     db.session.delete(comment)
     db.session.commit()
     return jsonify(dict(result='success'))

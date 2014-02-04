@@ -14,7 +14,7 @@
 	    </div>    	
 	    <div class="col-sm-2 col-md-3 col-md-offset-2">
 	    	 <img src={{session.get('gravatar')}} align="right">
-	         <h4 name="email" align="right"> {{session['email']}}</h4>
+	         <h4 name="email" align="right"> {{session['user']['email']}}</h4>
 	    </div>           
 	    <div class="col-md-12 col-sm-12 center-block">
 	    	 {{ post.contents }} 
@@ -24,12 +24,12 @@
 
 	</div> 
 <div class="container center-block">  	
-	<form action="{{ url_for('put_post', id=post.id)}}" method="post">
+	<form action="" method="post">
     <div class="col-md-12">
         <table class="table table-striped" border="1">
         <thead>
 			<p>현재 제안서는 {{post.status}} 상태입니다.
-			{% if session['email'] in (
+			{% if session['user']['email'] in (
 										'jc@spoqa.com',
 										'grant@spoqa.com',
 										'richard@spoqa.com',
@@ -92,10 +92,13 @@
     <div class="container center-block">
     <div class="row-fluid">
         <div class="col-md-12" name="comm_list">
-        	{% for comm in comm_list %}
+        	<form action="" method="post">
+        	{% for comm in post.comments %}{% for users in user %}
         	<table class="table table-striped" data-id={{comm.id}}>
-        		<th> <p><img src={{comm.img}} /> </p>
-        			 <p> {{comm.email}} </p>
+        		
+        		<th> <p><img src="{{ set_img(users.email) }}" /> </p>
+        		
+        			 <p> {{users.email}} </p>
         			 <p> {{comm.created_at.date()}}</p>
         			 <p id={{comm.id}}> {{ comm.comment }}</p>
         		</th>
@@ -105,7 +108,7 @@
                 	<span class="error"> 댓글을 입력하세요 </span>
                 	</div>
                 </td>
-                 {% if comm.email==session.get('email') %}
+                 {% if users.email==session['user']['email'] %}
                 <td>
                 	<a class="btn btn-default modify" role="button">수정</a>
                 	<a class="btn btn-default delete" role="button">삭제</a>
@@ -114,14 +117,15 @@
                
             </table>
              {% endfor %}
-          
+          {%endfor%}
+          </form>
         </div>
     </div>
 	<div id="addComm">
 	 <form action="{{ url_for('add_comm', id=post.id) }}" method="post">    
 	 	<ul class="list-inline">
 	      <li><img src="{{session.get('gravatar')}}"></li>
-	      <li><p class="form-control-static" name="email">{{session.get('email')}}</p></li>
+	      <li><p class="form-control-static" name="email">{{session['user']['email']}}</p></li>
 	    </ul>                      
 	    <textarea class="form-control reply" name="reply" rows="3"> </textarea>  
 	    <input type="submit" class="pull-right" value="댓글 입력">    
@@ -135,19 +139,18 @@
 	$('.modify').on('click', function(){
 		var data=$(this).closest('table').data('id');
 		var str= $('#' + data).text();
-		console.log(data);
-		console.log(str);
 		$(this).closest('table').find('.edit_box')
-			.html(
+			.html("<form methods=post>" +
 				"<textarea class='form-control' rows=3 name='comment_modify'>" + str + "</textarea>"
-			+ "<button type='button' class='comment_modify'>수정</button>")	
+			+ "<button type='button' class='modify_comment'>수정</button>" + "</form>")	
 			.find('form');
 	});
 	
-	$(document).on('click', '.comment_modify', function() {
+	$(document).on('click', '.modify_comment', function() {
 		var id = $(this).closest('table').data('id');
 		var $textarea = $(this).parent().find('textarea');
 		var result_value =  $(this).parent().find('textarea').val();
+		console.log(result_value);
 		$.ajax({
 			url: {{ url_for('update_comm', id=-1 )|tojson }}.replace('-1', id),
 			type: 'PUT',
@@ -156,7 +159,7 @@
 			$('#' + id).html(result_value);
 			
 		}).always(function() {
-			$('.comment_modify').hide();
+			$('.modify_comment').hide();
     		$textarea.hide();
  		 });
 	});
