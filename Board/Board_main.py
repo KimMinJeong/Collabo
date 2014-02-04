@@ -23,7 +23,7 @@ app = Flask(__name__)
 oid = OpenID(app, join(dirname(__file__), 'openid_store'))
 
 SQLALCHEMY_DATABASE_URI = os.environ.get(
-    'DATABASE_URL','postgresql://postgres:1111@localhost/fortest')
+    'DATABASE_URL','postgresql://postgres:1234@localhost/pos')
 
 db = SQLAlchemy(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
@@ -133,10 +133,10 @@ def show(id):
 def put_post(id):
     post = Post.query.get(id)
     post.status = request.values.get('status')
-    post.comments.append(Comment(user_id=session.get('user_id'),
-                                 post_id=session.get('post_id'),
-                                 comment=request.form['opinion']))
-
+    post.comments.append(Comment(comment=request.form['opinion'],
+                                 user_id=session['user_id'],
+                                 post_id=session.get('post_id')
+                                 ))
     db.session.commit()
     return redirect(oid.get_next_url())
 
@@ -171,7 +171,6 @@ def after_login(resp):
               "name" : user.name,
               "email" : user.email
             }
-     
     if not user:
         return redirect(oid.get_next_url()) 
     flash(u'Successfully signed in')   

@@ -20,9 +20,7 @@
 	    	 {{ post.contents }} 
 	    </div>
 	</div>    
-
-
-	</div> 
+</div> 
 <div class="container center-block">  	
 	<form action="" method="post">
     <div class="col-md-12">
@@ -38,7 +36,6 @@
         	<button class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">
         	제안상태변경
 			</button>
-			{% endif %}
 			</p>
 			<!-- Modal -->
 			<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -76,11 +73,12 @@
         
         <tbody>
         	<tr><td> 이곳에 제안서에 대한 의견을 작성해주세요</td></tr>
-        	<tr><td class="result"> {{comm_list.comment}}</td></tr>
+        	<tr><td class="result"> {{comm}}</td></tr>
         </tbody>
 		</table>
 	</div>
 	</form>
+{% endif %}
     <br/>
     <br/>
     <br/>
@@ -96,10 +94,11 @@
         	<form action="" method="post">
         	{% for comm in comm_list %}
         	<table class="table table-striped" data-id={{comm.id}}>        		
-        		<th> <p><img src={{set_img( comm.author.email )}}></p>
-        			 <p>{{comm.author.email}}</p>
-        			 <p> {{comm.created_at.date()}}</p>
-        			 <p id={{comm.id}}> {{ comm.comment }}</p>
+        		<th> 
+        			<p><img src={{set_img('comm.author.email')}}></p>
+        			<p>{{comm.author.name}}</p>
+        			<p>{{comm.created_at.date()}}</p>
+        			<p id={{comm.id}}> {{ comm.comment }}</p>
         		</th>
      
         		 <td>
@@ -121,12 +120,11 @@
     </div>
 	<div id="addComm">   
 	 	<ul class="list-inline">
-	      <li><img src="{{session.get('gravatar')}}"></li>
+	      <li><img src="{{session['gravatar']}}"></li>
 	      <li><p class="form-control-static" name="email">{{session['user']['email']}}</p></li>
 	    </ul>                      
 	    <textarea class="form-control reply" name="reply" rows="3"> </textarea>  
 	    <input type="submit" class="pull-right" value="댓글 입력">    
-	 
 	</div>
 	<hr>
 </div>
