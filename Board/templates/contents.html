@@ -76,7 +76,7 @@
         </thead> 
         
         <tbody>
-        	<tr><td> 이곳에 제안서에 대한 의견을 작성해주세요</td></tr>
+        	<tr></tr>
         	{% for comm in comm_list%}
         	{% if comm.author.email in ('jc@spoqa.com' , 
         								'richard@spoqa.com' ,
@@ -111,7 +111,7 @@
         	<table class="table table-striped" data-id={{comm.id}}>        		
         		
         		<th> <p><img src={{set_img('comm.author.email')}}></p>
-        			 <p>{{comm.author.email}} comm.author.name</p>
+        			 <p>{{comm.author.email}}</p>
         			 <p> {{comm.created_at.date()}}</p>
         			 <p id={{comm.id}}> {{ comm.comment }}</p>
         		</th>

@@ -4,6 +4,7 @@ from flask import Flask, render_template, request, g, session, flash, redirect, 
     url_for, abort, jsonify
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask_openid import OpenID
+from functools import wraps
 from openid.extensions import pape
 from os import environ
 from os.path import dirname, join
@@ -14,8 +15,8 @@ from sqlalchemy.sql import functions
 from sqlalchemy.sql.expression import case
 from sqlalchemy.types import DateTime, Boolean
 import hashlib
-import urllib
 import os
+import urllib
 
 
 app = Flask(__name__)
@@ -106,6 +107,15 @@ def index():
     return render_template('index.html')
 
 
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if session.get('user') is None:
+            return redirect(url_for('login', next=request.url))
+        return f(*args, **kwargs)
+    return decorated_function
+
+
 @app.route('/login', methods=['GET', 'POST'])
 @oid.loginhandler
 def login():
@@ -114,6 +124,7 @@ def login():
         
         
 @app.route('/posts/lists')
+@login_required
 def board_list():
     
     post_list = Post.query.all()
@@ -121,6 +132,7 @@ def board_list():
 
 
 @app.route('/posts/<int:id>', methods=['GET'])
+@login_required
 def show(id):    
     post= db.session.query(Post).get(id)
     comm_list = db.session.query(Comment).filter(Comment.post_id==id).all()
@@ -131,11 +143,12 @@ def show(id):
 
 
 @app.route('/posts/<int:id>', methods=['POST'])
+@login_required
 def put_post(id):
     post = Post.query.get(id)
     post.status = request.values.get('status')
     post.comments.append(Comment( comment=request.form['opinion'],
-                                 user_id=session.get('user_id'),
+                                 user_id=session['user']['id'],
                                  post_id=session.get('post_id')
                                 ))
 
@@ -144,17 +157,20 @@ def put_post(id):
 
 
 @app.route('/posts/status', methods=['GET'])
+@login_required
 def board_detail():
     post = Post.query.all()
     return render_template('board_detail.html', post=post)
 
 
 @app.route('/register', methods=['GET'])
+@login_required
 def register():    
     return render_template('register.html')
 
 
 @app.route('/register', methods=['POST'])
+@login_required
 def add_user():
     email = request.form['newEmail']
     name = email.split('@')
@@ -190,6 +206,7 @@ app.jinja_env.globals.update(set_img=set_img)
 
 
 @app.route('/posts', methods=['POST'])
+@login_required
 def board_insert():
     category = request.form["category"]
     subject = request.form["subject"]
@@ -203,11 +220,13 @@ def board_insert():
 
 
 @app.route('/posts', methods=['GET'])
+@login_required
 def board_get():
     return render_template('board_insert.html')
 
 
 @app.route('/posts/<int:id>/comment', methods=['POST'])
+@login_required
 def add_comm(id):#comment 추가
     if request.method =='POST':
         user_id = session['user']['id']
@@ -220,6 +239,7 @@ def add_comm(id):#comment 추가
 
 
 @app.route('/posts/comments/<int:id>', methods=['PUT'])
+@login_required
 def update_comm(id):
     update= Comment.query.get(id)
     update.comment= request.form['comment_modify'] 
@@ -228,6 +248,7 @@ def update_comm(id):
 
 
 @app.route('/posts/comments/<int:id>', methods=['DELETE'])
+@login_required
 def del_comm(id):
     comment = Comment.query.get(id)
     db.session.delete(comment)
@@ -236,6 +257,7 @@ def del_comm(id):
     
     
 @app.route('/logout')
+@login_required
 def logout():
     session.pop('id', None)
     flash(u'로그아웃!')
@@ -243,6 +265,7 @@ def logout():
 
 
 @app.route('/edit')
+@login_required
 def edit():
     return render_template('edit.html')
 
