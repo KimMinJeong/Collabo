@@ -36,7 +36,6 @@ class User(db.Model):
     id = db.Column(Integer, primary_key=True)
     name = db.Column(String(60))
     email = db.Column(String(60))
-
     posts = db.relationship('Post', backref='author', \
                             cascade="all, delete-orphan", passive_deletes=True)
     comments = db.relationship('Comment', backref='author', \
@@ -54,7 +53,8 @@ class User(db.Model):
 class Comment(db.Model):
     __tablename__ = 'comments'
     id = db.Column(db.Integer, primary_key=True)
-    comment = db.Column(db.Text, nullable=False)
+    comment = db.Column(db.Text, nullable=True)
+    #opinion = db.Column(db.Text, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id',ondelete='cascade'))
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id',ondelete='cascade'))
     created_at = db.Column(DateTime(timezone=True), nullable=False,
@@ -62,6 +62,7 @@ class Comment(db.Model):
     
     def __init__(self, comment, user_id, post_id):
         self.comment = comment
+        #self.opinion = opinion
         self.user_id = user_id
         self.post_id = post_id
 
@@ -83,7 +84,6 @@ class Post(db.Model):
                            default=functions.now())
     comments = db.relationship('Comment', backref='post', \
                                cascade="all, delete-orphan", passive_deletes=True)
-
     
     def __init__(self, category, subject, status, contents, user_id):
         self.category = category
@@ -134,9 +134,10 @@ def put_post(id):
     post = Post.query.get(id)
     post.status = request.values.get('status')
     post.comments.append(Comment(comment=request.form['opinion'],
-                                 user_id=session['user_id'],
+                                 user_id=session['user']['id'],
                                  post_id=session.get('post_id')
                                  ))
+
     db.session.commit()
     return redirect(oid.get_next_url())
 
@@ -248,4 +249,5 @@ def edit():
 
 
 if __name__ == '__main__':
+    init_db()
     app.run(debug=True, host='0.0.0.0', port=int(environ.get('PORT',5000)))
