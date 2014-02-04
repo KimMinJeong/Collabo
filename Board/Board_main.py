@@ -11,6 +11,7 @@ from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.sql import functions
+from sqlalchemy.sql.expression import case
 from sqlalchemy.types import DateTime, Boolean
 import hashlib
 import urllib
@@ -19,11 +20,10 @@ import os
 
 app = Flask(__name__)
 
-#app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 oid = OpenID(app, join(dirname(__file__), 'openid_store'))
 
 SQLALCHEMY_DATABASE_URI = os.environ.get(
-    'DATABASE_URL','postgresql://postgres:1234@localhost/pos')
+    'DATABASE_URL','postgresql://postgres:1111@localhost/fortest')
 
 db = SQLAlchemy(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
@@ -36,9 +36,12 @@ class User(db.Model):
     id = db.Column(Integer, primary_key=True)
     name = db.Column(String(60))
     email = db.Column(String(60))
-    posts = db.relationship('Post', backref='author')
-    comments = db.relationship('Comment', backref='author')
-    
+
+    posts = db.relationship('Post', backref='author', \
+                            cascade="all, delete-orphan", passive_deletes=True)
+    comments = db.relationship('Comment', backref='author', \
+                               cascade="all, delete-orphan", passive_deletes=True)
+
     def __init__(self,name,email):
         self.name = name
         self.email = email
@@ -52,8 +55,8 @@ class Comment(db.Model):
     __tablename__ = 'comments'
     id = db.Column(db.Integer, primary_key=True)
     comment = db.Column(db.Text, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id',ondelete='cascade'))
+    post_id = db.Column(db.Integer, db.ForeignKey('posts.id',ondelete='cascade'))
     created_at = db.Column(DateTime(timezone=True), nullable=False,
                                      default=functions.now())
     
@@ -74,11 +77,13 @@ class Post(db.Model):
     subject = db.Column(db.String(50))
     status = db.Column(db.String(20))
     contents = db.Column(db.Text, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id',ondelete='cascade'))
     created_at = db.Column(DateTime(timezone=True),
                            nullable=False,
                            default=functions.now())
-    comments = db.relationship('Comment', backref='post')
+    comments = db.relationship('Comment', backref='post', \
+                               cascade="all, delete-orphan", passive_deletes=True)
+
     
     def __init__(self, category, subject, status, contents, user_id):
         self.category = category
@@ -110,17 +115,18 @@ def login():
         
 @app.route('/posts/lists')
 def board_list():
+    
     post_list = Post.query.all()
     return render_template('board_list.html', post_list=post_list)
 
 
 @app.route('/posts/<int:id>', methods=['GET'])
-def show(id):
-    post = Post.query.get(id)
-    comm_list = Comment.query.filter(Comment.post_id==id).all()
-    gravatar = session.get('gravatar')
+def show(id):    
+    post= db.session.query(Post).get(id)
+    comm_list = db.session.query(Comment).filter(Comment.post_id==id).all()
+    
     return render_template('contents.html',
-                             post=post, comm_list=comm_list)
+                            post=post, comm_list=comm_list)
 
 
 @app.route('/posts/<int:id>', methods=['POST'])
@@ -158,27 +164,27 @@ def add_user():
 
 
 @oid.after_login
-def after_login(resp):      
+def after_login(resp):
+    gravatar = set_img(resp.email)
     user = User.query.filter_by(email=resp.email).first()
     user = { "id" : user.id,
               "name" : user.name,
               "email" : user.email
             }
-    session['user'] = user      
-    if not user:
-        return redirect(oid.get_next_url()) 
-    gravatar = set_img(resp)
-    flash(u'Successfully signed in')   
-    session['gravatar'] = gravatar[0]       
+    session['user'] = user
+    flash(u'Successfully signed in')
+    session['gravatar'] =gravatar              
     return redirect(url_for('board_list'))
 
-def set_img(resp):
-    email_gra = resp.email
+
+def set_img(s):
+    email_gra = s
     size = 40
     gravatar_url = "http://www.gravatar.com/avatar/" + \
                     hashlib.md5(email_gra.lower()).hexdigest() + "?"
     gravatar_url += urllib.urlencode( {'d': 'mm' ,'s': str(size)} )     
-    return gravatar_url, email_gra  
+    return gravatar_url 
+app.jinja_env.globals.update(set_img=set_img)
 
 
 @app.route('/posts', methods=['POST'])
@@ -188,7 +194,6 @@ def board_insert():
     status = request.form["status"]
     contents = request.form["contents"]   
     user_id = session['user']['id']
-   
     db_insert = Post(category, subject, status, contents, user_id)
     db.session.add(db_insert)
     db.session.commit()
@@ -214,9 +219,8 @@ def add_comm(id):#comment 추가
 
 @app.route('/posts/comments/<int:id>', methods=['PUT'])
 def update_comm(id):
-    update = Comment.query.get(id)
-    update.comment = request.form['comment_modify']
-    update.img=session.get('gravatar')
+    update= Comment.query.get(id)
+    update.comment= request.form['comment_modify'] 
     db.session.commit()    
     return jsonify(dict(result='success'))
 
@@ -242,5 +246,4 @@ def edit():
 
 
 if __name__ == '__main__':
-    init_db()
     app.run(debug=True, host='0.0.0.0', port=int(environ.get('PORT',5000)))
