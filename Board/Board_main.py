@@ -37,11 +37,11 @@ class User(db.Model):
     id = db.Column(Integer, primary_key=True)
     name = db.Column(String(60))
     email = db.Column(String(60))
-
+    authority = db.Column(db.Boolean,nullable=False,default=False)
     posts = db.relationship('Post', backref='author', \
-                            cascade="all, delete-orphan", passive_deletes=True)
+                            cascade="all, delete-orphan",passive_deletes=True)
     comments = db.relationship('Comment', backref='author', \
-                               cascade="all, delete-orphan", passive_deletes=True)
+                               cascade="all, delete-orphan",passive_deletes=True)
 
     def __init__(self,name,email):
         self.name = name
@@ -125,8 +125,7 @@ def login():
         
 @app.route('/posts/lists')
 @login_required
-def board_list():
-    
+def board_list():    
     post_list = Post.query.all()
     return render_template('board_list.html', post_list=post_list)
 
@@ -134,12 +133,9 @@ def board_list():
 @app.route('/posts/<int:id>', methods=['GET'])
 @login_required
 def show(id):    
-    post= db.session.query(Post).get(id)
-    comm_list = db.session.query(Comment).filter(Comment.post_id==id).all()
-    
-    
+    post = db.session.query(Post).get(id)  
     return render_template('contents.html',
-                            post=post, comm_list=comm_list)
+                            post=post)
 
 
 @app.route('/posts/<int:id>', methods=['POST'])
@@ -151,7 +147,6 @@ def put_post(id):
                                  user_id=session['user']['id'],
                                  post_id=session.get('post_id')
                                 ))
-
     db.session.commit()
     return redirect(oid.get_next_url())
 
@@ -186,12 +181,13 @@ def after_login(resp):
     gravatar = set_img(resp.email)
     user = User.query.filter_by(email=resp.email).first()
     user = { "id" : user.id,
-              "name" : user.name,
-              "email" : user.email
+               "name" : user.name,
+               "email" : user.email,
+               "authority":user.authority
             }
     session['user'] = user
     flash(u'Successfully signed in')
-    session['gravatar'] =gravatar              
+    session['gravatar'] = gravatar              
     return redirect(url_for('board_list'))
 
 
@@ -241,8 +237,8 @@ def add_comm(id):#comment 추가
 @app.route('/posts/comments/<int:id>', methods=['PUT'])
 @login_required
 def update_comm(id):
-    update= Comment.query.get(id)
-    update.comment= request.form['comment_modify'] 
+    update = Comment.query.get(id)
+    update.comment = request.form['comment_modify'] 
     db.session.commit()    
     return jsonify(dict(result='success'))
 
@@ -271,4 +267,5 @@ def edit():
 
 
 if __name__ == '__main__':
+    init_db()
     app.run(debug=True, host='0.0.0.0', port=int(environ.get('PORT',5000)))

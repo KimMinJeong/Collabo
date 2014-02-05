@@ -29,13 +29,7 @@
         <table class="table table-striped" border="1">
         <thead>
 			<p>현재 제안서는 {{post.status}} 상태입니다.
-			{% if session['user']['email'] in (
-										'jc@spoqa.com',
-										'grant@spoqa.com',
-										'richard@spoqa.com',
-										'anny@spoqa.com'
-										) 
-           	%}
+			{% if session['user']['authority']	%}
         	<button class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">
         	제안상태변경
 			</button>
@@ -77,11 +71,8 @@
         
         <tbody>
         	<tr></tr>
-        	{% for comm in comm_list%}
-        	{% if comm.author.email in ('jc@spoqa.com' , 
-        								'richard@spoqa.com' ,
-        								'anny@spoqa.com')
-        							%}
+        	{% for comm in post.comments%}
+        	{% if comm.author.authority %}
         	<tr><td class="result">{{comm.comment}} </td></tr>
         	{% endif %}
         	{% endfor %}
@@ -103,11 +94,7 @@
         <div class="col-md-12" name="comm_list">
         	<form action="" method="post">
         	{% for comm in post.comments %}
-        	{% if not comm.author.email in ('jc@spoqa.com' ,
-        									'richard@spoqa.com' ,
-        									'anny@spoqa.com')
-        									
-        							 %}
+        	{% if not comm.author.authority  %}
         	<table class="table table-striped" data-id={{comm.id}}>        		
         		
         		<th> <p><img src={{set_img('comm.author.email')}}></p>
