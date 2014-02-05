@@ -1,18 +1,15 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime, date, time
 from flask import Flask, render_template, request, g, session, flash, redirect, \
-    url_for, abort, jsonify
+    url_for, abort, jsonify, json
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask_openid import OpenID
 from functools import wraps
-from openid.extensions import pape
 from os import environ
 from os.path import dirname, join
-from sqlalchemy import create_engine, Column, Integer, String
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy import Column, Integer, String
+from sqlalchemy.orm import scoped_session
 from sqlalchemy.sql import functions
-from sqlalchemy.sql.expression import case
 from sqlalchemy.types import DateTime, Boolean
 import hashlib
 import os
@@ -23,12 +20,12 @@ app = Flask(__name__)
 
 oid = OpenID(app, join(dirname(__file__), 'openid_store'))
 
-SQLALCHEMY_DATABASE_URI = os.environ.get(
+SQLALCHEMY_DATABASE_URI = environ.get(
     'DATABASE_URL','postgresql://postgres:1111@localhost/fortest')
 
 db = SQLAlchemy(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
-app.config['SECRET_KEY'] = 'development keys'
+app.config['SECRET_KEY'] = os.urandom(24)
 app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
 
@@ -85,7 +82,6 @@ class Post(db.Model):
     comments = db.relationship('Comment', backref='post', \
                                cascade="all, delete-orphan", passive_deletes=True)
 
-    
     def __init__(self, category, subject, status, contents, user_id):
         self.category = category
         self.subject = subject
@@ -94,8 +90,8 @@ class Post(db.Model):
         self.user_id = user_id
         
     def __repr__(self):
-        return "<Post id={0!r}, category={1!r}, subject={2!r}, status={3!r}, contents={4!r}> user_id={5!r}".\
-                format(self.id, self.category, self.subject, self.status, self.contents, self.user_id)
+        return "<Post id={0!r}, category={1!r}, subject={2!r}, status={3!r}, contents={4!r}> user_id={5!r}"\
+            .format(self.id, self.category, self.subject, self.status, self.contents, self.user_id)
 
 
 def init_db():
@@ -122,11 +118,11 @@ def login():
     return oid.try_login("https://www.google.com/accounts/o8/id",
           ask_for=['email','fullname','nickname'])
         
-        
+            
 @app.route('/posts/lists')
 @login_required
 def board_list():    
-    post_list = Post.query.all()
+    post_list = Post.query.order_by(Post.id).all()
     return render_template('board_list.html', post_list=post_list)
 
 
@@ -179,12 +175,13 @@ def add_user():
 @oid.after_login
 def after_login(resp):
     gravatar = set_img(resp.email)
-    user = User.query.filter_by(email=resp.email).first()
+    user=User.query.filter_by(email=resp.email).first()
     user = { "id" : user.id,
                "name" : user.name,
                "email" : user.email,
                "authority":user.authority
             }
+    #json_data = json.dumps(set())
     session['user'] = user
     flash(u'Successfully signed in')
     session['gravatar'] = gravatar              
@@ -198,9 +195,9 @@ def set_img(s):
                     hashlib.md5(email_gra.lower()).hexdigest() + "?"
     gravatar_url += urllib.urlencode( {'d': 'mm' ,'s': str(size)} )     
     return gravatar_url 
-app.jinja_env.globals.update(set_img=set_img)
-
-
+app.jinja_env.globals.update(set_img=set_img)     
+    
+    
 @app.route('/posts', methods=['POST'])
 @login_required
 def board_insert():
@@ -223,7 +220,7 @@ def board_get():
 
 @app.route('/posts/<int:id>/comment', methods=['POST'])
 @login_required
-def add_comm(id):#comment 추가
+def add_comm(id):
     if request.method =='POST':
         user_id = session['user']['id']
         comment = request.form['reply']
