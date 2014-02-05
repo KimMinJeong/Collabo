@@ -3,7 +3,7 @@
 
 {{ super() }}
 
-<form action="" method="post">
+<form action="" method="post" onclick="return postForm()">
 <div class="container" >
 	<div class="row" align="left">
 		<div class="col-md-12 col-md-offset-3">
@@ -23,11 +23,11 @@
 				<option value="reject" >반려</option>
 			</select></p>
 			<br/>
-			{{ g.author_id }}
 			<p><strong>제목</strong>
 			<input type="text" size="100" id="subject" name="subject"></p>
 			<br/>
-			<textarea rows="20" cols="105" name="contents" value="contents"> </textarea>
+			<textarea class="summernote" rows="20" cols="105" name="content"> </textarea>
+			
 			<br/>
 			<p><input type="submit" value="작성완료"></p>
 		</div>
@@ -36,14 +36,19 @@
 </form>
 
 <script type="text/javascript">
-	$(document).ready(function() {
-  $('#summernote').summernote({
-  		height:300,
-  		focus:false
-  });
+  	$(document).ready(function() {
+ 		$('.summernote').summernote({
+  		height: 300,   //set editable area's height
+  		focus: true    //set focus editable area after Initialize summernote
+	});
 });
+
+var postForm = function() {
+     var content = $('textarea[name="content"]').html($('.summernote').code());
+};
 </script>
 
 {% endblock %}
+
 
 
