@@ -14,7 +14,7 @@
 	    </div>    	
 	    <div class="col-sm-2 col-md-3 col-md-offset-2">
 	    	 <img src={{session.get('gravatar')}} align="right">
-	         <h4 name="email" align="right"> {{session['user']['email']}}</h4>
+	         <h4 name="email" align="right"> {{session['user_email']}}</h4>
 	    </div>           
 	    <div class="col-md-12 col-sm-12 center-block">
 	    	 {{ post.contents }} 
@@ -29,7 +29,7 @@
         <table class="table table-striped" border="1">
         <thead>
 			<p>현재 제안서는 {{post.status}} 상태입니다.
-			{% if session['user']['authority']	%}
+			{% if g.user.authority	%}
         	<button class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">
         	제안상태변경
 			</button>
@@ -94,37 +94,36 @@
         <div class="col-md-12" name="comm_list">
         	<form action="" method="post">
         	{% for comm in post.comments %}
-        	{% if not comm.author.authority  %}
+        	
         	<table class="table table-striped" data-id={{comm.id}}>        		
         		
-        		<th> <p><img src={{set_img('comm.author.email')}}></p>
-        			 <p>{{comm.author.email}}</p>
-        			 <p> {{comm.created_at.date()}}</p>
-        			 <p id={{comm.id}}> {{ comm.comment }}</p>
-        		</th>
-     
+        		<th> <img src={{set_img('comm.author.email')}}>
+        			 
+        			 {{comm.author.email}}
+        			 {{comm.created_at.date()}}
+        			  <p style="padding:0 50px" id={{comm.id}}> {{ comm.comment }}</p>
+        		</th>	
         		 <td>
         		 	<div class='edit_box'>
                 	<span class="error"> 댓글을 입력하세요 </span>
                 	</div>
                 </td>
-                 {% if comm.author.email==session['user']['email']  %}
+                 {% if comm.author.email==session['user_email']  %}
                 <td>
                 	<a class="btn btn-default modify" role="button">수정</a>
                 	<a class="btn btn-default delete" role="button">삭제</a>
                 </td>
               {%endif%}
             </table>
-            {%endif%}
             {%endfor%}
-         
           </form>
-        </div>
-    </div>
+      </div>
+   </div>
+   
 	<div id="addComm">   
 	 	<ul class="list-inline">
 	      <li><img src="{{session.get('gravatar')}}"></li>
-	      <li><p class="form-control-static" name="email">{{session['user']['email']}}</p></li>
+	      <li><p class="form-control-static" name="email">{{session['user_email']}}</p></li>
 	    </ul>                      
 	    <textarea class="form-control reply" name="reply" rows="3"> </textarea>  
 	    <input type="submit" class="pull-right" value="댓글 입력">    

@@ -20,21 +20,13 @@ import json
 app = Flask(__name__)
 oid = OpenID(app, join(dirname(__file__), 'openid_store'))
 SQLALCHEMY_DATABASE_URI = os.environ.get(
-                                         'DATABASE_URL',
-                                         'postgresql://postgres:1111@localhost:5432/fortest')
+    'DATABASE_URL','postgresql://postgres:1111@localhost:5432/fortest')
 db = SQLAlchemy(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
 app.config['SECRET_KEY'] = os.urandom(24)
 app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
 
-class ComplexEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, complex):
-            return [obj.id, obj.name, obj.email]
-        return json.JSONEncoder.default(self, obj)
-    
-    
 class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(Integer, primary_key=True)
@@ -104,6 +96,12 @@ def init_db():
     db.create_all()
 
 
+@app.before_request
+def before_request():
+    if not session.get('user_email') is None:
+        g.user = User.query.filter_by(email=session.get('user_email')).first()
+    
+    
 @app.route('/')
 def index():      
     return render_template('index.html')
@@ -112,7 +110,7 @@ def index():
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if session.get('user') is None:
+        if session.get('user_email') is None:
             return redirect(url_for('login', next=request.url))
         return f(*args, **kwargs)
     return decorated_function
@@ -146,7 +144,7 @@ def put_post(id):
     post = Post.query.get(id)
     post.status = request.values.get('status')
     post.comments.append(Comment(comment=request.form['opinion'],
-                                 user_id=session['user']['id'],
+                                 user_id=g.user.id,
                                  post_id=session.get('post_id')))
     db.session.commit()
     return redirect(oid.get_next_url())
@@ -173,27 +171,19 @@ def add_user():
     user = User(name[0],email)
     db.session.add(user)
     db.session.commit()
-    flash(u'추가!')
     return redirect(oid.get_next_url())
     
 
 @oid.after_login
-def after_login(resp):
-    user=User.query.filter_by(email=resp.email).first()
-    if user is None:
+def after_login(resp):   
+    session['user_email'] = resp.email
+    if session.get('user_email') is None:
         flash(u'접근권한이 없습니다. 관리자에게 문의하세요')
         return redirect(oid.get_next_url())
-    user = { "id" : user.id,
-             "name" : user.name,
-             "email" : user.email,
-             "authority":user.authority
-            }
-    #json.dumps(user, cls=ComplexEncoder)
-    session['user'] = user
-    gravatar = set_img(resp.email)
-    session['gravatar'] = gravatar     
-    flash(u'Successfully signed in')            
-    return redirect(url_for('board_list'))
+    else:
+        gravatar = set_img(resp.email)    
+        session['gravatar'] = gravatar              
+        return redirect(url_for('board_list'))
 
 
 def set_img(s):
@@ -213,7 +203,7 @@ def board_insert():
     subject = request.form["subject"]
     status = request.form["status"]
     contents = request.form["contents"]   
-    user_id = session['user']['id']
+    user_id = g.user.id
     db_insert = Post(category, subject, status, contents, user_id)
     db.session.add(db_insert)
     db.session.commit()
@@ -230,7 +220,7 @@ def board_get():
 @login_required
 def add_comm(id):
     if request.method =='POST':
-        user_id = session['user']['id']
+        user_id = g.user.id
         comment = request.form['reply']
         post_id = id
         comment = Comment(comment, user_id, post_id)
