@@ -14,21 +14,27 @@ from sqlalchemy.types import DateTime, Boolean
 import hashlib
 import os
 import urllib
+import json
 
 
 app = Flask(__name__)
-
 oid = OpenID(app, join(dirname(__file__), 'openid_store'))
-
-SQLALCHEMY_DATABASE_URI = environ.get(
-    'DATABASE_URL','postgresql://postgres:1111@localhost/fortest')
-
+SQLALCHEMY_DATABASE_URI = os.environ.get(
+                                         'DATABASE_URL',
+                                         'postgresql://postgres:1111@localhost:5432/fortest')
 db = SQLAlchemy(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
 app.config['SECRET_KEY'] = os.urandom(24)
 app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
 
+class ComplexEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, complex):
+            return [obj.id, obj.name, obj.email]
+        return json.JSONEncoder.default(self, obj)
+    
+    
 class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(Integer, primary_key=True)
@@ -139,10 +145,9 @@ def show(id):
 def put_post(id):
     post = Post.query.get(id)
     post.status = request.values.get('status')
-    post.comments.append(Comment( comment=request.form['opinion'],
+    post.comments.append(Comment(comment=request.form['opinion'],
                                  user_id=session['user']['id'],
-                                 post_id=session.get('post_id')
-                                ))
+                                 post_id=session.get('post_id')))
     db.session.commit()
     return redirect(oid.get_next_url())
 
@@ -151,7 +156,7 @@ def put_post(id):
 @login_required
 def board_detail():
     post = Post.query.all()
-    return render_template('board_detail.html', post=post)
+    return render_template('board_detail.html',post=post)
 
 
 @app.route('/register', methods=['GET'])
@@ -170,21 +175,24 @@ def add_user():
     db.session.commit()
     flash(u'추가!')
     return redirect(oid.get_next_url())
-
+    
 
 @oid.after_login
 def after_login(resp):
-    gravatar = set_img(resp.email)
     user=User.query.filter_by(email=resp.email).first()
+    if user is None:
+        flash(u'접근권한이 없습니다. 관리자에게 문의하세요')
+        return redirect(oid.get_next_url())
     user = { "id" : user.id,
-               "name" : user.name,
-               "email" : user.email,
-               "authority":user.authority
+             "name" : user.name,
+             "email" : user.email,
+             "authority":user.authority
             }
-    #json_data = json.dumps(set())
+    #json.dumps(user, cls=ComplexEncoder)
     session['user'] = user
-    flash(u'Successfully signed in')
-    session['gravatar'] = gravatar              
+    gravatar = set_img(resp.email)
+    session['gravatar'] = gravatar     
+    flash(u'Successfully signed in')            
     return redirect(url_for('board_list'))
 
 
@@ -264,5 +272,4 @@ def edit():
 
 
 if __name__ == '__main__':
-    init_db()
     app.run(debug=True, host='0.0.0.0', port=int(environ.get('PORT',5000)))
