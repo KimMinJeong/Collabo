@@ -107,6 +107,7 @@ class Post(db.Model):
         return "<Post id={0!r}, category={1!r}, subject={2!r}, status={3!r}, content={4!r}> user_id={5!r}".\
                 format(self.id, self.category, self.subject, self.status, self.content, self.user_id)
 
+
 def init_db():
     db.create_all()
 
@@ -170,7 +171,7 @@ def put_post(id):
 
 @app.route('/posts/status', methods=['GET'])
 def board_detail():
-    post_list = Post.query.get(id)
+    post_list = Post.query.all()
     return render_template('board_detail.html', post_list=post_list)
 
 
@@ -259,6 +260,24 @@ def del_comm(id):
     db.session.delete(comment)
     db.session.commit()
     return jsonify(dict(result='success'))
+
+
+@app.route('/posts/<int:id>/modify', methods=['GET'])
+def get_modify(id):
+    post = db.session.query(Post).get(id)
+    return render_template('board_modify.html', post=post)
+
+
+@app.route('/posts/<int:id>/modify', methods=['POST'])
+def board_modify(id):
+    update = Post.query.get(id)
+    update.category = request.form["category"]
+    update.subject = request.form["subject"]
+    update.status = request.form["status"]
+    update.content = request.form["content"]   
+    update.user_id = g.user.id
+    db.session.commit()
+    return redirect(url_for('board_list'))
     
     
 @app.route('/logout')

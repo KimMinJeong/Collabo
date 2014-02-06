@@ -2,7 +2,7 @@
 {% block body %}
 {{ super() }}
 
-
+<form action="" method="post">
 <div class="container center-block">
     <div class="row-fluid ">
 	    <div class="col-sm-5 col-md-5">
@@ -18,12 +18,15 @@
 	         <h4 name="email" align="right"> {{session['user_email']}}</h4>
 	    </div>           
 	    <div class="col-md-12 col-sm-12 center-block">
-	    	 <pre>{{ post.content }}</pre> 
+	    	 {{ post.content }}
+	    	 {% if g.user.email==session['user_email']  %}
+        	<a href="{{url_for('get_modify', id=post.id) }}">글수정</a>
+    		{%endif%}
 	    </div>
-	</div>    
+	</div>
+</div> 
+</form>
 
-
-	</div> 
 <div class="container center-block">  	
 	<form action="{{ url_for('put_post', id=post.id) }}" method="post">
     <div class="col-md-12">
@@ -45,21 +48,21 @@
 			      <div class="modal-header">
 			        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
 			        <h2 class="modal-title" id="myModalLabel">제안상태변경하기</h2>
-	 			</div>
+	 			  </div>
 
 			      <div class="modal-body">
 			      	<div  class="btn-group">
 			      		<p>상태 </p>
 			      		<select id="status" name="status">
-							<option value="wait">대기중</option>
-							<option value="create_wait">개발예정</option>
-							<option value="creating">개발중</option>
-							<option value="update">업데이트</option>
-							<option value="reject">반려</option>
+							<option value="대기중">대기중</option>
+							<option value="개발예정">개발예정</option>
+							<option value="개발중">개발중</option>
+							<option value="업데이트">업데이트</option>
+							<option value="반려">반려</option>
 						</select>
 	            		<div>
 	    				<p>의견</p>
-	    				<textarea rows="8" cols="50" name="opinion"> </textarea>
+	    				<pre><textarea rows="8" cols="50" name="opinion"> </textarea></pre>
 	            		</div>
 			      	</div>
 			      </div>
@@ -129,7 +132,6 @@
 </div>
 </form>
 
-
 <script type="text/javascript">
 	$('.modify').on('click', function(){
 		var data=$(this).closest('table').data('id');
@@ -196,8 +198,14 @@
 		});
 
 	});
-
 </script>
 
+<script type="text/javascript">
+	$('.modify_btn').on('click', function(){
+		var url = "/posts/" + id + "/modify";
+		location = url;
+	});
+	
+</script>
 {% endblock %}
 

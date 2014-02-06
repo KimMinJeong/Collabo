@@ -3,32 +3,35 @@
 
 {{ super() }}
 
-<form action="" method="post" onclick="return postForm()">
+<form action="" method="post" onclick="return modifyForm()">
 <div class="container" >
 	<div class="row" align="left">
 		<div class="col-md-12">
 			<p><strong>분류</strong>
 			<select id="category" name="category">
+				<option value="{{ post.category }}">{{ post.category }}</option>
 				<option value="STORE" name="store">STORE</option>
 				<option value="ADMIN" name="admin">ADMIN</option>
 				<option value="MOBILE" name="mobile">MOBILE</option>
 			</select></p>
 			<br/>
 			<p><strong>상태</strong>
-			<select id="status" name="status">
-				<option value="대기중" name="wait">대기중</option>
+			<select id="status" name="status" value="{{ post.status }}">
+				<option value="{{ post.status }}">{{ post.status }}</option>
+				<option value="대기" name="wait">대기</option>
 				<option value="개발예정" name="wait_create" >개발예정</option>
 				<option value="개발중" name="creating">개발중</option>
 				<option value="업데이트" name="update">업데이트</option>
 				<option value="반려" name="reject">반려</option>
+				
 			</select></p>
 			<br/>
 			<p><strong>제목</strong>
-			<input type="text" size="100" id="subject" name="subject"></p>
+			<input type="text" size="100" id="subject" name="subject" value="{{post.subject}}"></p>
 			<br/>
-			<pre><textarea class="summernote" rows="20" cols="105" name="content"> </textarea></pre>
+			<pre><textarea class="summernote" rows="20" cols="105" name="content"> {{ post.content }} </textarea></pre>
 			<br/>
-			<p><input type="submit" value="작성완료"></p>
+			<p><input type="submit" value="수정완료"></p>
 		</div>
 	</div>
 </div>
@@ -42,7 +45,7 @@
 	});
 });
 
-var postForm = function() {
+var modifyForm = function() {
      var content = $('textarea[name="content"]').html($('.summernote').code());
 };
 </script>
