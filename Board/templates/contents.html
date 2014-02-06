@@ -16,11 +16,15 @@
 	    <div class="col-sm-2 col-md-3 col-md-offset-2">
 	    	 <img src={{session.get('gravatar')}} align="right">
 	         <h4 name="email" align="right"> {{session['user_email']}}</h4>
-	    </div>           
+	    </div>
+	    
 	    <div class="col-md-12 col-sm-12 center-block">
 	    	 {{ post.content }}
 	    	 {% if g.user.email==session['user_email']  %}
+        	<div class="col-md-1 col-md-offset-1">
         	<a href="{{url_for('get_modify', id=post.id) }}">글수정</a>
+	    	<a class="del_body" data-id={{post.id}}>글삭제</a>
+	    	</div>
     		{%endif%}
 	    </div>
 	</div>
@@ -37,11 +41,11 @@
 				if g.user.is_admin()
            	%}
         	<button class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">
+
         	제안상태변경
 			</button>
 			{% endif %}
 			</p>
-			<!-- Modal -->
 			<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 			  <div class="modal-dialog">
 			    <div class="modal-content">
@@ -91,7 +95,6 @@
     <hr>
 	</div>
 
-    <!-- 댓글 부분 -->
 <form action="{{ url_for('add_comm', id=post.id) }}" method="post"> 
     <div class="container center-block">
     <div class="row-fluid">
@@ -101,7 +104,7 @@
         		<th> <p><img src={{set_img('comm.user.email')}}></p>
         			 <p>{{comm.user.email}}</p>
         			 <p> {{comm.created_at.date()}}</p>
-        			 <p id={{comm.id}}> {{ comm.comment }}</p>
+        			 <p style="padding:0 80px" id={{comm.id}}> {{ comm.comment }}</p>
         		</th>
      
         		 <td>
@@ -110,7 +113,7 @@
                 	</div>
                 </td>
                  {% if g.user.email==session['user_email']  %}
-                <td>
+                <td style="width:300px;height:100px">
                 	<a class="btn btn-default modify" role="button">수정</a>
                 	<a class="btn btn-default delete" role="button">삭제</a>
                 </td>
@@ -119,6 +122,7 @@
             {%endfor%}
         </div>
     </div>
+    
 	<div id="addComm">   
 	 	<ul class="list-inline">
 	      <li><img src="{{session.get('gravatar')}}"></li>
@@ -126,7 +130,6 @@
 	    </ul>                      
 	    <textarea class="form-control reply" name="reply" rows="3"> </textarea>  
 	    <input type="submit" class="pull-right" value="댓글 입력">    
-	 
 	</div>
 	<hr>
 </div>
@@ -161,13 +164,13 @@
  		 });
 	});
 </script>
-<!-- 댓글 유효성 검사를 하려고해요 -->
+
 <script type="text/javascript">
 	
 		$('.error').hide();
 		$('.pull-right').on('click', function(e){	
 			
-		var data= $('.reply').val();//$('.form-control').val();
+		var data= $('.reply').val();
 		var len= data.length;
 		if(len < 1)
 		{
@@ -199,6 +202,24 @@
 
 	});
 </script>
+
+<script type="text/javascript">
+	$('.del_body').on('click', function(){
+		var del_id = $(this).data('id');
+		console.log(del_id);
+		$.ajax({
+			url: {{ url_for('del_board', id=-1 )|tojson }}.replace('-1', del_id),
+			type: 'DELETE',
+			success:function(){
+				alert('게시물이 삭제되었습니다.');
+				window.location.href = document.referrer;
+				
+			}		
+		});
+
+	});
+</script>
+
 
 {% endblock %}
 
