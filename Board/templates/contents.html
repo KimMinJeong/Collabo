@@ -2,6 +2,7 @@
 {% block body %}
 {{ super() }}
 
+<form action="" method="post">
 <div class="container center-block">
     <div class="row-fluid ">
 	    <div class="col-sm-5 col-md-5">
@@ -15,26 +16,32 @@
 	    <div class="col-sm-2 col-md-3 col-md-offset-2">
 	    	 <img src={{session.get('gravatar')}} align="right">
 	         <h4 name="email" align="right"> {{session['user_email']}}</h4>
-	    </div>           
-	    <div class="col-md-10 col-sm-12 center-block">
-	    	 {{ post.contents }}	 	
 	    </div>
-	    {% if g.user.id ==post.user_id %}
-	    <div class="col-md-1 col-md-offset-1"> 
-	    	<a class="del_body" data-id={{post.id}}>삭제</a>
+	    
+	    <div class="col-md-12 col-sm-12 center-block">
+	    	 {{ post.content }}
+	    	 {% if g.user.email==session['user_email']  %}
+        	<div class="col-md-1 col-md-offset-1">
+        	<a href="{{url_for('get_modify', id=post.id) }}">글수정</a>
+	    	<a class="del_body" data-id={{post.id}}>글삭제</a>
+	    	</div>
+    		{%endif%}
 	    </div>
-	    {% endif %}
-	</div>    
-</div>
- 
+	</div>
+</div> 
+</form>
+
 <div class="container center-block">  	
-	<form action="" method="post">
+	<form action="{{ url_for('put_post', id=post.id) }}" method="post">
     <div class="col-md-12">
         <table class="table table-striped" border="1">
         <thead>
 			<p>현재 제안서는 {{post.status}} 상태입니다.
-			{% if g.user.authority	%}
-        	<button class="btn btn-primary" data-toggle="modal" data-target="#myModal">
+			{% 
+				if g.user.is_admin()
+           	%}
+        	<button class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">
+
         	제안상태변경
 			</button>
 			{% endif %}
@@ -45,21 +52,21 @@
 			      <div class="modal-header">
 			        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
 			        <h2 class="modal-title" id="myModalLabel">제안상태변경하기</h2>
-	 			</div>
+	 			  </div>
 
 			      <div class="modal-body">
 			      	<div  class="btn-group">
 			      		<p>상태 </p>
 			      		<select id="status" name="status">
-							<option value="wait">대기중</option>
-							<option value="create_wait">개발예정</option>
-							<option value="creating">개발중</option>
-							<option value="update">업데이트</option>
-							<option value="reject">반려</option>
+							<option value="대기중">대기중</option>
+							<option value="개발예정">개발예정</option>
+							<option value="개발중">개발중</option>
+							<option value="업데이트">업데이트</option>
+							<option value="반려">반려</option>
 						</select>
 	            		<div>
 	    				<p>의견</p>
-	    				<textarea rows="8" cols="50" name="opinion"> </textarea>
+	    				<pre><textarea rows="8" cols="50" name="opinion"> </textarea></pre>
 	            		</div>
 			      	</div>
 			      </div>
@@ -67,16 +74,15 @@
 			        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
 			        <input type="submit" value="변경완료">
 			      </div>
-			    </div>
-			  </div>
-			</div>
-        </thead> 
+			    </div><!-- /.modal-content -->
+			  </div><!-- /.modal-dialog -->
+			</div><!-- /.modal -->
+       </thead> 
         
         <tbody>
-        	{% for comm in post.comments%}
-        	{% if comm.author.authority %}
-        	<tr><td class="result"> {{comm.comment}} </td></tr>
-        	{% endif %}
+        	<tr><td> 이곳에 제안서에 대한 의견을 작성해주세요</td></tr>
+        	{% for comm in comm_list_admin %}
+        	<tr><td class="result">{{comm.comment}} </td></tr>
         	{% endfor %}
         </tbody>
 		</table>
@@ -93,20 +99,20 @@
     <div class="container center-block">
     <div class="row-fluid">
         <div class="col-md-12" name="comm_list">
-        	<form action="" method="post">
-        	{% for comm in post.comments %}
+        	{% for comm in comm_list %}				 
         	<table class="table table-striped" data-id={{comm.id}}>        		
-        		<th> <img src={{set_img('comm.author.email')}} class="img-thumbnail">
-        			 {{comm.author.email}}
-        			 {{comm.created_at.date()}}
-        			  <p style="padding:0 80px" id={{comm.id}}> {{ comm.comment }}</p>
-        		</th>	
+        		<th> <p><img src={{set_img('comm.user.email')}}></p>
+        			 <p>{{comm.user.email}}</p>
+        			 <p> {{comm.created_at.date()}}</p>
+        			 <p style="padding:0 80px" id={{comm.id}}> {{ comm.comment }}</p>
+        		</th>
+     
         		 <td>
         		 	<div class='edit_box'>
                 	<span class="error"> 댓글을 입력하세요 </span>
                 	</div>
                 </td>
-                 {% if comm.author.email==session['user_email']  %}
+                 {% if g.user.email==session['user_email']  %}
                 <td style="width:300px;height:100px">
                 	<a class="btn btn-default modify" role="button">수정</a>
                 	<a class="btn btn-default delete" role="button">삭제</a>
@@ -114,10 +120,9 @@
               {%endif%}
             </table>
             {%endfor%}
-          </form>
-      </div>
-   </div>
-   
+        </div>
+    </div>
+    
 	<div id="addComm">   
 	 	<ul class="list-inline">
 	      <li><img src="{{session.get('gravatar')}}"></li>
@@ -129,7 +134,6 @@
 	<hr>
 </div>
 </form>
-
 
 <script type="text/javascript">
 	$('.modify').on('click', function(){
@@ -218,3 +222,4 @@
 
 
 {% endblock %}
+
