@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
-from datetime import datetime, date, time
 from flask import Flask, render_template, request, g, session, flash, redirect, \
-    url_for, abort, jsonify, json
+    url_for, jsonify, json
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask_openid import OpenID
 from functools import wraps
 from os import environ
 from os.path import dirname, join
 from sqlalchemy import Column, Integer, String
-from sqlalchemy.orm import scoped_session
 from sqlalchemy.sql import functions
 from sqlalchemy.types import DateTime, Boolean
 import hashlib
@@ -111,7 +109,7 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args,**kwargs):
         if session.get('user_email') is None:
-            flash('로그인을 하면 접근이 가능합니다.')
+            flash('세션이 끊겼습니다.')
             return redirect(url_for('index',next=request.url))
         return f(*args,**kwargs)
     return decorated_function
@@ -135,8 +133,7 @@ def board_list():
 @login_required
 def show(id):    
     post = db.session.query(Post).get(id)  
-    return render_template('contents.html',
-                            post=post)
+    return render_template('contents.html', post=post)
 
 
 @app.route('/posts/<int:id>', methods=['POST'])
@@ -154,7 +151,7 @@ def put_post(id):
 @login_required
 def board_detail():
     post = Post.query.all()
-    return render_template('board_detail.html',post=post)
+    return render_template('board_detail.html', post=post)
 
 
 @app.route('/register', methods=['GET'])
@@ -175,14 +172,15 @@ def add_user():
 
 @oid.after_login
 def after_login(resp):   
-    session['user_email'] = resp.email
-    if session.get('user_email') is None:
+    user = User.query.filter(User.email==resp.email).first()
+    if user is None:
         flash(u'접근권한이 없습니다. 관리자에게 문의하세요')
         return redirect(oid.get_next_url())
     else:
+        session['user_email'] = resp.email
         gravatar = set_img(resp.email)    
         session['gravatar'] = gravatar              
-        return redirect(url_for('board_list'))
+        return redirect(url_for('board_list'))    
 
 
 def set_img(s):
@@ -190,7 +188,7 @@ def set_img(s):
     size = 40
     gravatar_url = "http://www.gravatar.com/avatar/" + \
                     hashlib.md5(email_gra.lower()).hexdigest() + "?"
-    gravatar_url += urllib.urlencode( {'d': 'mm' ,'s': str(size)} )     
+    gravatar_url += urllib.urlencode( {'d': 'mm' , 's': str(size)} )     
     return gravatar_url 
 app.jinja_env.globals.update(set_img=set_img)     
     

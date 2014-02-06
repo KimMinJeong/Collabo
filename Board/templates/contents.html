@@ -16,13 +16,14 @@
 	    	 <img src={{session.get('gravatar')}} align="right">
 	         <h4 name="email" align="right"> {{session['user_email']}}</h4>
 	    </div>           
-	    <div class="col-md-12 col-sm-12 center-block">
-	    	 {{ post.contents }} 
-	    	<span><a class="del_body" data-id={{post.id}}>삭제</a></span>
+	    <div class="col-md-10 col-sm-12 center-block">
+	    	 {{ post.contents }}	 	
 	    </div>
-	
-	    	
-	   
+	    {% if g.user.id ==post.user_id %}
+	    <div class="col-md-1 col-md-offset-1"> 
+	    	<a class="del_body" data-id={{post.id}}>삭제</a>
+	    </div>
+	    {% endif %}
 	</div>    
 </div>
  
@@ -72,10 +73,9 @@
         </thead> 
         
         <tbody>
-        	
         	{% for comm in post.comments%}
         	{% if comm.author.authority %}
-        	<tr><td class="result">{{comm.comment}} </td></tr>
+        	<tr><td class="result"> {{comm.comment}} </td></tr>
         	{% endif %}
         	{% endfor %}
         </tbody>
@@ -201,7 +201,7 @@
 
 <script type="text/javascript">
 	$('.del_body').on('click', function(){
-		var del_id= $(this).data('id');
+		var del_id = $(this).data('id');
 		console.log(del_id);
 		$.ajax({
 			url: {{ url_for('del_board', id=-1 )|tojson }}.replace('-1', del_id),
