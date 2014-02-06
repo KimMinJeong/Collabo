@@ -15,10 +15,10 @@
           </div>
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav">
-                	{% if g.user.authority %}
-                        <li class="active"><a href="{{ url_for('register') }}"> 사용자등록</a></li>
+                	{% if g.user.is_admin() %}
+                        <li><a href="{{ url_for('register') }}"> 사용자등록</a></li>
                    		 {% endif %}
-                   		<li class="active"><a href="{{ url_for('board_list') }}">목록보기</a></li>
+                   		<li><a href="{{ url_for('board_list') }}">목록보기</a></li>
                         <li><a href="{{ url_for('board_insert')}}">제안쓰기</a></li>
                         <li><a href="{{ url_for('board_detail')}}">제안서 상황</a></li>
                  </ul>
