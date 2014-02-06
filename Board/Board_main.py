@@ -93,8 +93,9 @@ class Post(db.Model):
     created_at = db.Column(DateTime(timezone=True),
                            nullable=False,
                            default=functions.now())
-    comments = db.relationship('Comment', backref='post', \
-                               cascade="all, delete-orphan", passive_deletes=True)
+    comments = db.relationship('Comment', backref='post',
+                               cascade="all, delete-orphan", 
+                               passive_deletes=True)
     
     def __init__(self, category, subject, status, content, user_id):
         self.category = category
@@ -140,12 +141,14 @@ def login():
       
         
 @app.route('/posts/lists')
+@login_required
 def board_list():
     post_list = Post.query.all()
     return render_template('board_list.html', post_list=post_list)
 
 
 @app.route('/posts/<int:id>', methods=['GET'])
+@login_required
 def show(id):    
     post = db.session.query(Post).get(id)
     comm_list_admin = Comment.query.filter(Comment.post_id==id).filter(Comment.section==10).all()
@@ -155,6 +158,7 @@ def show(id):
 
 
 @app.route('/posts/<int:id>/put_post', methods=['POST'])
+@login_required
 def put_post(id):
     post = Post.query.get(id)
     post.status = request.values.get('status')
@@ -170,17 +174,20 @@ def put_post(id):
 
 
 @app.route('/posts/status', methods=['GET'])
+@login_required
 def board_detail():
     post_list = Post.query.all()
     return render_template('board_detail.html', post_list=post_list)
 
 
 @app.route('/register', methods=['GET'])
+@login_required
 def register():    
     return render_template('register.html')
 
 
 @app.route('/register', methods=['POST'])
+@login_required
 def add_user():
     email = request.form['newEmail']
     name = email.split('@')
@@ -193,6 +200,7 @@ def add_user():
 
 
 @oid.after_login
+@login_required
 def after_login(resp):
     session['user_email'] = resp.email
     
@@ -215,6 +223,7 @@ app.jinja_env.globals.update(set_img=set_img)
 
 
 @app.route('/posts', methods=['POST'])
+@login_required
 def board_insert():
     category = request.form["category"]
     subject = request.form["subject"]
@@ -228,11 +237,13 @@ def board_insert():
 
 
 @app.route('/posts', methods=['GET'])
+@login_required
 def board_get():
     return render_template('board_insert.html')
 
 
 @app.route('/posts/<int:id>/comment', methods=['POST'])
+@login_required
 def add_comm(id):#comment 추가
     if request.method =='POST':
         user_id = g.user.id
@@ -247,6 +258,7 @@ def add_comm(id):#comment 추가
 
 
 @app.route('/posts/comments/<int:id>', methods=['PUT'])
+@login_required
 def update_comm(id):
     update= Comment.query.get(id)
     update.comment= request.form['comment_modify'] 
@@ -255,6 +267,7 @@ def update_comm(id):
 
 
 @app.route('/posts/comments/<int:id>', methods=['DELETE'])
+@login_required
 def del_comm(id):
     comment = Comment.query.get(id)
     db.session.delete(comment)
@@ -263,12 +276,14 @@ def del_comm(id):
 
 
 @app.route('/posts/<int:id>/modify', methods=['GET'])
+@login_required
 def get_modify(id):
     post = db.session.query(Post).get(id)
     return render_template('board_modify.html', post=post)
 
 
 @app.route('/posts/<int:id>/modify', methods=['POST'])
+@login_required
 def board_modify(id):
     update = Post.query.get(id)
     update.category = request.form["category"]
@@ -281,6 +296,7 @@ def board_modify(id):
     
     
 @app.route('/logout')
+@login_required
 def logout():
     session.pop('id', None)
     flash(u'로그아웃!')
