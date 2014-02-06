@@ -93,11 +93,8 @@
     <div class="container center-block">
     <div class="row-fluid">
         <div class="col-md-12" name="comm_list">
-        	<form action="" method="post">
-        	{% for comm in comm_list %}
-        						 
+        	{% for comm in comm_list %}				 
         	<table class="table table-striped" data-id={{comm.id}}>        		
-        		
         		<th> <p><img src={{set_img('comm.user.email')}}></p>
         			 <p>{{comm.user.email}}</p>
         			 <p> {{comm.created_at.date()}}</p>
@@ -116,10 +113,7 @@
                 </td>
               {%endif%}
             </table>
-
             {%endfor%}
-         
-          </form>
         </div>
     </div>
 	<div id="addComm">   

@@ -146,15 +146,14 @@ def board_list():
 
 @app.route('/posts/<int:id>', methods=['GET'])
 def show(id):    
-    post= db.session.query(Post).get(id)
-    comm_list_admin= Comment.query.filter(Comment.post_id==id,Comment.section==10).all()
-    comm_list = Comment.query.filter(Comment.post_id==id, Comment.section==99).all()
-    
+    post = db.session.query(Post).get(id)
+    comm_list_admin = Comment.query.filter(Comment.post_id==id).filter(Comment.section==10).all()
+    comm_list = Comment.query.filter(Comment.post_id==id).filter(Comment.section==99).all()
     return render_template('contents.html',
                             post=post, comm_list_admin=comm_list_admin, comm_list=comm_list)
 
 
-@app.route('/posts/<int:id>', methods=['POST'])
+@app.route('/posts/<int:id>/put_post', methods=['POST'])
 def put_post(id):
     post = Post.query.get(id)
     post.status = request.values.get('status')
@@ -267,11 +266,6 @@ def logout():
     session.pop('id', None)
     flash(u'로그아웃!')
     return redirect(url_for('index'))
-
-
-@app.route('/edit')
-def edit():
-    return render_template('edit.html')
 
 
 if __name__ == '__main__':
