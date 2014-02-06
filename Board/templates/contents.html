@@ -2,6 +2,7 @@
 {% block body %}
 {{ super() }}
 
+
 <div class="container center-block">
     <div class="row-fluid ">
 	    <div class="col-sm-5 col-md-5">
@@ -14,7 +15,7 @@
 	    </div>    	
 	    <div class="col-sm-2 col-md-3 col-md-offset-2">
 	    	 <img src={{session.get('gravatar')}} align="right">
-	         <h4 name="email" align="right"> {{session['user']['email']}}</h4>
+	         <h4 name="email" align="right"> {{session['user_email']}}</h4>
 	    </div>           
 	    <div class="col-md-12 col-sm-12 center-block">
 	    	 <pre>{{ post.content }}</pre> 
@@ -24,17 +25,13 @@
 
 	</div> 
 <div class="container center-block">  	
-	<form action="" method="post">
+	<form action="{{ url_for('put_post', id=post.id) }}" method="post">
     <div class="col-md-12">
         <table class="table table-striped" border="1">
         <thead>
 			<p>현재 제안서는 {{post.status}} 상태입니다.
-			{% if session['user']['email'] in (
-										'jc@spoqa.com',
-										'grant@spoqa.com',
-										'richard@spoqa.com',
-										'anny@spoqa.com'
-										) 
+			{% 
+				if g.user.is_admin()
            	%}
         	<button class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">
         	제안상태변경
@@ -73,17 +70,12 @@
 			    </div><!-- /.modal-content -->
 			  </div><!-- /.modal-dialog -->
 			</div><!-- /.modal -->
-        </thead> 
+       </thead> 
         
         <tbody>
         	<tr><td> 이곳에 제안서에 대한 의견을 작성해주세요</td></tr>
-        	{% for comm in comm_list%}
-        	{% if comm.author.email in ('jc@spoqa.com' , 
-        								'richard@spoqa.com' ,
-        								'anny@spoqa.com')
-        							%}
+        	{% for comm in comm_list_admin %}
         	<tr><td class="result">{{comm.comment}} </td></tr>
-        	{% endif %}
         	{% endfor %}
         </tbody>
 		</table>
@@ -102,16 +94,12 @@
     <div class="row-fluid">
         <div class="col-md-12" name="comm_list">
         	<form action="" method="post">
-        	{% for comm in post.comments %}
-        	{% if not comm.author.email in ('jc@spoqa.com' ,
-        									'richard@spoqa.com' ,
-        									'anny@spoqa.com')
-        									
-        							 %}
+        	{% for comm in comm_list %}
+        						 
         	<table class="table table-striped" data-id={{comm.id}}>        		
         		
-        		<th> <p><img src={{set_img('comm.author.email')}}></p>
-        			 <p>{{comm.author.email}} comm.author.name</p>
+        		<th> <p><img src={{set_img('comm.user.email')}}></p>
+        			 <p>{{comm.user.email}}</p>
         			 <p> {{comm.created_at.date()}}</p>
         			 <p id={{comm.id}}> {{ comm.comment }}</p>
         		</th>
@@ -121,14 +109,14 @@
                 	<span class="error"> 댓글을 입력하세요 </span>
                 	</div>
                 </td>
-                 {% if comm.author.email==session['user']['email']  %}
+                 {% if g.user.email==session['user_email']  %}
                 <td>
                 	<a class="btn btn-default modify" role="button">수정</a>
                 	<a class="btn btn-default delete" role="button">삭제</a>
                 </td>
               {%endif%}
             </table>
-            {%endif%}
+
             {%endfor%}
          
           </form>
@@ -137,7 +125,7 @@
 	<div id="addComm">   
 	 	<ul class="list-inline">
 	      <li><img src="{{session.get('gravatar')}}"></li>
-	      <li><p class="form-control-static" name="email">{{session['user']['email']}}</p></li>
+	      <li><p class="form-control-static" name="email">{{session['user_email']}}</p></li>
 	    </ul>                      
 	    <textarea class="form-control reply" name="reply" rows="3"> </textarea>  
 	    <input type="submit" class="pull-right" value="댓글 입력">    
