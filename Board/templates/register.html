@@ -1,15 +1,15 @@
 {% extends "board_top.html" %}
 {% block body %}
 {{ super() }}
-
+<div class="centered">
 <h2>register</h2>
   <form action="{{url_for('add_user')}}" method="post">
     
     <p>
       등록할 Email:</p>
-      <input type="text" name="newEmail" size=30>
+      <input type="email" class="form-control" id="exampleInputEmail1" size=30 name="newEmail" placeholder="Enter email">
       <input type=hidden name=next value="{{ next }}">
       <input type=submit value="등록">
   </form>
-
+</div>
 {% endblock %}

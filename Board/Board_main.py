@@ -20,7 +20,7 @@ import json
 app = Flask(__name__)
 oid = OpenID(app, join(dirname(__file__), 'openid_store'))
 SQLALCHEMY_DATABASE_URI = os.environ.get(
-    'DATABASE_URL','postgresql://postgres:1111@localhost:5432/fortest')
+    'DATABASE_URL', 'postgresql://postgres:1111@localhost:5432/fortest')
 db = SQLAlchemy(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
 app.config['SECRET_KEY'] = os.urandom(24)
@@ -32,13 +32,13 @@ class User(db.Model):
     id = db.Column(Integer, primary_key=True)
     name = db.Column(String(60))
     email = db.Column(String(60))
-    authority = db.Column(db.Boolean,nullable=False,default=False)
-    posts = db.relationship('Post', backref='author', \
-                            cascade="all, delete-orphan",passive_deletes=True)
-    comments = db.relationship('Comment', backref='author', \
-                               cascade="all, delete-orphan",passive_deletes=True)
+    authority = db.Column(db.Boolean, nullable=False, default=False)
+    posts = db.relationship('Post', backref='author',\
+                            cascade="all, delete-orphan", passive_deletes=True)
+    comments = db.relationship('Comment', backref='author',\
+                            cascade="all, delete-orphan", passive_deletes=True)
 
-    def __init__(self,name,email):
+    def __init__(self, name, email):
         self.name = name
         self.email = email
         
@@ -51,8 +51,8 @@ class Comment(db.Model):
     __tablename__ = 'comments'
     id = db.Column(db.Integer, primary_key=True)
     comment = db.Column(db.Text, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id',ondelete='cascade'))
-    post_id = db.Column(db.Integer, db.ForeignKey('posts.id',ondelete='cascade'))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='cascade'))
+    post_id = db.Column(db.Integer, db.ForeignKey('posts.id', ondelete='cascade'))
     created_at = db.Column(DateTime(timezone=True), nullable=False,
                                      default=functions.now())
     
@@ -62,7 +62,7 @@ class Comment(db.Model):
         self.post_id = post_id
 
     def __repr__(self):
-        return "<Comment id={0!r},comment={1!r}, user_id={2!r}, post_id={3!r}>".\
+        return "<Comment id={0!r}, comment={1!r}, user_id={2!r}, post_id={3!r}>".\
                 format(self.id, self.comment, self.user_id, self.post_id)
 
 
@@ -77,7 +77,7 @@ class Post(db.Model):
     created_at = db.Column(DateTime(timezone=True),
                            nullable=False,
                            default=functions.now())
-    comments = db.relationship('Comment', backref='post', \
+    comments = db.relationship('Comment', backref='post',\
                                cascade="all, delete-orphan", passive_deletes=True)
 
     def __init__(self, category, subject, status, contents, user_id):
@@ -94,14 +94,14 @@ class Post(db.Model):
 
 def init_db():
     db.create_all()
-
+    
 
 @app.before_request
 def before_request():
     if not session.get('user_email') is None:
         g.user = User.query.filter_by(email=session.get('user_email')).first()
-    
-    
+
+
 @app.route('/')
 def index():      
     return render_template('index.html')
@@ -109,28 +109,29 @@ def index():
 
 def login_required(f):
     @wraps(f)
-    def decorated_function(*args, **kwargs):
+    def decorated_function(*args,**kwargs):
         if session.get('user_email') is None:
-            return redirect(url_for('login', next=request.url))
-        return f(*args, **kwargs)
+            flash('로그인을 하면 접근이 가능합니다.')
+            return redirect(url_for('index',next=request.url))
+        return f(*args,**kwargs)
     return decorated_function
-
-
-@app.route('/login', methods=['GET', 'POST'])
+        
+        
+@app.route('/login')
 @oid.loginhandler
 def login():
     return oid.try_login("https://www.google.com/accounts/o8/id",
-          ask_for=['email','fullname','nickname'])
+          ask_for=['email', 'fullname', 'nickname'])
         
             
 @app.route('/posts/lists')
 @login_required
 def board_list():    
-    post_list = Post.query.order_by(Post.id).all()
+    post_list = Post.query.order_by(Post.id.desc()).all()
     return render_template('board_list.html', post_list=post_list)
 
 
-@app.route('/posts/<int:id>', methods=['GET'])
+@app.route('/posts/<int:id>',methods=['GET'])
 @login_required
 def show(id):    
     post = db.session.query(Post).get(id)  
@@ -139,7 +140,6 @@ def show(id):
 
 
 @app.route('/posts/<int:id>', methods=['POST'])
-@login_required
 def put_post(id):
     post = Post.query.get(id)
     post.status = request.values.get('status')
@@ -164,7 +164,6 @@ def register():
 
 
 @app.route('/register', methods=['POST'])
-@login_required
 def add_user():
     email = request.form['newEmail']
     name = email.split('@')
@@ -197,7 +196,6 @@ app.jinja_env.globals.update(set_img=set_img)
     
     
 @app.route('/posts', methods=['POST'])
-@login_required
 def board_insert():
     category = request.form["category"]
     subject = request.form["subject"]
@@ -206,8 +204,8 @@ def board_insert():
     user_id = g.user.id
     db_insert = Post(category, subject, status, contents, user_id)
     db.session.add(db_insert)
-    db.session.commit()
-    return redirect(url_for('board_list'))
+    db.session.commit()    
+    return redirect(url_for('show', id=db_insert.id))
 
 
 @app.route('/posts', methods=['GET'])
@@ -216,8 +214,16 @@ def board_get():
     return render_template('board_insert.html')
 
 
-@app.route('/posts/<int:id>/comment', methods=['POST'])
+@app.route('/posts/<int:id>', methods=['DELETE'])
 @login_required
+def del_board(id):
+    post = Post.query.get(id)
+    db.session.delete(post)
+    db.session.commit()
+    return jsonify(result='success')
+
+
+@app.route('/posts/<int:id>/comment', methods=['POST'])
 def add_comm(id):
     if request.method =='POST':
         user_id = g.user.id
@@ -230,27 +236,25 @@ def add_comm(id):
 
 
 @app.route('/posts/comments/<int:id>', methods=['PUT'])
-@login_required
 def update_comm(id):
     update = Comment.query.get(id)
     update.comment = request.form['comment_modify'] 
     db.session.commit()    
-    return jsonify(dict(result='success'))
+    return jsonify(result='success')
 
 
 @app.route('/posts/comments/<int:id>', methods=['DELETE'])
-@login_required
 def del_comm(id):
     comment = Comment.query.get(id)
     db.session.delete(comment)
     db.session.commit()
-    return jsonify(dict(result='success'))
+    return jsonify(result='success')
     
     
 @app.route('/logout')
 @login_required
 def logout():
-    session.pop('id', None)
+    session.pop('id',None)
     flash(u'로그아웃!')
     return redirect(url_for('index'))
 
