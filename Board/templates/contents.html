@@ -2,47 +2,60 @@
 {% block body %}
 {{ super() }}
 
-<form action="" method="post">
-<div class="container center-block">
-    <div class="row-fluid ">
-	    <div class="col-sm-6 col-md-6">
-	        <h2 align="left">{{post.subject}}</h2>
-	    </div>
-	    <div class="col-sm-1 col-md-1" >
-	        <h4 class="text-muted page-bottom" align="center">
-	        	{{post.category}}
-	        </h4>
-	    </div>    	
-	    <div class="col-sm-2 col-md-3 col-md-offset-2">
-	    	 <img src={{session.get('gravatar')}} align="right">
-	         <h4 name="email" align="right"> {{session['user_email']}}</h4>
-	    </div>
-	    
-	    <div class="col-md-9 col-sm-12 center-block">
-	    <div class="content_body">
-	    	 {{ post.content }}
-	    </div>
-        </div>
-         {% if g.user.email==session['user_email']  %}
-        	<div class="col-md-2 col-md-offset-1">
-        	<a href="{{url_for('get_modify', id=post.id) }}">수정</a>
-	    	<a class="del_body" data-id={{post.id}}>삭제</a>
-	    	</div>
-    		{%endif%}
-	   
-	</div>
-</div> 
-</form>
 
-<div class="container center-block">  	
+<div class="container">
+
+<form action="" method="post">   
+<div class="row">
+	<div class="col-xs-6 col-md-6 col-sm-6">
+		<h1 align="left">{{post.subject}}</h1>
+	</div>
+	<div class="col-xs-1 col-md-1 col-sm-1" align="bottom">
+		<br>
+	    <h4 class="text-muted page-bottom" align="bottom">
+		   	{{post.category}}
+	    </h4>
+	</div>    	
+	<div class="col-xs-5 col-md-3 col-md-offset-2 col-sm-3 col-sm-offset-2">
+		 <br>
+		  <div>
+	     <img src={{session.get('gravatar')}} align="right" style="height:50px;width:50px;" class="img-rounded" align="right">
+		 </div>
+		 <div>
+		  <h5 name="email" align="right"> {{session['user_email']}} </h5>   
+		  <h6 align="right">{{post.created_at.date()}}</h6>	
+		 </div>
+	   	
+	    
+	</div>
+</div>
+<hr>
+<div class="row">    
+    <div class="col-xs-12 col-md-12 col-sm-12 center-block">
+    	<div class="content_body">
+    		 {{ post.content|safe }}
+    	</div>
+    </div>   
+</div>	
+<div class="row">
+	{% if g.user.email==session['user_email'] %}
+    <div class="col-xs-12 col-md-12 col-sm-12" align="right">
+    <a href="{{url_for('get_modify', id=post.id) }}" align="right">수정   </a>
+    <a class="del_body" data-id={{post.id}} align="right">삭제</a>
+	</div>
+    {%endif%}	
+</div>
+</form>
+<hr>
+
+<div class="row">	
 	<form action="{{ url_for('put_post', id=post.id) }}" method="post">
-    <div class="col-md-12">
+    <div class="col-xs-12 col-md-12 col-sm-12">
         <table class="table table-striped" border="1">
         <thead>
 			<p>현재 제안서는 {{post.status}} 상태입니다.
 			{% if g.user.is_admin()	%}
         	<button class="btn btn-primary" data-toggle="modal" data-target="#myModal">
-
         	제안상태변경
 			</button>
 			{% endif %}
@@ -56,7 +69,7 @@
 	 			  </div>
 
 			      <div class="modal-body">
-			      	<div  class="btn-group">
+			      	<div class="btn-group">
 			      		<p>상태 </p>
 			      		<select id="status" name="status">
 							<option value="대기중">대기중</option>
@@ -78,10 +91,8 @@
 			    </div><!-- /.modal-content -->
 			  </div><!-- /.modal-dialog -->
 			</div><!-- /.modal -->
-       </thead> 
-        
-        <tbody>
-        	
+       </thead>     
+       <tbody>
         	{% for comm in post.comments %}
         	{% if comm.section==10%}
         	<tr><td class="result">{{comm.comment}} </td></tr>
@@ -96,49 +107,55 @@
     <br/>
     <br/>
     <hr>
+  </div>
+  
+  
+<div class="row">
+	<div class="col-xs-12 col-md-12 col-sm-12" name="comm_list">
+      	{% for comm in post.comments %}		
+       	{% if comm.section==99%}		 
+       	<table class="table table-striped" data-id={{comm.id}}>  
+       		<tr>      		
+       		<th> <img src={{set_img('comm.user.email')}} class="img-thumbnail">
+       			 {{comm.user.email}}
+       			 {{comm.created_at.date()}}
+       			 <p style="padding:0 70px" id={{comm.id}}> {{ comm.comment }}</p>
+       		</th>
+    		</tr>
+         	 <td>
+        	 	<div class='edit_box'>
+               	<span class="error"> 댓글을 입력하세요 </span>
+               	</div>
+            </td>
+            {% if g.user.email==session['user_email']  %}
+            <td style="width:300px;height:100px">
+               	<a class="btn btn-default modify" role="button">수정</a>
+               	<a class="btn btn-default delete" role="button">삭제</a>
+            </td>
+            {%endif%}
+            {%endif%}
+        </table>
+        {%endfor%}
 	</div>
+</div>
 
-<form action="{{ url_for('add_comm', id=post.id) }}" method="post"> 
-    <div class="container center-block">
-    <div class="row-fluid">
-        <div class="col-md-12" name="comm_list">
-        	{% for comm in post.comments %}		
-        	{% if comm.section==99%}		 
-        	<table class="table table-condensed" data-id={{comm.id}}>        		
-        		<th> <img src={{set_img('comm.user.email')}} class="thumbnails">
-        			 {{comm.user.email}}
-        			 {{comm.created_at.date()}}
-        			 <p style="padding:0 70px" id={{comm.id}}> {{ comm.comment }}</p>
-        		</th>
-     
-        		 <td>
-        		 	<div class='edit_box'>
-                	<span class="error"> 댓글을 입력하세요 </span>
-                	</div>
-                </td>
-                 {% if g.user.email==session['user_email']  %}
-                <td style="width:300px;height:100px">
-                	<a class="btn btn-default modify" role="button">수정</a>
-                	<a class="btn btn-default delete" role="button">삭제</a>
-                </td>
-              {%endif%}
-              {% endif%}
-            </table>
-            {%endfor%}
-        </div>
-    </div>
     
+<div class="row">
+   	<form action="{{ url_for('add_comm', id=post.id) }}" method="post"> 
+   	<div class="col-xs-12 col-md-12 col-sm-12">
 	<div id="addComm">   
-	 	<ul class="list-inline">
-	      <li><img src="{{session.get('gravatar')}}"></li>
-	      <li><p class="form-control-static" name="email">{{session['user_email']}}</p></li>
-	    </ul>                      
-	    <textarea class="form-control reply" name="reply" rows="3"> </textarea>  
-	    <input type="submit" class="pull-right" value="댓글 입력">    
+	<ul class="list-inline">
+		<li><img src="{{session.get('gravatar')}}"></li>
+	    <li><p class="form-control-static" name="email">{{session['user_email']}}</p></li>
+	</ul>                      
+	<textarea class="form-control reply" name="reply" rows="3" cols="30"> </textarea>  
+	<input class="btn btn-default" type="submit" class="pull-right" value="댓글 입력">  
 	</div>
 	<hr>
+	</div>
+	</form>
 </div>
-</form>
+</div>
 
 <script type="text/javascript">
 	$('.modify').on('click', function(){
@@ -225,14 +242,6 @@
 	});
 </script>
 
-<script type="text/javascript">
-	$(document).on('ready', function(){
-		$('.content_body').each(function(){
-		var $this = $(this);
-		var text = $('.content_body').text();
-		$this.html(text.replace('&lt;','<').replace('&gt;', '>'));
-		});
-	});
-</script>
+
 {% endblock %}
 
