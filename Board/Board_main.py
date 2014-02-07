@@ -19,8 +19,7 @@ import json
 app = Flask(__name__)
 oid = OpenID(app, join(dirname(__file__), 'openid_store'))
 SQLALCHEMY_DATABASE_URI = os.environ.get(
-    'DATABASE_URL','postgresql://postgres:1234@localhost/pos')
-
+    'DATABASE_URL', 'postgresql://postgres:1234@localhost/pos')
 db = SQLAlchemy(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
 app.config['SECRET_KEY'] = os.urandom(24)
@@ -36,7 +35,7 @@ class User(db.Model):
                             cascade="all, delete-orphan", passive_deletes=True)
     comments = db.relationship('Comment', backref='user', 
                                cascade="all, delete-orphan", passive_deletes=True)
-    authority = db.Column(db.Boolean, default='False')
+    authority = db.Column(db.Boolean, nullable=False, default='False')
     
     def __init__(self, name, email, authority):
         self.name = name
@@ -48,14 +47,15 @@ class User(db.Model):
             'jc@spoqa.com',
             'grant@spoqa.com',
             'richard@spoqa.com',
-            'zooey@spoqa.com'
+            'zooey@spoqa.com',
+            'anny@spoqa.com'
         )
         
     def __repr__(self):
         return "<User id={0!r}, name={1!r}, email={2!r}, authority={3!r}>".\
                 format(self.id, self.name, self.email, self.authority)
                 
-
+    
 class Comment(db.Model):
     __tablename__ = 'comments'
     id = db.Column(db.Integer, primary_key=True)
@@ -162,9 +162,7 @@ def put_post(id):
     post.comments.append(Comment(comment=request.form['opinion'],
                                  user_id=g.user.id,
                                  post_id=session.get('post_id'),
-                                 section=section 
-                                ))
-    
+                                 section=section))
     db.session.commit()
     return redirect(oid.get_next_url())
 
@@ -176,35 +174,31 @@ def board_detail():
     return render_template('board_detail.html', post_list=post_list)
 
 
-@app.route('/register', methods=['GET'])
-@login_required
-def register():    
-    return render_template('register.html')
-
-
 @app.route('/register', methods=['POST'])
-@login_required
-def add_user():
-    email = request.form['newEmail']
+def add_user(account):
+    email = account
     name = email.split('@')
     authority = False
     user = User(name[0],email,authority)
     db.session.add(user)
     db.session.commit()
-    return redirect(oid.get_next_url())
+    flash(u'처음 접속하셨습니다. 다시 한번 로그인 해주세요.')
+    return redirect(url_for('index'))
     
 
 @oid.after_login
 def after_login(resp):   
-    user = User.query.filter(User.email==resp.email).first()
-    if user is None:
-        flash(u'접근권한이 없습니다. 관리자에게 문의하세요')
-        return redirect(oid.get_next_url())
+    user = User.query.filter(User.email==resp.email).first() 
+    if (resp.email.find('spoqa.com')>0) and (user is None):
+        add_user(resp.email)
+        return redirect(url_for('index')) 
+    elif user is None:
+        flash(u'접근권한이 없습니다. 관리자에게 문의하세요') 
     else:
         session['user_email'] = resp.email
         gravatar = set_img(resp.email)    
         session['gravatar'] = gravatar              
-        return redirect(url_for('board_list'))    
+        return redirect(url_for('board_list')) 
 
 
 def set_img(s):
@@ -218,7 +212,6 @@ app.jinja_env.globals.update(set_img=set_img)
     
     
 @app.route('/posts', methods=['POST'])
-@login_required
 def board_insert():
     category = request.form["category"]
     subject = request.form["subject"]
@@ -253,7 +246,6 @@ def add_comm(id):
         comment = request.form['reply']
         post_id = id
         section = 99
-        
         comment = Comment(comment, user_id, post_id, section)
         db.session.add(comment)       
         db.session.commit()
@@ -277,6 +269,7 @@ def del_comm(id):
     db.session.commit()
     return jsonify(dict(result='success'))
 
+
 @app.route('/posts/<int:id>/modify', methods=['GET'])
 @login_required
 def get_modify(id):
@@ -285,7 +278,6 @@ def get_modify(id):
 
 
 @app.route('/posts/<int:id>/modify', methods=['POST'])
-@login_required
 def board_modify(id):
     update = Post.query.get(id)
     update.category = request.form["category"]
@@ -295,10 +287,9 @@ def board_modify(id):
     update.user_id = g.user.id
     db.session.commit()
     return redirect(url_for('board_list'))
-    
+
     
 @app.route('/logout')
-@login_required
 def logout():
     session.pop('id',None)
     flash(u'로그아웃!')
@@ -306,4 +297,4 @@ def logout():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=int(environ.get('PORT',5000)))
+    app.run( debug=True, host='0.0.0.0', port=int(environ.get('PORT',5000)))

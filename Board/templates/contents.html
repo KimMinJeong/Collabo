@@ -5,10 +5,10 @@
 <form action="" method="post">
 <div class="container center-block">
     <div class="row-fluid ">
-	    <div class="col-sm-5 col-md-5">
+	    <div class="col-sm-6 col-md-6">
 	        <h2 align="left">{{post.subject}}</h2>
 	    </div>
-	    <div class="col-sm-2 col-md-2" >
+	    <div class="col-sm-1 col-md-1" >
 	        <h4 class="text-muted page-bottom" align="center">
 	        	{{post.category}}
 	        </h4>
@@ -18,15 +18,16 @@
 	         <h4 name="email" align="right"> {{session['user_email']}}</h4>
 	    </div>
 	    
-	    <div class="col-md-12 col-sm-12 center-block">
+	    <div class="col-md-9 col-sm-12 center-block">
 	    	 {{ post.content }}
-	    	 {% if g.user.email==session['user_email']  %}
-        	<div class="col-md-1 col-md-offset-1">
-        	<a href="{{url_for('get_modify', id=post.id) }}">글수정</a>
-	    	<a class="del_body" data-id={{post.id}}>글삭제</a>
+        </div>
+         {% if g.user.email==session['user_email']  %}
+        	<div class="col-md-2 col-md-offset-1">
+        	<a href="{{url_for('get_modify', id=post.id) }}">수정</a>
+	    	<a class="del_body" data-id={{post.id}}>삭제</a>
 	    	</div>
     		{%endif%}
-	    </div>
+	   
 	</div>
 </div> 
 </form>
@@ -40,7 +41,7 @@
 			{% 
 				if g.user.is_admin()
            	%}
-        	<button class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">
+        	<button class="btn btn-primary" data-toggle="modal" data-target="#myModal">
 
         	제안상태변경
 			</button>
@@ -101,10 +102,10 @@
         <div class="col-md-12" name="comm_list">
         	{% for comm in comm_list %}				 
         	<table class="table table-striped" data-id={{comm.id}}>        		
-        		<th> <p><img src={{set_img('comm.user.email')}}></p>
-        			 <p>{{comm.user.email}}</p>
-        			 <p> {{comm.created_at.date()}}</p>
-        			 <p style="padding:0 80px" id={{comm.id}}> {{ comm.comment }}</p>
+        		<th> <img src={{set_img('comm.user.email')}} class="thumbnails">
+        			 {{comm.user.email}}
+        			 {{comm.created_at.date()}}
+        			 <p style="padding:0 70px" id={{comm.id}}> {{ comm.comment }}</p>
         		</th>
      
         		 <td>
