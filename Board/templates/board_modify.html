@@ -3,30 +3,47 @@
 
 {{ super() }}
 
-<form action="" method="post" onclick="return modifyForm()">
+<form action="" class="form-horizontal" method="post" onclick="return postForm()">
 <div class="container" >
-	<div class="row" align="left">
-		<div class="col-xs-12 col-sm-12 col-md-12">
-			<p><strong>분류</strong>
-			<select id="category" name="category">
+	<div class="row" align="left">	
+		<label class="col-xs-1 col-md-1 col-sm-1" align="center"><h4>분 류</h4></label>
+		<div class="col-xs-2 col-md-2 col-sm-2">
+			<select id="category" name="category" class="form-control">
 				<option value="{{ post.category }}">{{ post.category }}</option>
 				<option value="STORE" name="store">STORE</option>
 				<option value="ADMIN" name="admin">ADMIN</option>
 				<option value="MOBILE" name="mobile">MOBILE</option>
-			</select></p>
+			</select>
 			<br/>
-			<p><strong>상태</strong>
-			<select id="status" name="status" value="{{ post.status }}">
-				<option value="{{ post.status }}">{{ post.status }}</option>
+		</div>
+		
+		<label class="col-xs-1 col-md-1 col-sm-1" align="center"><h4>상 태</h4></label>
+		<div class="col-xs-2 col-md-2 col-sm-2">
+			<select id="status" name="status" class="form-control">
 				<option value="대기중" name="wait">대기중</option>
-			</select></p>
+				
+			</select>
 			<br/>
-			<p><strong>제목</strong>
-			<input type="text" size="100" id="subject" name="subject" value="{{post.subject}}"></p>
+		</div>
+	</div>
+	<div class="row">
+		<label class="col-xs-1 col-md-1 col-sm-1" align="center" ><h4>제 목</h4></label>
+		<div class="col-xs-9 col-md-9 col-sm-9">	
+		<input type="text" size="100" class="form-control" id="subject" name="subject" value="{{post.subject}}">
+		<span class="glyphicon glyphicon-remove form-control-feedback"> </span>
+		
+		<br/>
+	</div>
+		<div class="col-xs-12 col-md-12 col-sm-12">
+			<pre><textarea class="summernote" rows="20" cols="105" name="content">{{post.content}}</textarea></pre>
 			<br/>
-			<pre><textarea class="summernote" rows="20" cols="105" name="content"> {{ post.content | safe }} </textarea></pre>
-			<br/>
+<<<<<<< HEAD
+		</div>
+		<div class="col-md-1 col-xs-1 col-sm-1 col-md-offset-11 col-xs-offset-11 col-sm-offset-11">
+			<p><input class="btn btn-default" type="submit" class="submit" value="작성완료"></p>
+=======
 			<p><input type="submit" class="modify" value="수정완료"></p>
+>>>>>>> c3490e621d0af211c944df0caa1a5ce50f121df0
 		</div>
 	</div>
 </div>
@@ -38,15 +55,14 @@
   		height: 300,   //set editable area's height
   		focus: true    //set focus editable area after Initialize summernote
 	});
-});
 
-var modifyForm = function() {
+});
+var postForm = function() {
      var content = $('textarea[name="content"]').html($('.summernote').code());
 };
 </script>
 
 
 {% endblock %}
-
 
 
