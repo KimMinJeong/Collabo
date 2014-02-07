@@ -15,7 +15,6 @@ import os
 import urllib
 import json
 
-
 app = Flask(__name__)
 oid = OpenID(app, join(dirname(__file__), 'openid_store'))
 SQLALCHEMY_DATABASE_URI = os.environ.get(
@@ -171,7 +170,8 @@ def put_post(id):
 @login_required
 def board_detail():
     post_list = Post.query.all()
-    return render_template('board_detail.html', post_list=post_list)
+    comm_list_admin = Comment.query.filter(Comment.id==id).filter(Comment.section==10).all()
+    return render_template('board_detail.html', post_list=post_list, comm_list_admin=comm_list_admin)
 
 
 @app.route('/register', methods=['POST'])
@@ -231,7 +231,6 @@ def board_get():
 
 
 @app.route('/posts/<int:id>', methods=['DELETE'])
-@login_required
 def del_board(id):
     post = Post.query.get(id)
     db.session.delete(post)
@@ -262,7 +261,6 @@ def update_comm(id):
 
 
 @app.route('/posts/comments/<int:id>', methods=['DELETE'])
-@login_required
 def del_comm(id):
     comment = Comment.query.get(id)
     db.session.delete(comment)
@@ -297,4 +295,5 @@ def logout():
 
 
 if __name__ == '__main__':
+    init_db()
     app.run( debug=True, host='0.0.0.0', port=int(environ.get('PORT',5000)))
