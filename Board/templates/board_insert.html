@@ -6,7 +6,7 @@
 <form action="" method="post" onclick="return postForm()">
 <div class="container" >
 	<div class="row" align="left">
-		<div class="col-md-12">
+		<div class="col-lg-12 col-sm-12 col-md-12">
 			<p><strong>분류</strong>
 			<select id="category" name="category">
 				<option value="STORE" name="store">STORE</option>
@@ -17,10 +17,6 @@
 			<p><strong>상태</strong>
 			<select id="status" name="status">
 				<option value="대기중" name="wait">대기중</option>
-				<option value="개발예정" name="wait_create" >개발예정</option>
-				<option value="개발중" name="creating">개발중</option>
-				<option value="업데이트" name="update">업데이트</option>
-				<option value="반려" name="reject">반려</option>
 			</select></p>
 			<br/>
 			<p><strong>제목</strong>
@@ -44,11 +40,12 @@
 });
 
 var postForm = function() {
-     var content = $('textarea[name="content"]').html($('.summernote').code());
+     var content = $('textarea[name="content"]').text($('.summernote').code());
      
      console.log(content);
 };
 </script>
+
 
 {% endblock %}
 
