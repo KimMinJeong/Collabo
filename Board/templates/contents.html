@@ -92,7 +92,7 @@
        <div class="panel-body">
         	{% for comm in post.comments %}
         	{% if comm.section==10%}
-        	<tr><td class="result">{{comm.comment}} </td></tr>
+        	<p class="result">{{comm.user.name}}:{{comm.comment}} </p> <hr>
         	{% endif %}
         	{% endfor %}
         </div>
