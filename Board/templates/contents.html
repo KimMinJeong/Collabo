@@ -2,135 +2,143 @@
 {% block body %}
 {{ super() }}
 
+
 <div class="container">
-	<form action="" method="post">
-		<!--제안서부분-->
-		<div class="row">
-			<div class="col-xs-6 col-md-6 col-sm-6">
-				<h2 align="left">{{post.subject}}</h2>
-			</div>
-			<div class="col-xs-1 col-md-1 col-sm-1">
-			    <h4 class="text-muted page-bottom" align="center">
-				   	{{post.category}}
-			    </h4>
-			</div>    	
-			<div class="col-xs-5 col-md-3 col-md-offset-2 col-sm-3 col-sm-offset-2">
-			   	 <img src={{session.get('gravatar')}} align="right">
-			     <h4 name="email" align="right"> {{g.user.email}}</h4>
-			</div>
-		</div>
-		
-		<div class="row">    
-		    <div class="col-xs-9 col-md-9 col-sm-9 center-block">
-		    	<div class="content_body">
-		    		 {{ post.content|safe }}
-		    	</div>
-		    </div>
-		    {% if g.user.email==session['user_email'] %}
-		    <div class="col-xs-3 col-md-2 col-md-offset-1 col-sm-3">
-		    <a href="{{url_for('get_modify', id=post.id) }}">글수정</a>
-		    <a class="del_body" data-id={{post.id}}>글삭제</a>
-			</div>
-		    {%endif%}	   
-		</div>	
-	</form>
-	<!--모달부분-->
-	<div class="row">	
-		<form action="{{ url_for('put_post', id=post.id) }}" method="post">
-	    <div class="col-xs-12 col-md-12 col-sm-12">
-	        <table class="table table-striped" border="1">
-	        <thead>
-				<p>현재 제안서는 {{post.status}} 상태입니다.
-				{% if g.user.is_admin()	%}
-	        	<button class="btn btn-primary" data-toggle="modal" data-target="#myModal">
-	        	제안상태변경
-				</button>
-				{% endif %}
-				</p>
-				<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-				  <div class="modal-dialog">
-				    <div class="modal-content">
-				      <div class="modal-header">
-				        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-				        <h2 class="modal-title" id="myModalLabel">제안상태변경하기</h2>
-		 			  </div>
-	
-				      <div class="modal-body">
-				      	<div class="btn-group">
-				      		<p>상태</p>
-				      		<select id="status" name="status">
-								<option value="대기중">대기중</option>
-								<option value="개발예정">개발예정</option>
-								<option value="개발중">개발중</option>
-								<option value="업데이트">업데이트</option>
-								<option value="반려">반려</option>
-							</select>
-		            		<div>
-		    				<p>의견</p>
-		    				<pre><textarea rows="8" cols="50" name="opinion"> </textarea></pre>
-		            		</div>
-				      	</div>
-				      </div>
-				      <div class="modal-footer">
-				        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-				        <input type="submit" value="변경완료">
-				      </div>
-				    </div><!-- /.modal-content -->
-				  </div><!-- /.modal-dialog -->
-				</div><!-- /.modal -->
-	       </thead>     
-	       <tbody>
-	        	{% for comm in post.comments %}
-	        	{% if comm.section==10%}
-	        	<tr><td class="result">{{comm.comment}} </td></tr>
-	        	{% endif %}
-	        	{% endfor %}
-	        </tbody>
-			</table>
-		</div>
-		</form>
-	    <br/>
-	    <br/>
-	    <br/>
-	    <hr>
-	  </div>
-	  
-	<!--댓글 창부분-->
-	<div class="row">
-		<div name="comm_list">
-	      	{% for comm in post.comments %}		
-	       	{% if comm.section==99%}		 
-	       	<div class="col-xs-12 col-sm-12 col-md-12" data-id={{comm.id}}>   		
-	       		<div class="col-xs-1 col-md-1 col-sm-1"> 
-	       			<img src={{set_img('comm.user.email')}} class="thumbnails">
-	       		</div>
-	       		<div class="col-md-11">
-	       			 {{comm.user.email}}
-        			<br/>
-        			<h6>{{comm.created_at.date()}}</h6>
-	       		</div>
-	       	</div>
-	   	</div>
-   		<div class="col-xs-12 col-sm-12 col-md-12">
-    		<p style="padding:0 70px" id={{comm.id}} align="left">
-    			{{ comm.comment }}
-    		</p>
-		</div>	 
-        {% if g.user.email==session['user_email']  %}
-        <div>
-    	 	<div class='edit_box'>
-           	<span class="error"> 댓글을 입력해주세요 </span>
-           	</div>
-        </div>
-        {%endif%}
-       	{%endif%}
-        {%endfor%}
+<form action="" method="post">   
+<div class="row">
+	<div class="col-xs-6 col-md-6 col-sm-6">
+		<h1 align="left">{{post.subject}}</h1>
 	</div>
-	<br/>
-	<br/>
-	<br/>
-	<!--댓글 쓰기부분-->
-	<div class="row">
+	<div class="col-xs-1 col-md-1 col-sm-1" align="bottom">
+		<br>
+	    <h4 class="text-muted page-bottom" align="bottom">
+		   	{{post.category}}
+	    </h4>
+	</div>    	
+	<div class="col-xs-5 col-md-3 col-md-offset-2 col-sm-3 col-sm-offset-2">
+		 <br>
+		  <div>
+	     <img src={{set_img('post.author.email')}} align="right" style="height:50px;width:50px;" class="img-rounded" align="right">
+		 </div>
+		 <div>
+		  <h5 name="email" align="right"> {{post.author.email}} </h5>   
+		  <h6 align="right">{{post.created_at.date()}}</h6>	
+		 </div> 
+	</div>
+</div>
+<hr>
+<div class="row">    
+    <div class="col-xs-12 col-md-12 col-sm-12 center-block">
+    	<div class="content_body">
+    		 {{ post.content|safe }}
+    	</div>
+    </div>   
+</div>	
+<div class="row">
+	{% if g.user.email==session['user_email'] %}
+    <div class="col-xs-12 col-md-12 col-sm-12" align="right">
+    <a href="{{url_for('get_modify', id=post.id) }}" align="right">수정   </a>
+    <a class="del_body" data-id={{post.id}} align="right">삭제</a>
+	</div>
+    {%endif%}	
+</div>
+</form>
+<hr>
+
+<div class="row">	
+	<form action="{{ url_for('put_post', id=post.id) }}" method="post">
+    <div class="col-xs-12 col-md-12 col-sm-12">
+        <table class="table table-striped" border="1">
+        <thead>
+			<p>현재 제안서는 {{post.status}} 상태입니다.
+			{% if g.user.is_admin()	%}
+        	<button class="btn btn-primary" data-toggle="modal" data-target="#myModal">
+        	제안상태변경
+			</button>
+			{% endif %}
+			</p>
+			<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+			  <div class="modal-dialog">
+			    <div class="modal-content">
+			      <div class="modal-header">
+			        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+			        <h2 class="modal-title" id="myModalLabel">제안상태변경하기</h2>
+	 			  </div>
+
+			      <div class="modal-body">
+			      	<div class="btn-group">
+			      		<p>상태 </p>
+			      		<select id="status" name="status">
+							<option value="대기중">대기중</option>
+							<option value="개발예정">개발예정</option>
+							<option value="개발중">개발중</option>
+							<option value="업데이트">업데이트</option>
+							<option value="반려">반려</option>
+						</select>
+	            		<div>
+	    				<p>의견</p>
+	    				<pre><textarea rows="8" cols="50" name="opinion"> </textarea></pre>
+	            		</div>
+			      	</div>
+			      </div>
+			      <div class="modal-footer">
+			        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+			        <input type="submit" value="변경완료">
+			      </div>
+			    </div><!-- /.modal-content -->
+			  </div><!-- /.modal-dialog -->
+			</div><!-- /.modal -->
+       </thead>     
+       <tbody>
+        	{% for comm in post.comments %}
+        	{% if comm.section==10%}
+        	<tr><td class="result">{{comm.comment}} </td></tr>
+        	{% endif %}
+        	{% endfor %}
+        </tbody>
+		</table>
+	</div>
+	</form>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <hr>
+</div>
+  <hr>
+</div>
+<div class="container">
+<div class="row">
+	<div class="col-xs-12 col-md-12 col-sm-12" name="comm_list">
+		{% for comm in post.comments%}
+       	<table class="table table-striped" data-id={{comm.id}}>  
+       		     		
+       		<th> <img src={{set_img('comm.user.email')}} class="img-thumbnail">
+       			 {{comm.user.email}}
+       			 {{comm.created_at.date()}}
+       			 <p style="padding:0 70px" id={{comm.id}}>  {{comm.comment}}</p>
+       		</th>
+    		
+         	 <td>
+        	 	<div class='edit_box'>
+               	<span class="error"> 댓글을 입력하세요 </span>
+               	</div>
+            </td>
+            {% if session.get('user_email')==comm.user.email%}
+            <td style="width:300px;height:100px">
+               	<a class="btn btn-default modify" role="button">수정</a>
+               	<a class="btn btn-default delete" role="button">삭제</a>
+            </td>
+            {%endif%}
+            
+        </table>
+        		{%endfor%}
+ </div>
+ 
+</div>
+</div>
+<div class="container">    
+<div class="row">
 	   	<form action="{{ url_for('add_comm', id=post.id) }}" method="post"> 
 		   	<div class="col-xs-12 col-md-12 col-sm-12">
 				<div id="addComm">
@@ -159,7 +167,7 @@
 		var data=$(this).closest('table').data('id');
 		var str= $('#' + data).text();
 		$(this).closest('table').find('.edit_box')
-			.html("<form methods=post>" +
+			.html("<form method=post>" +
 				"<textarea class='form-control' rows=3 name='comment_modify'>" + str + "</textarea>"
 			+ "<button type='button' class='modify_comment'>수정</button>" + "</form>")	
 			.find('form');

@@ -29,7 +29,6 @@
 		<div class="col-xs-9 col-md-9 col-sm-9">	
 		<input type="text" size="100" class="form-control" id="subject" name="subject">
 		<span class="glyphicon glyphicon-remove form-control-feedback"></span>
-		
 		<br/>
 	</div>
 		<div class="col-xs-12 col-md-12 col-sm-12">
@@ -51,19 +50,22 @@
 	});
 
 });
-var postForm = function() {
-     var content = $('textarea[name="content"]').html($('.summernote').code());
-};
+	var postForm = function() {
+  	   var content = $('textarea[name="content"]').html($('.summernote').code());
+	};
 </script>
 
 <script type="text/javascript">
-		$('.glyphicon').hide();
+	$(document).ready(function() {
+ 		$('.glyphicon').hide();
 		$('.submit').on('click', function(e){
 			var data=$('#subject').val();
 			var len=data.length;
+			console.log(len);
 			if(len<1)
 			{
 				$('.glyphicon').show();
+				alert("제목을 입력하세요.");
 				e.preventDefault();
 			}
 			else
@@ -71,7 +73,7 @@ var postForm = function() {
 				$('.glyphicon').hide();
 			}
 		});
-	
+	});
 </script>
 {% endblock %}
 

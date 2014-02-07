@@ -1,17 +1,16 @@
 {% extends "layout.html" %}
 {% block body %}
 <div class="centered container" style="padding:0 19px">
-        <div class="row centered" >
-        
-                <div class="col-xs-6 col-md-4 ">
-                         <img src="static/img/dodo.png" class="img-responsive"/>
-                </div>                        
-                <div class="col-xs-6 col-sm-12 col-md-6 col-md-offset-2">
-                         	<h1>도도 제품 제안서</h1>  
-                         <a href="{{url_for('login')}}" class="btn btn-primary btn-lg" role="button">스포카 계정으로 로그인하기</a>                                                                            
-                </div>
+	<div class="row centered" >
+    	<div class="col-xs-4 col-md-4 col-sm-4 ">
+        	<img src="static/img/dodo.png" class="img-responsive"/>
+        </div>                        
+        <div class="col-xs-8 col-sm-8 col-md-6 col-md-offset-2">
+           	<h1>도도 제품 제안서</h1>  
+            <a href="{{url_for('login')}}" class="btn btn-primary btn-lg" role="button">스포카 계정으로 로그인하기</a>                                                                            
         </div>
-<div class="row body" style="padding: 0 19px">
+    </div>
+	<div class="row body" style="padding: 0 19px">
         <div class="col-xs-12 col-sm-12 col-md-12 col-centered"> 
         <hr />
         <p>
@@ -19,7 +18,7 @@
                 (주) 스포카 개발팀은 제안서의 아이디어를 첫번째 우선순위로 업데이트 계획을 잡습니다. 좋은 아이디어가 있다면 적극적으로 공유해주시면 서비스 업데이트 방향 설정에 큰 도움이 됩니다. 
         </p>
         </div>
-</div>
+	</div>
 </div>
 
 {% endblock %}
