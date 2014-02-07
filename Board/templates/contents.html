@@ -102,10 +102,10 @@
         <div class="col-md-12" name="comm_list">
         	{% for comm in comm_list %}				 
         	<table class="table table-striped" data-id={{comm.id}}>        		
-        		<th> <p><img src={{set_img('comm.user.email')}}></p>
-        			 <p>{{comm.user.email}}</p>
-        			 <p> {{comm.created_at.date()}}</p>
-        			 <p style="padding:0 80px" id={{comm.id}}> {{ comm.comment }}</p>
+        		<th> <img src={{set_img('comm.user.email')}} class="thumbnails">
+        			 {{comm.user.email}}
+        			 {{comm.created_at.date()}}
+        			 <p style="padding:0 70px" id={{comm.id}}> {{ comm.comment }}</p>
         		</th>
      
         		 <td>

@@ -212,7 +212,6 @@ app.jinja_env.globals.update(set_img=set_img)
     
     
 @app.route('/posts', methods=['POST'])
-@login_required
 def board_insert():
     category = request.form["category"]
     subject = request.form["subject"]
@@ -279,7 +278,6 @@ def get_modify(id):
 
 
 @app.route('/posts/<int:id>/modify', methods=['POST'])
-@login_required
 def board_modify(id):
     update = Post.query.get(id)
     update.category = request.form["category"]
@@ -292,7 +290,6 @@ def board_modify(id):
 
     
 @app.route('/logout')
-@login_required
 def logout():
     session.pop('id',None)
     flash(u'로그아웃!')
