@@ -19,7 +19,7 @@ import json
 app = Flask(__name__)
 oid = OpenID(app, join(dirname(__file__), 'openid_store'))
 SQLALCHEMY_DATABASE_URI = os.environ.get(
-    'DATABASE_URL','postgresql://postgres:1234@localhost/pos')
+    'DATABASE_URL','postgresql://postgres:1234@localhost/postgres')
 
 db = SQLAlchemy(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
@@ -174,29 +174,13 @@ def put_post(id):
 def board_detail():
     post_list = Post.query.all()
     return render_template('board_detail.html', post_list=post_list)
-
-
-@app.route('/register', methods=['GET'])
-@login_required
-def register():    
-    return render_template('register.html')
-
-
-@app.route('/register', methods=['POST'])
-@login_required
-def add_user():
-    email = request.form['newEmail']
-    name = email.split('@')
-    authority = False
-    user = User(name[0],email,authority)
-    db.session.add(user)
-    db.session.commit()
-    return redirect(oid.get_next_url())
     
 
 @oid.after_login
 def after_login(resp):   
     user = User.query.filter(User.email==resp.email).first()
+
+    
     if user is None:
         flash(u'접근권한이 없습니다. 관리자에게 문의하세요')
         return redirect(oid.get_next_url())
@@ -306,4 +290,5 @@ def logout():
 
 
 if __name__ == '__main__':
+    init_db()
     app.run(debug=True, host='0.0.0.0', port=int(environ.get('PORT',5000)))
