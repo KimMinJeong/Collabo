@@ -43,7 +43,7 @@ class User(db.Model):
 
     def is_admin(self):
         return self.email in (
-            'jc@spoqa.com',
+            'shinvee@spoqa.com',
             'grant@spoqa.com',
             'richard@spoqa.com',
             'zooey@spoqa.com',
@@ -167,8 +167,8 @@ def put_post(id):
 @login_required
 def board_detail():
     post_list = Post.query.all()
-    comms = Comment.query.filter_by(section=10).all()
-    return render_template('board_detail.html', post_list=post_list, comms=comms)
+    comm = Comment.query.filter(Comment.section==10).all()
+    return render_template('board_detail.html', post_list=post_list, comm=comm)
 
 
 @app.route('/register', methods=['POST'])
