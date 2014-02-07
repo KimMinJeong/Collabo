@@ -18,7 +18,7 @@ import json
 app = Flask(__name__)
 oid = OpenID(app, join(dirname(__file__), 'openid_store'))
 SQLALCHEMY_DATABASE_URI = os.environ.get(
-    'DATABASE_URL','postgresql://postgres:1234@localhost/postgres')
+    'DATABASE_URL','postgresql://postgres:1111@localhost/postgres')
 db = SQLAlchemy(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
 app.config['SECRET_KEY'] = os.urandom(24)
