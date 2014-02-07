@@ -15,10 +15,6 @@
 		{% for post in post_list %}
 		<div class="panel panel-primary">
 	    <div class="panel-heading">이 제안은 현재 {{post.status}} 상태입니다.</div>
-<<<<<<< HEAD
-    	<div class="panel-body"><pre>{{post.content}}</pre></div>
-	    {% endfor %}
-=======
     	<div class="panel-body"><pre>{{post.content}}</pre>
     		{%for co in comm %}
     		{% if co.post_id == post.id%}
@@ -27,10 +23,8 @@
     		{%endfor%}
     	</div>
     	
->>>>>>> c3490e621d0af211c944df0caa1a5ce50f121df0
-	    <br/>
-		</div>
-		{%endfor%}
+</div>
+{%endfor%}
 	</div>
 	
 </div>
