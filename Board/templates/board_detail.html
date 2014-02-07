@@ -15,7 +15,7 @@
 		<div class="panel panel-primary">
 		{% for post in post_list %}
 	    <div class="panel-heading">이 제안은 현재 {{post.status}} 상태입니다.</div>
-	       {% for comm in comm_list_admin %}
+	      	{% for comm in comm_list_admin %}
     		<div class="panel-body"><pre>{{g.user.name}} : {{comm.comment}}</pre></div>
     		{% endfor %}
 	    {% endfor %}
