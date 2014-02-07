@@ -3,28 +3,38 @@
 
 {{ super() }}
 
-<form action="" method="post" onclick="return postForm()">
+<form action="" class="form-horizontal" method="post" onclick="return postForm()">
 <div class="container" >
-	<div class="row" align="left">
-		<div class="col-lg-12 col-sm-12 col-md-12">
-			<p><strong>분류</strong>
-			<select id="category" name="category">
+	<div class="row" align="left">	
+		<label class="col-xs-1 col-md-1 col-sm-1" align="center"><h4>분 류</h4></label>
+		<div class="col-xs-2 col-md-2 col-sm-2">
+			<select id="category" name="category" class="form-control">
 				<option value="STORE" name="store">STORE</option>
 				<option value="ADMIN" name="admin">ADMIN</option>
 				<option value="MOBILE" name="mobile">MOBILE</option>
-			</select></p>
+			</select>
 			<br/>
-			<p><strong>상태</strong>
-			<select id="status" name="status">
+		</div>
+		
+		<label class="col-xs-1 col-md-1 col-sm-1" align="center"><h4>상 태</h4></label>
+		<div class="col-xs-2 col-md-2 col-sm-2">
+			<select id="status" name="status" class="form-control">
 				<option value="대기중" name="wait">대기중</option>
-			</select></p>
+			</select>
 			<br/>
-			<p><strong>제목</strong>
-			<input type="text" size="100" id="subject" name="subject"></p>
-			<br/>
+		</div>
+	</div>
+	<div class="row">
+		<label class="col-xs-1 col-md-1 col-sm-1" align="center"><h4>제 목</h4></label>
+		<div class="col-xs-9 col-md-9 col-sm-9">	
+		<input type="text" size="100" class="form-control" id="subject" name="subject">
+		<span class="glyphicon glyphicon-remove form-control-feedback"></span>
+		<br/>
+	</div>
+		<div class="col-xs-12 col-md-12 col-sm-12">
 			<pre><textarea class="summernote" rows="20" cols="105" name="content"> </textarea></pre>
 			<br/>
-			<p><input type="submit" value="작성완료"></p>
+			<input class="btn btn-default" type="submit" class="submit" value="작성완료">
 		</div>
 	</div>
 </div>
@@ -38,15 +48,31 @@
 	});
 
 });
-
-var postForm = function() {
-     var content = $('textarea[name="content"]').text($('.summernote').code());
-     
-     console.log(content);
-};
+	var postForm = function() {
+  	   var content = $('textarea[name="content"]').html($('.summernote').code());
+	};
 </script>
 
-
+<script type="text/javascript">
+	$(document).ready(function() {
+ 		$('.glyphicon').hide();
+		$('.submit').on('click', function(e){
+			var data=$('#subject').val();
+			var len=data.length;
+			console.log(len);
+			if(len<1)
+			{
+				$('.glyphicon').show();
+				alert("제목을 입력하세요.");
+				e.preventDefault();
+			}
+			else
+			{
+				$('.glyphicon').hide();
+			}
+		});
+	});
+</script>
 {% endblock %}
 
 

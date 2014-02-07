@@ -1,3 +1,6 @@
+<!DOCTYPE html>
+<html>
+<head>
 {% block metas %}
 <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -33,14 +36,17 @@
 });
         document.all['status'].disabled=true;
 </script>
-
-
+<title>{% block title %}도도 제품 제안서 - 스포카{% endblock %}</title>
+</head>
+<body>
 {% for message in get_flashed_messages() %}
 <div class="alert alert-warning alert-dismissable">
 	<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
 		<strong>{{message}} </strong>
 </div>  
  {% endfor %}  
-<title>{% block title %}도도 제품 제안서 - 스포카{% endblock %}</title>
 {% block body %}{% endblock %}
+
+</body>
+</html>
 

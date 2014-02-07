@@ -26,7 +26,7 @@
 			<br/>
 			<pre><textarea class="summernote" rows="20" cols="105" name="content"> {{ post.content | safe }} </textarea></pre>
 			<br/>
-			<p><input type="submit" value="수정완료"></p>
+			<p><input type="submit" class="modify" value="수정완료"></p>
 		</div>
 	</div>
 </div>
@@ -44,6 +44,7 @@ var modifyForm = function() {
      var content = $('textarea[name="content"]').html($('.summernote').code());
 };
 </script>
+
 
 {% endblock %}
 

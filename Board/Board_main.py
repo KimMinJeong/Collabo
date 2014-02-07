@@ -43,7 +43,7 @@ class User(db.Model):
 
     def is_admin(self):
         return self.email in (
-            'jc@spoqa.com',
+            'shinvee@spoqa.com',
             'grant@spoqa.com',
             'richard@spoqa.com',
             'zooey@spoqa.com',
@@ -146,10 +146,7 @@ def board_list():
 @login_required
 def show(id):    
     post = db.session.query(Post).get(id)
-    comm_list_admin = Comment.query.filter(Comment.post_id==id).filter(Comment.section==10).all()
-    comm_list = Comment.query.filter(Comment.post_id==id).filter(Comment.section==99).all()
-    return render_template('contents.html',
-                            post=post, comm_list_admin=comm_list_admin, comm_list=comm_list)
+    return render_template('contents.html', post=post)
 
 
 @app.route('/posts/<int:id>/put_post', methods=['POST'])
@@ -170,8 +167,8 @@ def put_post(id):
 @login_required
 def board_detail():
     post_list = Post.query.all()
-    comm_list_admin = Comment.query.filter(Comment.id==id).filter(Comment.section==10).all()
-    return render_template('board_detail.html', post_list=post_list, comm_list_admin=comm_list_admin)
+    comm = Comment.query.filter(Comment.section==10).all()
+    return render_template('board_detail.html', post_list=post_list, comm=comm)
 
 
 @app.route('/register', methods=['POST'])
@@ -239,6 +236,7 @@ def del_board(id):
 
 
 @app.route('/posts/<int:id>/comment', methods=['POST'])
+@login_required
 def add_comm(id):
     if request.method =='POST':
         user_id = g.user.id
@@ -252,7 +250,6 @@ def add_comm(id):
 
 
 @app.route('/posts/comments/<int:id>', methods=['PUT'])
-@login_required
 def update_comm(id):
     update = Comment.query.get(id)
     update.comment = request.form['comment_modify'] 
@@ -284,7 +281,7 @@ def board_modify(id):
     update.content = request.form["content"]   
     update.user_id = g.user.id
     db.session.commit()
-    return redirect(url_for('board_list'))
+    return redirect(url_for('show',id=id))
 
     
 @app.route('/logout')
@@ -294,6 +291,10 @@ def logout():
     return redirect(url_for('index'))
 
 
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
+
+
 if __name__ == '__main__':
-    init_db()
     app.run( debug=True, host='0.0.0.0', port=int(environ.get('PORT',5000)))

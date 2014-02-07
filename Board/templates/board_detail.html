@@ -12,16 +12,22 @@
 	<div class="row">
 		<h1>제안서 상황</h1>
 		<br/>
-		<div class="panel panel-primary">
 		{% for post in post_list %}
+		<div class="panel panel-primary">
 	    <div class="panel-heading">이 제안은 현재 {{post.status}} 상태입니다.</div>
-	       {% for comm in comm_list_admin %}
-    		<div class="panel-body"><pre>{{g.user.name}} : {{comm.comment}}</pre></div>
-    		{% endfor %}
-	    {% endfor %}
+    	<div class="panel-body"><pre>{{post.content}}</pre>
+    		{%for co in comm %}
+    		{% if co.post_id == post.id%}
+    		<pre>의견: {{co.comment}}</pre>
+    		{%endif%}
+    		{%endfor%}
+    	</div>
+    	
 	    <br/>
 		</div>
+		{%endfor%}
 	</div>
+	
 </div>
 {% endblock %}
 
