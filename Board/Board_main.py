@@ -179,8 +179,6 @@ def board_detail():
 @oid.after_login
 def after_login(resp):   
     user = User.query.filter(User.email==resp.email).first()
-
-    
     if user is None:
         flash(u'접근권한이 없습니다. 관리자에게 문의하세요')
         return redirect(oid.get_next_url())
@@ -290,5 +288,4 @@ def logout():
 
 
 if __name__ == '__main__':
-    init_db()
     app.run(debug=True, host='0.0.0.0', port=int(environ.get('PORT',5000)))
