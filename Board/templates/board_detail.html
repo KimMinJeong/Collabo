@@ -1,20 +1,32 @@
 {% extends "board_top.html" %}
 {% block body %}
 {{ super() }}
+<style type="text/css">
+	h1{
+		color: #A9302A;
+		font-family: "Franklin Gothic Heavy"
+	}
+</style>
+
 <div class="container">
 	<div class="row">
 		<div class="col-md-12 col-sm-12 col-xs-12">
 		<h1>제안서 상황</h1>
-		<br/><br/>
-		{% for post in post_list %}		
+		<br/>
 		<div class="panel panel-primary">
+		{% for post in post_list %}
 	    <div class="panel-heading">이 제안은 현재 {{post.status}} 상태입니다.</div>
-	    <div class="panel-body"><pre> {{post.content|safe}} </pre></div>
+		
+		<div class="panel-body"><pre> {{post.content|safe}} </pre></div>
+		{% for comm in comm_list_admin %}
+    	<div class="panel-body"><pre>{{g.user.name}} : {{comm.comment}}</pre></div>
+	    {%endfor%}
 	    <br/>
 	    <br/>
 		</div>
 		{% endfor %}
-		</div>
+	</div>
 	</div>
 </div>
 {% endblock %}
+
