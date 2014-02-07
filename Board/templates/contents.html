@@ -60,11 +60,11 @@
 			      	<div class="btn-group">
 			      		<p>상태 </p>
 			      		<select id="status" name="status">
-							<option value="대기중">대기중</option>
-							<option value="개발예정">개발예정</option>
-							<option value="개발중">개발중</option>
-							<option value="업데이트">업데이트</option>
-							<option value="반려">반려</option>
+							<option value="대기중" >대기중</option>
+							<option value="개발예정" >개발예정</option>
+							<option value="개발중" >개발중</option>
+							<option value="업데이트" >업데이트</option>
+							<option value="반려" >반려</option>
 						</select>
 	            		<div>
 	    				<p>의견</p>
@@ -79,7 +79,9 @@
 			    </div><!-- /.modal-content -->
 			  </div><!-- /.modal-dialog -->
 			</div><!-- /.modal -->
-        <div class="panel panel-primary">
+			
+        
+        <div class="{{set_color(post.status)}}">
         <div class="panel-heading">
 			<p>현재 제안서는 {{post.status}} 상태입니다.
 			{% if g.user.is_admin()	%}
@@ -97,6 +99,7 @@
         	{% endfor %}
         </div>
         </div>
+	
 	</div>
 	</form>
     <br/>

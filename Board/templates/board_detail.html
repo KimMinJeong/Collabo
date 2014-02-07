@@ -13,7 +13,8 @@
 		<h1>제안서 상황</h1>
 		<br/>
 		{% for post in post_list %}
-		<div class="panel panel-primary">
+		{% set st = set_color(post.status)%}
+		<div class="{{st}}" id=status>
 	    <div class="panel-heading">이 제안은 현재 {{post.status}} 상태입니다.</div>
     	<div class="panel-body"><pre>{{post.content}}</pre>
     		{%for co in comm %}
@@ -22,11 +23,20 @@
     		{%endif%}
     		{%endfor%}
     	</div>
-    	
+    	</div>
+    	{%endfor%}
 </div>
-{%endfor%}
+
+
 	</div>
 	
-</div>
+
+<script type="text/javascript">
+	$(document).on('ready', function(){
+		
+		class_name = $('#status').attr('class');
+		console.log(class_name);
+	});
+</script>
 {% endblock %}
 

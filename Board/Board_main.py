@@ -168,7 +168,31 @@ def put_post(id):
 def board_detail():
     post_list = Post.query.all()
     comm = Comment.query.filter(Comment.section==10).all()
-    return render_template('board_detail.html', post_list=post_list, comm=comm)
+    status = {
+    'wait' : 'panel-success',
+    'create_wait' :'panel-warning',
+    'creating' : 'panel-primary',
+    'reject' : 'panel-danger',
+    'update': 'panel-info',
+    }
+    return render_template('board_detail.html', post_list=post_list, comm=comm,
+                          )
+
+
+def set_color(status): 
+    if status=='대기중':
+        return 'panel panel-success'
+    elif status=='개발예정':
+        return 'panel panel-warning'
+    elif status=='업데이트':
+        return 'panel panel-primary'
+    elif status=='개발중':
+        return 'panel panel-danger'
+    elif status=='반려':
+        return 'panel panel-danger'
+    else:
+        return 'panel panel-info'
+app.jinja_env.globals.update(set_color=set_color) 
 
 
 @app.route('/register', methods=['POST'])
