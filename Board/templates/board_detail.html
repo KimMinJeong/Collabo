@@ -5,13 +5,16 @@
 	<div class="row-fluid">
 		<h1>제안서 상황</h1>
 		<br/><br/>
-		{% for post in post_list %}
+		{% for pos in post_list %}{% for comm in comms %}		
 		<div class="panel panel-primary">
-	    <div class="panel-heading">이 제안은 현재 {{post.status}} 상태입니다.</div>
-	    <div class="panel-body"><pre> {{post.comment}} </pre></div>
+	    <div class="panel-heading">이 제안은 현재 {{pos.status}} 상태입니다.</div>
+	   
+	    <div class="panel-body"><pre> {{comm.comment}} </pre></div>
+	   
 	    <br/>
 	    <br/>
 		</div>
+		{% endfor %}
 		{% endfor %}
 	</div>
 </div>

@@ -19,7 +19,9 @@
 	    </div>
 	    
 	    <div class="col-md-9 col-sm-12 center-block">
+	    <div class="content_body">
 	    	 {{ post.content }}
+	    </div>
         </div>
          {% if g.user.email==session['user_email']  %}
         	<div class="col-md-2 col-md-offset-1">
@@ -38,9 +40,7 @@
         <table class="table table-striped" border="1">
         <thead>
 			<p>현재 제안서는 {{post.status}} 상태입니다.
-			{% 
-				if g.user.is_admin()
-           	%}
+			{% if g.user.is_admin()	%}
         	<button class="btn btn-primary" data-toggle="modal" data-target="#myModal">
 
         	제안상태변경
@@ -81,9 +81,11 @@
        </thead> 
         
         <tbody>
-        	<tr><td> 이곳에 제안서에 대한 의견을 작성해주세요</td></tr>
-        	{% for comm in comm_list_admin %}
+        	
+        	{% for comm in post.comments %}
+        	{% if comm.section==10%}
         	<tr><td class="result">{{comm.comment}} </td></tr>
+        	{% endif %}
         	{% endfor %}
         </tbody>
 		</table>
@@ -100,8 +102,9 @@
     <div class="container center-block">
     <div class="row-fluid">
         <div class="col-md-12" name="comm_list">
-        	{% for comm in comm_list %}				 
-        	<table class="table table-striped" data-id={{comm.id}}>        		
+        	{% for comm in post.comments %}		
+        	{% if comm.section==99%}		 
+        	<table class="table table-condensed" data-id={{comm.id}}>        		
         		<th> <img src={{set_img('comm.user.email')}} class="thumbnails">
         			 {{comm.user.email}}
         			 {{comm.created_at.date()}}
@@ -119,6 +122,7 @@
                 	<a class="btn btn-default delete" role="button">삭제</a>
                 </td>
               {%endif%}
+              {% endif%}
             </table>
             {%endfor%}
         </div>
@@ -221,6 +225,14 @@
 	});
 </script>
 
-
+<script type="text/javascript">
+	$(document).on('ready', function(){
+		$('.content_body').each(function(){
+		var $this = $(this);
+		var text = $('.content_body').text();
+		$this.html(text.replace('&lt;','<').replace('&gt;', '>'));
+		});
+	});
+</script>
 {% endblock %}
 
