@@ -122,7 +122,7 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args,**kwargs):
         if session.get('user_email') is None:
-            flash('세션이 끊겼습니다.')
+            flash(u'세션이 끊겼습니다.')
             return redirect(url_for('index',next=request.url))
         return f(*args,**kwargs)
     return decorated_function
