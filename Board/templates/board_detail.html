@@ -13,30 +13,21 @@
 		<h1>제안서 상황</h1>
 		<br/>
 		{% for post in post_list %}
-		{% set st = set_color(post.status)%}
-		<div class="{{st}}" id=status>
+		<div class="{{set_color(post.status)}}" id=status>
 	    <div class="panel-heading">이 제안은 현재 {{post.status}} 상태입니다.</div>
-    	<div class="panel-body"><pre>{{post.content}}</pre>
-    		{%for co in comm %}
-    		{% if co.post_id == post.id%}
-    		<pre>의견: {{co.comment}}</pre>
+    	<div class="panel-body content"><pre>{{post.content|safe}}</pre></div>
+    	<div class="panel-body">
+    		{%for co in post.comments %}
+    		{% if co.section == 10 %}
+    		<pre>{{co.user.name}}: {{co.comment}}</pre>
     		{%endif%}
     		{%endfor%}
     	</div>
     	</div>
     	{%endfor%}
-</div>
-
-
 	</div>
+</div>
 	
 
-<script type="text/javascript">
-	$(document).on('ready', function(){
-		
-		class_name = $('#status').attr('class');
-		console.log(class_name);
-	});
-</script>
 {% endblock %}
 

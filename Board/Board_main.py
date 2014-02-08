@@ -167,16 +167,7 @@ def put_post(id):
 @login_required
 def board_detail():
     post_list = Post.query.all()
-    comm = Comment.query.filter(Comment.section==10).all()
-    status = {
-    'wait' : 'panel-success',
-    'create_wait' :'panel-warning',
-    'creating' : 'panel-primary',
-    'reject' : 'panel-danger',
-    'update': 'panel-info',
-    }
-    return render_template('board_detail.html', post_list=post_list, comm=comm,
-                          )
+    return render_template('board_detail.html', post_list=post_list)
 
 
 def set_color(status): 
