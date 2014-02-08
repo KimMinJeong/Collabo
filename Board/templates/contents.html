@@ -137,6 +137,7 @@
                                      <div class='edit_box'>
                						</div>	
                                 </div>
+                                {% if comm.user.email==session.get('user_email')%}
                                 <div class="action">
                                     <button type="button" class="btn btn-primary btn-xs edit" title="Edit">
                                         <span class="glyphicon glyphicon-chevron-down">edit</span>
@@ -146,6 +147,7 @@
                                     </button>
              
                                 </div>
+                                {%endif%}
                             </div>
                         </div>
                     </li>
