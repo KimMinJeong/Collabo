@@ -48,16 +48,7 @@
 <div class="row">	
 	<form action="{{ url_for('put_post', id=post.id) }}" method="post">
     <div class="col-xs-12 col-md-12 col-sm-12">
-        <table class="table table-striped" border="1">
-        <thead>
-			<p>현재 제안서는 {{post.status}} 상태입니다.
-			{% if g.user.is_admin()	%}
-        	<button class="btn btn-primary" data-toggle="modal" data-target="#myModal">
-        	제안상태변경
-			</button>
-			{% endif %}
-			</p>
-			<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    	<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 			  <div class="modal-dialog">
 			    <div class="modal-content">
 			      <div class="modal-header">
@@ -69,11 +60,11 @@
 			      	<div class="btn-group">
 			      		<p>상태 </p>
 			      		<select id="status" name="status">
-							<option value="대기중">대기중</option>
-							<option value="개발예정">개발예정</option>
-							<option value="개발중">개발중</option>
-							<option value="업데이트">업데이트</option>
-							<option value="반려">반려</option>
+							<option value="대기중" >대기중</option>
+							<option value="개발예정" >개발예정</option>
+							<option value="개발중" >개발중</option>
+							<option value="업데이트" >업데이트</option>
+							<option value="반려" >반려</option>
 						</select>
 	            		<div>
 	    				<p>의견</p>
@@ -83,78 +74,109 @@
 			      </div>
 			      <div class="modal-footer">
 			        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-			        <input type="submit" value="변경완료">
+			        <input type="submit" class="btn btn-default" value="변경완료">
 			      </div>
 			    </div><!-- /.modal-content -->
 			  </div><!-- /.modal-dialog -->
 			</div><!-- /.modal -->
-       </thead>     
-       <tbody>
+			
+        
+        <div class="{{set_color(post.status)}}">
+        <div class="panel-heading">
+			<span>현재 제안서는 {{post.status}} 상태입니다.</span>
+			{% if g.user.is_admin()	%}
+        	<button class="btn btn-warning btn-sm" data-toggle="modal" data-target="#myModal">
+        	제안상태변경
+			</button>
+			{% endif %}
+       </div>   
+       <div class="panel-body">
         	{% for comm in post.comments %}
         	{% if comm.section==10%}
-        	<tr><td class="result">{{comm.comment}} </td></tr>
+        	<h5 class="result">{{comm.user.name}}: {{comm.comment}} </h5> <hr>
         	{% endif %}
         	{% endfor %}
-        </tbody>
-		</table>
+        </div>
+        </div>
+	
 	</div>
 	</form>
     <br/>
     <br/>
     <br/>
     <br/>
-    <hr>
+   
 </div>
   <hr>
 </div>
+
 <div class="container">
-<div class="row">
-	<div class="col-xs-12 col-md-12 col-sm-12" name="comm_list">
-		{% for comm in post.comments%}
-       	<table class="table table-striped" data-id={{comm.id}}>  
-       		     		
-       		<th> <img src={{set_img('comm.user.email')}} class="img-thumbnail">
-       			 {{comm.user.email}}
-       			 {{comm.created_at.date()}}
-       			 <p style="padding:0 70px" id={{comm.id}}>  {{comm.comment}}</p>
-       		</th>
-    		
-         	 <td>
-        	 	<div class='edit_box'>
-               	<span class="error"> 댓글을 입력하세요 </span>
-               	</div>
-            </td>
-            {% if session.get('user_email')==comm.user.email%}
-            <td style="width:300px;height:100px">
-               	<a class="btn btn-default modify" role="button">수정</a>
-               	<a class="btn btn-default delete" role="button">삭제</a>
-            </td>
-            {%endif%}
-            
-        </table>
-        		{%endfor%}
- </div>
- 
+    <div class="row">
+        <div class="panel panel-default widget">
+            <div class="panel-heading">
+                <span class="glyphicon glyphicon-comment"></span>
+                <h3 class="panel-title">
+                    Recent Comments</h3>
+            </div>
+            <div class="panel-body">
+                <ul class="list-group">
+                	{% for comm in post.comments%}
+                    <li class="list-group-item" data-id={{comm.id}}>
+                        <div class="row">
+                            <div class="col-xs-2 col-md-1">
+                                <img src="{{set_img(comm.user.email)}}" class="img-circle img-responsive" style="height:50px;width:50px;"/></div>
+                            <div class="col-xs-10 col-md-11">
+                                <div>
+                                   	 {{comm.user.email}}
+                                    <div class="mic-info">
+                                      {{comm.created_at.date()}}  	
+                                    </div>
+                                </div>
+                                <div class="comment-text">
+                                     <span id="{{comm.id}}">{{comm.comment}}</span>
+                                     <div class='edit_box'>
+               						</div>	
+                                </div>
+                                {% if comm.user.email==session.get('user_email')%}
+                                <div class="action">
+                                    <button type="button" class="btn btn-primary btn-xs edit" title="Edit">
+                                        <span class="glyphicon glyphicon-chevron-down">edit</span>
+                                    </button>
+                                    <button type="button" class="btn btn-success btn-xs delete" title="delete">
+                                        <span class="glyphicon glyphicon-ok">delete</span>
+                                    </button>
+             
+                                </div>
+                                {%endif%}
+                            </div>
+                        </div>
+                    </li>
+                    {%endfor%}
+                </ul>
+            </div>
+        </div>
+    </div>
 </div>
-</div>
+
 <div class="container">    
 <div class="row">
 	   	<form action="{{ url_for('add_comm', id=post.id) }}" method="post"> 
 		   	<div class="col-xs-12 col-md-12 col-sm-12">
 				<div id="addComm">
-					<div class="col-md-1 col-xs-1 col-sm1">
-						<img src="{{session.get('gravatar')}}">
-				    </div>
-				    <div class="col-md-1">
-				    	<p class="form-control-static" name="email">{{session['user_email']}}</p>
-				    </div> 
+					
+				    
 				  	<br/>              
-					<div class="col-xs-12 col-md-12 col-sm-12">
-						<textarea class="form-control reply" name="reply" rows="3"> </textarea>
+					<div class="col-xs-1 col-md-1 col-sm-1">
+						<img src="{{session.get('gravatar')}}" class="img-circle img-responsive" style="height:50px;width:50px;">
 					</div>
-					<div class="col-md-1 col-md-offset-11">
-						<input type="submit" class="pull-right" value="댓글입력">
+					<div class="col-xs-11 col-md-11 col-sm-11" align="left">
+						<textarea class="form-control reply" placeholder="Join the discussion" name="reply"> </textarea>
+
 					</div>
+					
+				</div>
+				<div align="right">
+						<input type="submit" class="pull-right btn btn-default" value="댓글입력">
 				</div>
 				<hr>
 			</div>
@@ -163,10 +185,10 @@
 </div>
 
 <script type="text/javascript">
-	$('.modify').on('click', function(){
-		var data=$(this).closest('table').data('id');
+	$('.edit').on('click', function(){
+		var data=$(this).closest('li').data('id');
 		var str= $('#' + data).text();
-		$(this).closest('table').find('.edit_box')
+		$(this).closest('li').find('.edit_box')
 			.html("<form method=post>" +
 				"<textarea class='form-control' rows=3 name='comment_modify'>" + str + "</textarea>"
 			+ "<button type='button' class='modify_comment'>수정</button>" + "</form>")	
@@ -174,7 +196,7 @@
 	});
 	
 	$(document).on('click', '.modify_comment', function() {
-		var id = $(this).closest('table').data('id');
+		var id = $(this).closest('li').data('id');
 		var $textarea = $(this).parent().find('textarea');
 		var result_value =  $(this).parent().find('textarea').val();
 		console.log(result_value);
@@ -193,21 +215,13 @@
 </script>
 
 <script type="text/javascript">
-	
-		$('.error').hide();
 		$('.pull-right').on('click', function(e){	
-			
 		var data= $('.reply').val();
 		var len= data.length;
-		if(len < 1)
+		if(len < 2)
 		{
 			alert('댓글을 입력하시오');
-			$('.error').show();
 			e.preventDefault();	
-		}
-		else
-		{
-			$('.error').hide();
 		}
 		
 	});
@@ -216,7 +230,7 @@
 
 <script type="text/javascript">
 	$('.delete').on('click', function(){
-		var closestUl = $(this).closest('table');
+		var closestUl = $(this).closest('li');
 		var del_id= closestUl.data('id');
 		$.ajax({
 			url: {{ url_for('del_comm', id=-1 )|tojson }}.replace('-1', del_id),
@@ -243,18 +257,8 @@
 				
 			}		
 		});
-
 	});
 </script>
 
-<script type="text/javascript">
-	$(document).on('ready', function(){
-		$('.content_body').each(function(){
-		var $this = $(this);
-		var text = $('.content_body').text();
-		$this.html(text.replace('&lt;','<').replace('&gt;', '>'));
-		});
-	});
-</script>
 {% endblock %}
 

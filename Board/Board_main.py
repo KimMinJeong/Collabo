@@ -122,7 +122,7 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args,**kwargs):
         if session.get('user_email') is None:
-            flash('세션이 끊겼습니다.')
+            flash(u'세션이 끊겼습니다.')
             return redirect(url_for('index',next=request.url))
         return f(*args,**kwargs)
     return decorated_function
@@ -167,8 +167,23 @@ def put_post(id):
 @login_required
 def board_detail():
     post_list = Post.query.all()
-    comm = Comment.query.filter(Comment.section==10).all()
-    return render_template('board_detail.html', post_list=post_list, comm=comm)
+    return render_template('board_detail.html', post_list=post_list)
+
+
+def set_color(status): 
+    if status=='대기중':
+        return 'panel panel-success'
+    elif status=='개발예정':
+        return 'panel panel-warning'
+    elif status=='업데이트':
+        return 'panel panel-primary'
+    elif status=='개발중':
+        return 'panel panel-danger'
+    elif status=='반려':
+        return 'panel panel-danger'
+    else:
+        return 'panel panel-info'
+app.jinja_env.globals.update(set_color=set_color) 
 
 
 @app.route('/register', methods=['POST'])
