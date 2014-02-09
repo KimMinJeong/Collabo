@@ -40,15 +40,6 @@ class User(db.Model):
         self.name = name
         self.email = email
         self.authority = authority
-
-    def is_admin(self):
-        return self.email in (
-            'shinvee@spoqa.com',
-            'grant@spoqa.com',
-            'richard@spoqa.com',
-            'zooey@spoqa.com',
-            'anny@spoqa.com'
-        )
         
     def __repr__(self):
         return "<User id={0!r}, name={1!r}, email={2!r}, authority={3!r}>".\
