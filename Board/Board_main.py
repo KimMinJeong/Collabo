@@ -17,7 +17,8 @@ import json
 
 app = Flask(__name__)
 oid = OpenID(app, join(dirname(__file__), 'openid_store'))
-SQLALCHEMY_DATABASE_URI = 'postgres://uvkxbyzicejuyd:FzhZqstwa1YQ7FVPNAId0GO_4l@ec2-54-197-241-91.compute-1.amazonaws.com:5432/d22mrqavab61bp'
+SQLALCHEMY_DATABASE_URI = os.environ.get(
+                                         'DATABASE_URL','postgresql://postgres:1111@localhost:5432/postgres')
 db = SQLAlchemy(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
 app.config['SECRET_KEY'] = os.urandom(24)
@@ -158,6 +159,7 @@ def put_post(id):
                                  user_id=g.user.id,
                                  post_id=session.get('post_id'),
                                  section=section))
+    
     db.session.commit()
     return redirect(oid.get_next_url())
 
@@ -203,7 +205,8 @@ def set_img(s):
     gravatar_url = "http://www.gravatar.com/avatar/" + \
                     hashlib.md5(email_gra.lower()).hexdigest() + "?"
     gravatar_url += urllib.urlencode( {'d': 'mm' , 's': str(size)} )     
-    return gravatar_url 
+    return gravatar_url
+     
 app.jinja_env.globals.update(set_img=set_img)     
     
     
@@ -229,7 +232,7 @@ def board_get():
 @app.route('/posts/<int:id>', methods=['DELETE'])
 def del_board(id):
     post = Post.query.get(id)
-    db.session.delete(post)
+    db.session.delete(post) 
     db.session.commit()
     return jsonify(result='success')
 

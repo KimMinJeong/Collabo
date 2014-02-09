@@ -13,20 +13,17 @@
 		<h1>제안서 상황</h1>
 		<br/>
 		{% for post in post_list %}
-		<div class="panel panel-primary">
 	    <div class="panel-heading">이 제안은 현재 {{post.status}} 상태입니다.</div>
     	<div class="panel-body"><pre>{{post.content}}</pre>
-    		{%for co in comm %}
-    		{% if co.post_id == post.id%}
     		<pre>의견: {{co.comment}}</pre>
-    		{%endif%}
+ 
     		{%endfor%}
     	</div>
 	    <br/>
 		</div>
 		{%endfor%}
 	</div>
-	
 </div>
+
 {% endblock %}
 
