@@ -13,6 +13,7 @@
 		<h1>제안서 상황</h1>
 		<br/>
 		{% for post in post_list %}
+<<<<<<< HEAD
 	    <div class="panel-heading">이 제안은 현재 {{post.status}} 상태입니다.</div>
     	<div class="panel-body"><pre>{{post.content}}</pre>
     		<pre>의견: {{co.comment}}</pre>
@@ -24,6 +25,23 @@
 		{%endfor%}
 	</div>
 </div>
+=======
+		<div class="{{set_color(post.status)}}" id=status>
+	    <div class="panel-heading">이 제안은 현재 {{post.status}} 상태입니다.</div>
+    	<div class="panel-body content"><pre>{{post.content|safe}}</pre></div>
+    	<div class="panel-body">
+    		{%for co in post.comments %}
+    		{% if co.section == 10 %}
+    		<pre>{{co.user.name}}: {{co.comment}}</pre>
+    		{%endif%}
+    		{%endfor%}
+    	</div>
+    	</div>
+    	{%endfor%}
+	</div>
+</div>
+	
+>>>>>>> 6c61dd80feea7cbf720d5e72b6bae06538fa6e5e
 
 {% endblock %}
 
