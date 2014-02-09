@@ -2,30 +2,18 @@
 {% block body %}
 {{ super() }}
 <style type="text/css">
-	h1{
+	h2{
 		color: #A9302A;
-		font-family: "Franklin Gothic Heavy"
+		font-family: "Franklin Gothic Heavy";
+		font-weight: bolder;
 	}
 </style>
 
 <div class="container">
 	<div class="row">
-		<h1>제안서 상황</h1>
+		<h2>제안서 상황</h2>
 		<br/>
 		{% for post in post_list %}
-<<<<<<< HEAD
-	    <div class="panel-heading">이 제안은 현재 {{post.status}} 상태입니다.</div>
-    	<div class="panel-body"><pre>{{post.content}}</pre>
-    		<pre>의견: {{co.comment}}</pre>
- 
-    		{%endfor%}
-    	</div>
-	    <br/>
-		</div>
-		{%endfor%}
-	</div>
-</div>
-=======
 		<div class="{{set_color(post.status)}}" id=status>
 	    <div class="panel-heading">이 제안은 현재 {{post.status}} 상태입니다.</div>
     	<div class="panel-body content"><pre>{{post.content|safe}}</pre></div>
@@ -40,8 +28,6 @@
     	{%endfor%}
 	</div>
 </div>
-	
->>>>>>> 6c61dd80feea7cbf720d5e72b6bae06538fa6e5e
 
 {% endblock %}
 
