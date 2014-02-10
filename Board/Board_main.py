@@ -185,7 +185,7 @@ def set_color(status):
     elif status=='반려':
         return 'panel panel-danger'
     else:
-        return 'panel panel-info'
+        return status
 app.jinja_env.globals.update(set_color=set_color) 
 
 
@@ -223,7 +223,6 @@ def set_img(s):
                     hashlib.md5(email_gra.lower()).hexdigest() + "?"
     gravatar_url += urllib.urlencode( {'d': 'mm' , 's': str(size)} )     
     return gravatar_url
-     
 app.jinja_env.globals.update(set_img=set_img)     
     
     
