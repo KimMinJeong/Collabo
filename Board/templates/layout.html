@@ -14,7 +14,6 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/summernote-bs2.css')}}" type="text/css">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/summernote-bs3.css')}}" type="text/css">
 
-
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/jquery.dataTables.js')}}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.min.js')}}"></script>
@@ -23,8 +22,6 @@
 <script type="text/javascript" src="{{ url_for('static', filename='js/button.js')}}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/modal.js')}}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/summernote.js')}}"></script>
-<script type="text/javascript" src="{{ url_for('static', filename='js/summernote.min.js')}}"></script>
-
 
 <script type="text/javascript" charset="utf-8">
         $(document).ready(function() {
@@ -42,7 +39,7 @@
 	<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
 		<strong>{{message}} </strong>
 </div>  
- {% endfor %}  
+{% endfor %}  
 {% block body %}{% endblock %}
 
 </body>
