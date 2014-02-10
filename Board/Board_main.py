@@ -105,12 +105,12 @@ def before_request():
 
 
 @app.route('/', methods=['GET'])
-def index():      
+def log_in():      
     return render_template('index.html')
 
 
-@app.route('/iden', methods=['GET'])
-def identity():
+@app.route('/index', methods=['GET'])
+def index():
     return render_template('identity.html')
 
 
@@ -180,6 +180,7 @@ def set_color(status):
         return 'panel panel-danger'
     else:
         return 'panel panel-info'
+    
 app.jinja_env.globals.update(set_color=set_color) 
 
 
