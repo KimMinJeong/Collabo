@@ -155,9 +155,15 @@ def put_post(id):
                                  user_id=g.user.id,
                                  post_id=session.get('post_id'),
                                  section=section))
-    
     db.session.commit()
     return redirect(oid.get_next_url())
+
+
+@app.route('/activation/<string:email>')
+@login_required
+def current_activation(email):
+    info = User.query.filter(User.email==email).first()
+    return render_template('current_activation.html', info=info)
 
 
 @app.route('/posts/status', methods=['GET'])
@@ -169,18 +175,15 @@ def board_detail():
 
 def set_color(status): 
     if status==u'대기중':
-        return 'panel panel-success'
+        return 'panel panel-info'
     elif status==u'개발예정':
-        return 'panel panel-warning'
-    elif status=='업데이트':
         return 'panel panel-primary'
+    elif status==u'업데이트':
+        return 'panel panel-warning'
     elif status==u'개발중':
-        return 'panel panel-danger'
+        return 'panel panel-success'
     elif status==u'반려':
         return 'panel panel-danger'
-    else:
-        return 'panel panel-info'
-    
 app.jinja_env.globals.update(set_color=set_color) 
 
 
@@ -218,7 +221,6 @@ def set_img(s):
                     hashlib.md5(email_gra.lower()).hexdigest() + "?"
     gravatar_url += urllib.urlencode( {'d': 'mm' , 's': str(size)} )     
     return gravatar_url
-     
 app.jinja_env.globals.update(set_img=set_img)     
     
     
