@@ -18,7 +18,7 @@ import json
 app = Flask(__name__)
 oid = OpenID(app, join(dirname(__file__), 'openid_store'))
 SQLALCHEMY_DATABASE_URI = os.environ.get(
-    'DATABASE_URL','postgresql://postgres:1111@localhost/postgres')
+                                         'DATABASE_URL','postgresql://postgres:1111@localhost:5432/postgres')
 db = SQLAlchemy(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
 app.config['SECRET_KEY'] = os.urandom(24)
@@ -40,15 +40,6 @@ class User(db.Model):
         self.name = name
         self.email = email
         self.authority = authority
-
-    def is_admin(self):
-        return self.email in (
-            'shinvee@spoqa.com',
-            'grant@spoqa.com',
-            'richard@spoqa.com',
-            'zooey@spoqa.com',
-            'anny@spoqa.com'
-        )
         
     def __repr__(self):
         return "<User id={0!r}, name={1!r}, email={2!r}, authority={3!r}>".\
@@ -159,6 +150,7 @@ def put_post(id):
                                  user_id=g.user.id,
                                  post_id=session.get('post_id'),
                                  section=section))
+    
     db.session.commit()
     return redirect(oid.get_next_url())
 
@@ -219,7 +211,8 @@ def set_img(s):
     gravatar_url = "http://www.gravatar.com/avatar/" + \
                     hashlib.md5(email_gra.lower()).hexdigest() + "?"
     gravatar_url += urllib.urlencode( {'d': 'mm' , 's': str(size)} )     
-    return gravatar_url 
+    return gravatar_url
+     
 app.jinja_env.globals.update(set_img=set_img)     
     
     
@@ -245,7 +238,7 @@ def board_get():
 @app.route('/posts/<int:id>', methods=['DELETE'])
 def del_board(id):
     post = Post.query.get(id)
-    db.session.delete(post)
+    db.session.delete(post) 
     db.session.commit()
     return jsonify(result='success')
 

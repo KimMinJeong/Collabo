@@ -37,8 +37,8 @@
 <div class="row">
 	{% if post.author.email==session['user_email'] %}
     <div class="col-xs-12 col-md-12 col-sm-12" align="right">
-    <a href="{{url_for('get_modify', id=post.id) }}" align="right">수정   </a>
-    <a class="del_body" data-id={{post.id}} align="right">삭제</a>
+    <a href="{{url_for('get_modify', id=post.id) }}" align="right">글수정</a>
+    <a class="del_body" data-id={{post.id}} align="right">글삭제</a>
 	</div>
     {%endif%}	
 </div>
@@ -78,13 +78,11 @@
 			      </div>
 			    </div><!-- /.modal-content -->
 			  </div><!-- /.modal-dialog -->
-			</div><!-- /.modal -->
-			
-        
+			</div><!-- /.modal -->     
         <div class="{{set_color(post.status)}}">
         <div class="panel-heading">
 			<span>현재 제안서는 {{post.status}} 상태입니다.</span>
-			{% if g.user.is_admin()	%}
+			{% if g.user.authority == true	%}
         	<button class="btn btn-warning btn-sm" data-toggle="modal" data-target="#myModal">
         	제안상태변경
 			</button>
@@ -98,9 +96,8 @@
         	{% endfor %}
         </div>
         </div>
-	
 	</div>
-	</form>
+	</form>\
     <br/>
     <br/>
     <br/>
@@ -163,20 +160,17 @@
 	   	<form action="{{ url_for('add_comm', id=post.id) }}" method="post"> 
 		   	<div class="col-xs-12 col-md-12 col-sm-12">
 				<div id="addComm">
-					
-				    
 				  	<br/>              
 					<div class="col-xs-1 col-md-1 col-sm-1">
 						<img src="{{session.get('gravatar')}}" class="img-circle img-responsive" style="height:50px;width:50px;">
 					</div>
 					<div class="col-xs-11 col-md-11 col-sm-11" align="left">
 						<textarea class="form-control reply" placeholder="Join the discussion" name="reply"> </textarea>
-
 					</div>
-					
 				</div>
+				
 				<div align="right">
-						<input type="submit" class="pull-right btn btn-default" value="댓글입력">
+					<input type="submit" class="pull-right btn btn-default" value="댓글입력">
 				</div>
 				<hr>
 			</div>
@@ -226,39 +220,52 @@
 		
 	});
 	
+	
 </script>
 
 <script type="text/javascript">
 	$('.delete').on('click', function(){
 		var closestUl = $(this).closest('li');
 		var del_id= closestUl.data('id');
-		$.ajax({
-			url: {{ url_for('del_comm', id=-1 )|tojson }}.replace('-1', del_id),
-			type: 'DELETE',
-			success:function(){
-				closestUl.remove();
-				alert('댓글이 삭제되었습니다');
-			}			
-		});
-
+		var conf = confirm('댓글을 삭제하겠습니까?');
+		if(conf)
+		{
+			$.ajax({
+				url: {{ url_for('del_comm', id=-1 )|tojson }}.replace('-1', del_id),
+				type: 'DELETE',
+				success:function(){
+					closestUl.remove();
+					alert('댓글이 삭제되었습니다');
+				}			
+			});
+		}
+		else
+		{
+			
+		}
 	});
 </script>
 
 <script type="text/javascript">
 	$('.del_body').on('click', function(){
 		var del_id = $(this).data('id');
-		console.log(del_id);
-		$.ajax({
-			url: {{ url_for('del_board', id=-1 )|tojson }}.replace('-1', del_id),
-			type: 'DELETE',
-			success:function(){
-				alert('게시물이 삭제되었습니다.');
-				window.location.href = document.referrer;
-				
-			}		
-		});
+		var conf = confirm('게시물을 삭제하겠습니까?');
+		if(conf)
+		{
+			console.log(del_id);
+			$.ajax({
+				url: {{ url_for('del_board', id=-1 )|tojson }}.replace('-1', del_id),
+				type: 'DELETE',
+				success:function(){
+					alert('게시물이 삭제되었습니다.');
+					window.location.href = document.referrer;	
+				}
+			});
+		}
+		else
+		{
+		}
 	});
 </script>
 
 {% endblock %}
-
