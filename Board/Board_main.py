@@ -176,16 +176,16 @@ def board_detail():
 def set_color(status): 
     if status.find(u'대기중') > 0:
         return 'panel panel-success'
-    elif status=='개발예정':
+    elif status==u'개발예정':
         return 'panel panel-warning'
-    elif status=='업데이트':
+    elif status==u'업데이트':
         return 'panel panel-primary'
-    elif status=='개발중':
+    elif status==u'개발중':
         return 'panel panel-danger'
-    elif status=='반려':
+    elif status==u'반려':
         return 'panel panel-danger'
     else:
-        return status
+        return status.find(u'대기중')
 app.jinja_env.globals.update(set_color=set_color) 
 
 
