@@ -18,7 +18,7 @@
 	<div class="col-xs-5 col-md-3 col-md-offset-2 col-sm-3 col-sm-offset-2">
 		 <br>
 		  <div>
-	     <img src={{set_img('post.author.email')}} align="right" style="height:50px;width:50px;" class="img-rounded" align="right">
+	     <img src="{{set_img(post.author.email)}}" style="height:50px;width:50px;" class="img-circle img-responsive" align="right">
 		 </div>
 		 <div>
 		  <h5 name="email" align="right"> {{post.author.email}} </h5>   
@@ -35,7 +35,7 @@
     </div>   
 </div>	
 <div class="row">
-	{% if g.user.email==session['user_email'] %}
+	{% if post.author.email==session['user_email'] %}
     <div class="col-xs-12 col-md-12 col-sm-12" align="right">
     <a href="{{url_for('get_modify', id=post.id) }}" align="right">글수정</a>
     <a class="del_body" data-id={{post.id}} align="right">글삭제</a>
