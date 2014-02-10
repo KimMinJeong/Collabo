@@ -97,7 +97,7 @@
         </div>
         </div>
 	</div>
-	</form>\
+	</form>
     <br/>
     <br/>
     <br/>
@@ -118,6 +118,7 @@
             <div class="panel-body">
                 <ul class="list-group">
                 	{% for comm in post.comments%}
+                	{% if comm.section==99 %}
                     <li class="list-group-item" data-id={{comm.id}}>
                         <div class="row">
                             <div class="col-xs-2 col-md-1">
@@ -148,6 +149,7 @@
                             </div>
                         </div>
                     </li>
+                    {%endif%}
                     {%endfor%}
                 </ul>
             </div>

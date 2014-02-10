@@ -150,9 +150,15 @@ def put_post(id):
                                  user_id=g.user.id,
                                  post_id=session.get('post_id'),
                                  section=section))
-    
     db.session.commit()
     return redirect(oid.get_next_url())
+
+
+@app.route('/activation/<string:email>')
+@login_required
+def current_activation(email):
+    info = User.query.filter(User.email==email).first()
+    return render_template('current_activation.html', info=info)
 
 
 @app.route('/posts/status', methods=['GET'])
