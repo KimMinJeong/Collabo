@@ -68,13 +68,13 @@
 						</select>
 	            		<div>
 	    				<p>의견</p>
-	    				<pre><textarea rows="8" cols="50" name="opinion"> </textarea></pre>
+	    				<pre><textarea rows="8" cols="50" class="opinion" name="opinion"> </textarea></pre>
 	            		</div>
 			      	</div>
 			      </div>
 			      <div class="modal-footer">
 			        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-			        <input type="submit" class="btn btn-default" value="변경완료">
+			        <input type="submit" class="btn btn-default modify_btn" value="변경완료">
 			      </div>
 			    </div><!-- /.modal-content -->
 			  </div><!-- /.modal-dialog -->
@@ -91,7 +91,7 @@
        <div class="panel-body">
         	{% for comm in post.comments %}
         	{% if comm.section==10%}
-        	<h5 class="result">{{comm.user.name}}: {{comm.comment}} </h5> <hr>
+        	<h5 class="result">{{comm.user.name}} : {{comm.comment}} </h5> <hr>
         	{% endif %}
         	{% endfor %}
         </div>
@@ -118,7 +118,7 @@
             <div class="panel-body">
                 <ul class="list-group">
                 	{% for comm in post.comments%}
-                	{% if comm.section==99 %}
+                	{% if comm.section == 99%}
                     <li class="list-group-item" data-id={{comm.id}}>
                         <div class="row">
                             <div class="col-xs-2 col-md-1">
@@ -264,6 +264,19 @@
 		else
 		{
 		}
+	});
+</script>
+
+<script type="text/javascript">
+	$('.modify_btn').on('click', function(e){
+		var data=$('.opinion').val();
+		var len=data.length;
+		console.log(len);
+		if(len<2)
+		{
+			alert('의견을 입력해주세요');		
+		}
+		
 	});
 </script>
 

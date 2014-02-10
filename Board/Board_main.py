@@ -105,12 +105,12 @@ def before_request():
 
 
 @app.route('/', methods=['GET'])
-def index():      
+def log_in():      
     return render_template('index.html')
 
 
-@app.route('/iden', methods=['GET'])
-def identity():
+@app.route('/index', methods=['GET'])
+def index():
     return render_template('identity.html')
 
 
@@ -177,9 +177,9 @@ def set_color(status):
     if status==u'대기중':
         return 'panel panel-info'
     elif status==u'개발예정':
-        return 'panel panel-warning'
-    elif status==u'업데이트':
         return 'panel panel-primary'
+    elif status==u'업데이트':
+        return 'panel panel-warning'
     elif status==u'개발중':
         return 'panel panel-success'
     elif status==u'반려':
