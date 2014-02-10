@@ -82,7 +82,7 @@
         <div class="{{set_color(post.status)}}">
         <div class="panel-heading">
 			<span>현재 제안서는 {{post.status}} 상태입니다.</span>
-			{% if g.user.authority == true	%}
+			{% if g.user.authority	%}
         	<button class="btn btn-warning btn-sm" data-toggle="modal" data-target="#myModal">
         	제안상태변경
 			</button>
@@ -97,7 +97,7 @@
         </div>
         </div>
 	</div>
-	</form>\
+	</form>
     <br/>
     <br/>
     <br/>
