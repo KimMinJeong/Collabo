@@ -105,12 +105,12 @@ def before_request():
 
 
 @app.route('/', methods=['GET'])
-def index():      
+def log_in():      
     return render_template('index.html')
 
 
-@app.route('/iden', methods=['GET'])
-def identity():
+@app.route('/index', methods=['GET'])
+def index():
     return render_template('identity.html')
 
 
@@ -168,18 +168,19 @@ def board_detail():
 
 
 def set_color(status): 
-    if status=='대기중':
+    if status==u'대기중':
         return 'panel panel-success'
-    elif status=='개발예정':
+    elif status==u'개발예정':
         return 'panel panel-warning'
     elif status=='업데이트':
         return 'panel panel-primary'
-    elif status=='개발중':
+    elif status==u'개발중':
         return 'panel panel-danger'
-    elif status=='반려':
+    elif status==u'반려':
         return 'panel panel-danger'
     else:
         return 'panel panel-info'
+    
 app.jinja_env.globals.update(set_color=set_color) 
 
 
