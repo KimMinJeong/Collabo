@@ -4,11 +4,11 @@
 
 <div class="container">
 	<div class="row"> 
-		<div class="col-xs-4 col-md-4 col-sm-4">
-				이름: {{info.name}} <img src="{{session.get('gravatar')}}" class="img-circle"><br>		
-				email: {{info.email}}<br>
-				게시물 작성수: {{info.posts|count}}<br>
-				덧글 작성수: {{info.comments|count}}
+		<div class="col-xs-4 col-md-4 col-sm-4" style="padding-top:10%" align="center">
+				<img src="{{session.get('gravatar')}}" class="img-circle" style="height:90px;width:60px;">	
+				<h3> {{info.name}}</h3>
+				<span class="posts">게시물 작성수: {{info.posts|count}}</span><br>
+				<span class="replys">덧글 작성수: {{info.comments|count}}</span>
 		</div>
 		<div class="col-xs-8 col-md-8 col-sm-8">
 			<div>
