@@ -168,15 +168,15 @@ def board_detail():
 
 
 def set_color(status): 
-    if status=='대기중':
+    if status==u'대기중':
         return 'panel panel-success'
-    elif status=='개발예정':
+    elif status==u'개발예정':
         return 'panel panel-warning'
     elif status=='업데이트':
         return 'panel panel-primary'
-    elif status=='개발중':
+    elif status==u'개발중':
         return 'panel panel-danger'
-    elif status=='반려':
+    elif status==u'반려':
         return 'panel panel-danger'
     else:
         return 'panel panel-info'
