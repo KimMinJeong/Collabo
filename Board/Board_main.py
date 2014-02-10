@@ -174,7 +174,7 @@ def board_detail():
 
 
 def set_color(status): 
-    if status.find('대기중') > 0:
+    if status.find(u'대기중') > 0:
         return 'panel panel-success'
     elif status=='개발예정':
         return 'panel panel-warning'
