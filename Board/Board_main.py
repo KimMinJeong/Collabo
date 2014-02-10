@@ -109,6 +109,11 @@ def index():
     return render_template('index.html')
 
 
+@app.route('/iden', methods=['GET'])
+def identity():
+    return render_template('identity.html')
+
+
 def login_required(f):
     @wraps(f)
     def decorated_function(*args,**kwargs):
