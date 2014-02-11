@@ -298,7 +298,7 @@ def board_modify(id):
     update.user_id = g.user.id
     db.session.commit()
     return redirect(url_for('show',id=id))
-
+    
     
 @app.route('/logout')
 def logout():
