@@ -69,7 +69,9 @@ P {
 	height:300px;
 	overflow: hidden;
 }
-
+.navbar{
+	width:100%;
+}
 
 .widget .panel-body { padding:0px; }
 .widget .list-group { margin-bottom: 0; }

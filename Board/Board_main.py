@@ -119,7 +119,7 @@ def login_required(f):
     def decorated_function(*args,**kwargs):
         if session.get('user_email') is None:
             flash(u'세션이 끊겼습니다.')
-            return redirect(url_for('index',next=request.url))
+            return redirect(url_for('log_in',next=request.url))
         return f(*args,**kwargs)
     return decorated_function
         
@@ -161,7 +161,7 @@ def put_post(id):
 
 @app.route('/activation/<string:email>')
 @login_required
-def current_activation(email):
+def activity(email):
     info = User.query.filter(User.email==email).first()
     return render_template('current_activation.html', info=info)
 
@@ -196,7 +196,7 @@ def add_user(account):
     db.session.add(user)
     db.session.commit()
     flash(u'처음 접속하셨습니다. 다시 한번 로그인 해주세요.')
-    return redirect(url_for('index'))
+    return redirect(url_for('log_in'))
     
 
 @oid.after_login
@@ -204,7 +204,7 @@ def after_login(resp):
     user = User.query.filter(User.email==resp.email).first() 
     if (resp.email.find('spoqa.com')>0) and (user is None):
         add_user(resp.email)
-        return redirect(url_for('index')) 
+        return redirect(url_for('log_in')) 
     elif user is None:
         flash(u'접근권한이 없습니다. 관리자에게 문의하세요') 
     else:
@@ -304,7 +304,7 @@ def board_modify(id):
 def logout():
     session.pop('id',None)
     flash(u'로그아웃!')
-    return redirect(url_for('index'))
+    return redirect(url_for('log_in'))
 
 
 @app.errorhandler(404)
