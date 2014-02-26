@@ -202,17 +202,17 @@ def add_user(account):
 @oid.after_login
 def after_login(resp):   
     user = User.query.filter(User.email==resp.email).first() 
-    if (resp.email.find('spoqa.com')>0) and (user is None):
+    if (resp.email.find('spoqa.com') > 0) and (user is None):
         add_user(resp.email)
         return redirect(url_for('log_in')) 
-    elif user is None:
-        flash(u'접근권한이 없습니다. 관리자에게 문의하세요') 
+    elif (resp.email.find('spoqa.com') < 0):
+        flash(u'접근권한이 없습니다. 관리자에게 문의하세요')
+        return redirect(url_for('log_in')) 
     else:
         session['user_email'] = resp.email
         gravatar = set_img(resp.email)    
         session['gravatar'] = gravatar              
         return redirect(url_for('board_list')) 
-
 
 def set_img(s):
     email_gra = s
@@ -313,4 +313,4 @@ def page_not_found(e):
 
 
 if __name__ == '__main__':
-    app.run( debug=True, host='0.0.0.0', port=int(environ.get('PORT',5000)))
+    app.run(host='0.0.0.0', port=int(environ.get('PORT',5000)))
