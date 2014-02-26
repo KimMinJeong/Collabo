@@ -214,6 +214,7 @@ def after_login(resp):
         session['gravatar'] = gravatar              
         return redirect(url_for('board_list')) 
 
+
 def set_img(s):
     email_gra = s
     size = 40
