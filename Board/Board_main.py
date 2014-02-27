@@ -154,7 +154,7 @@ def show(id):
 def put_post(id):
     post = Post.query.get(id)
     post.status = request.values.get('status')
-    if post.status == '개발예정':
+    if post.status == u'개발예정':
         r = requests.post(
                          'https://api.github.com/repos/{0}/{1}/issues'.format(ORG, REPO),
                          auth=(ACCESS_TOKEN,
