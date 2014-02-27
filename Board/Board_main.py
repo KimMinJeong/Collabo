@@ -3,17 +3,18 @@ from flask import Flask, render_template, request, g, session, flash, redirect, 
     url_for, jsonify, json
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask_openid import OpenID
-from functools import wraps
+from functools import wraps, wraps
 from os import environ
-from functools import wraps
 from os.path import dirname, join
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.sql import functions
 from sqlalchemy.types import DateTime, Boolean
 import hashlib
-import os
-import urllib
 import json
+import os
+import requests
+import urllib
+
 
 app = Flask(__name__)
 oid = OpenID(app, join(dirname(__file__), 'openid_store'))
@@ -23,6 +24,9 @@ db = SQLAlchemy(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
 app.config['SECRET_KEY'] = os.urandom(24)
 app.config.from_envvar('FLASKR_SETTINGS', silent=True)
+ACCESS_TOKEN = 'a122a18373551109d4bedaf55fd86545177380b7'
+ORG = 'KimMinJeong'
+REPO = 'Collabo'
 
 
 class User(db.Model):
@@ -150,6 +154,13 @@ def show(id):
 def put_post(id):
     post = Post.query.get(id)
     post.status = request.values.get('status')
+    if post.status == u'개발예정':
+        r = requests.post(
+                         'https://api.github.com/repos/{0}/{1}/issues'.format(ORG, REPO),
+                         auth=(ACCESS_TOKEN,
+                               'x-oauth-basic'),
+       data=json.dumps({'title':post.subject, 'body':post.content}))
+        print r.headers['location']
     section = 10
     post.comments.append(Comment(comment=request.form['opinion'],
                                  user_id=g.user.id,
