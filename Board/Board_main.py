@@ -155,13 +155,14 @@ def show(id):
 def put_post(id):
     post = Post.query.get(id)
     post.status = request.values.get('status')
+    post_url='http://spoqa-idea.heroku.com/posts/'+str(post.id)
     if(post.status==u'개발예정'):
         r = requests.post(
        'https://api.github.com/repos/{0}/{1}/issues'.format(ORG, REPO),
         auth=(ACCESS_TOKEN,
         'x-oauth-basic'),
         data=json.dumps(
-            {'title':post.subject, 'body':post.content}
+            {'title':post.subject, 'body':post.content +'\n'+ post_url}
             )
         )
         print r.headers['location']
