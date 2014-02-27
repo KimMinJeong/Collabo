@@ -13,7 +13,7 @@ from sqlalchemy.types import DateTime, Boolean
 import hashlib
 import os
 import urllib
-import json
+import json, requests
 
 app = Flask(__name__)
 oid = OpenID(app, join(dirname(__file__), 'openid_store'))
@@ -24,6 +24,11 @@ app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
 app.config['SECRET_KEY'] = os.urandom(24)
 app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
+ACCESS_TOKEN = 'a122a18373551109d4bedaf55fd86545177380b7'
+# https://github.com/settings/applications 에서 발급받으세요.
+ 
+ORG = 'KimMinJeong'
+REPO = 'Collabo'
 
 class User(db.Model):
     __tablename__ = 'users'
@@ -119,7 +124,7 @@ def login_required(f):
     def decorated_function(*args,**kwargs):
         if session.get('user_email') is None:
             flash(u'세션이 끊겼습니다.')
-            return redirect(url_for('index',next=request.url))
+            return redirect(url_for('log_in',next=request.url))
         return f(*args,**kwargs)
     return decorated_function
         
@@ -150,6 +155,17 @@ def show(id):
 def put_post(id):
     post = Post.query.get(id)
     post.status = request.values.get('status')
+    if(post.status==u'개발예정'):
+        r = requests.post(
+       'https://api.github.com/repos/{0}/{1}/issues'.format(ORG, REPO),
+        auth=(ACCESS_TOKEN,
+        'x-oauth-basic'),
+        data=json.dumps(
+            {'title':post.subject, 'body':post.content}
+            )
+        )
+        print r.headers['location']
+
     section = 10
     post.comments.append(Comment(comment=request.form['opinion'],
                                  user_id=g.user.id,
@@ -196,7 +212,7 @@ def add_user(account):
     db.session.add(user)
     db.session.commit()
     flash(u'처음 접속하셨습니다. 다시 한번 로그인 해주세요.')
-    return redirect(url_for('index'))
+    return redirect(url_for('log_in'))
     
 
 @oid.after_login
@@ -204,7 +220,7 @@ def after_login(resp):
     user = User.query.filter(User.email==resp.email).first() 
     if (resp.email.find('spoqa.com')>0) and (user is None):
         add_user(resp.email)
-        return redirect(url_for('index')) 
+        return redirect(url_for('log_in')) 
     elif user is None:
         flash(u'접근권한이 없습니다. 관리자에게 문의하세요') 
     else:
@@ -304,13 +320,12 @@ def board_modify(id):
 def logout():
     session.pop('id',None)
     flash(u'로그아웃!')
-    return redirect(url_for('index'))
+    return redirect(url_for('log_in'))
 
 
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
-
 
 if __name__ == '__main__':
     app.run( debug=True, host='0.0.0.0', port=int(environ.get('PORT',5000)))
