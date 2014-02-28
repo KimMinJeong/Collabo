@@ -6,7 +6,7 @@
 	<div class="row"> 
 		<div class="col-xs-4 col-md-4 col-sm-4">
 				이름: {{info.name}} <img src="{{session.get('gravatar')}}" class="img-circle"><br>		
-				email: {{info.email}}<br>
+				<a href="http://ko.gravatar.com" target="_blank">사진 등록</a><br>
 				게시물 작성수: {{info.posts|count}}<br>
 				덧글 작성수: {{info.comments|count}}
 		</div>
