@@ -87,8 +87,10 @@
         	제안상태변경
 			</button>
 			{% endif %}
-       </div>   
+       </div>
        <div class="panel-body">
+       		<h5 class="string text-muted" >이 제안은 현재 크레이터팀 및 경영팀의 리뷰를 거치지 않았습니다.<br>
+        		다른 분들께서 의견을 달아주시면 반영하여 검토하도록 하겠습니다.</h5>
         	{% for comm in post.comments %}
         	{% if comm.section==10%}
         	<h5 class="result">{{comm.user.name}} : {{comm.comment}} </h5> <hr>
@@ -278,6 +280,17 @@
 		}
 		
 	});
+</script>
+<script>
+	var len=$('.result').length;
+	if(len == 0)
+	{
+		$('.string').show();
+	}
+	else if (len >=1)
+	{
+		$('.string').hide();
+	}
 </script>
 
 {% endblock %}
